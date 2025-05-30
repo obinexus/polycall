@@ -1,0 +1,57 @@
+# CMakeLists.txt for the CLI components
+cmake_minimum_required(VERSION 3.13)
+
+# Main CLI source files
+file(GLOB CLI_SOURCES "*.c")
+
+# CLI command source files
+file(GLOB CLI_COMMAND_SOURCES "commands/*.c")
+
+# All CLI sources
+set(ALL_CLI_SOURCES ${CLI_SOURCES} ${CLI_COMMAND_SOURCES})
+
+# Create the CLI library
+add_library(polycall_cli STATIC ${ALL_CLI_SOURCES})
+
+# Add include directories
+target_include_directories(polycall_cli PUBLIC
+  ${POLYCALL_INCLUDE_DIR}
+  ${POLYCALL_SRC_DIR}
+)
+
+# Link with core library
+target_link_libraries(polycall_cli PRIVATE
+  polycall_core_static
+)
+
+# Add CLI to the CLI components target
+add_dependencies(polycall_cli_components polycall_cli)
+
+# Install CLI headers
+install(
+  DIRECTORY "${POLYCALL_INCLUDE_DIR}/polycall/cli/"
+  DESTINATION "${POLYCALL_INSTALL_INCLUDEDIR}/cli"
+  FILES_MATCHING PATTERN "*.h"
+  COMPONENT devel
+)
+
+# Install CLI library
+install(
+  TARGETS polycall_cli
+  EXPORT polycall-targets
+  ARCHIVE DESTINATION "${POLYCALL_INSTALL_LIBDIR}"
+  LIBRARY DESTINATION "${POLYCALL_INSTALL_LIBDIR}"
+  RUNTIME DESTINATION "${POLYCALL_INSTALL_BINDIR}"
+  INCLUDES DESTINATION "${POLYCALL_INSTALL_INCLUDEDIR}"
+  COMPONENT devel
+)
+
+# Validate include paths
+polycall_validate_target_includes(
+  TARGET polycall_cli
+)
+
+# Print component details
+message(STATUS "Configured CLI component")
+message(STATUS "  Sources: ${CLI_SOURCES}")
+message(STATUS "  Command Sources: ${CLI_COMMAND_SOURCES}")

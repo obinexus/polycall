@@ -1,0 +1,350 @@
+# Utils.cmake
+# Utility functions for LibPolyCall build system
+#
+# This module provides common utility functions used throughout the build system.
+
+if(DEFINED POLYCALL_UTILS_INCLUDED)
+  return()
+endif()
+set(POLYCALL_UTILS_INCLUDED TRUE)
+
+include(CMakeParseArguments)
+
+# Ensure a directory exists
+function(polycall_ensure_directory DIRECTORY)
+  if(NOT EXISTS "${DIRECTORY}")
+    file(MAKE_DIRECTORY "${DIRECTORY}")
+  endif()
+endfunction()
+
+# Generate a timestamp string
+function(polycall_timestamp OUTPUT_VAR)
+  string(TIMESTAMP TIMESTAMP "%Y%m%d_%H%M%S")
+  set(${OUTPUT_VAR} ${TIMESTAMP} PARENT_SCOPE)
+endfunction()
+
+# Execute a Python script
+function(polycall_run_python_script)
+  cmake_parse_arguments(
+    SCRIPT
+    "QUIET"
+    "SCRIPT;OUTPUT_VAR"
+    "ARGS"
+    ${ARGN}
+  )
+  
+  # Find Python interpreter
+  find_package(Python3 COMPONENTS Interpreter REQUIRED)
+  
+  # Validate arguments
+  if(NOT SCRIPT_SCRIPT)
+    message(FATAL_ERROR "SCRIPT argument is required for polycall_run_python_script")
+  endif()
+  
+  # Construct command
+  set(COMMAND ${Python3_EXECUTABLE} ${SCRIPT_SCRIPT} ${SCRIPT_ARGS})
+  
+  # Execute command
+  if(SCRIPT_OUTPUT_VAR)
+    execute_process(
+      COMMAND ${COMMAND}
+      OUTPUT_VARIABLE SCRIPT_OUTPUT
+      ERROR_VARIABLE SCRIPT_ERROR
+      RESULT_VARIABLE SCRIPT_RESULT
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    
+    # Set output variable
+    set(${SCRIPT_OUTPUT_VAR} ${SCRIPT_OUTPUT} PARENT_SCOPE)
+    
+    # Check result
+    if(NOT SCRIPT_RESULT EQUAL 0)
+      if(NOT SCRIPT_QUIET)
+        message(WARNING "Python script execution failed: ${SCRIPT_ERROR}")
+      endif()
+    endif()
+  else()
+    execute_process(
+      COMMAND ${COMMAND}
+      RESULT_VARIABLE SCRIPT_RESULT
+    )
+    
+    # Check result
+    if(NOT SCRIPT_RESULT EQUAL 0)
+      if(NOT SCRIPT_QUIET)
+        message(WARNING "Python script execution failed with code ${SCRIPT_RESULT}")
+      endif()
+    endif()
+  endif()
+endfunction()
+
+# Execute a shell script
+function(polycall_run_shell_script)
+  cmake_parse_arguments(
+    SCRIPT
+    "QUIET"
+    "SCRIPT;OUTPUT_VAR"
+    "ARGS"
+    ${ARGN}
+  )
+  
+  # Validate arguments
+  if(NOT SCRIPT_SCRIPT)
+    message(FATAL_ERROR "SCRIPT argument is required for polycall_run_shell_script")
+  endif()
+  
+  # Ensure script is executable
+  if(NOT EXISTS "${SCRIPT_SCRIPT}")
+    message(FATAL_ERROR "Script file not found: ${SCRIPT_SCRIPT}")
+  endif()
+  
+  # Make script executable if needed
+  execute_process(
+    COMMAND chmod +x ${SCRIPT_SCRIPT}
+    RESULT_VARIABLE CHMOD_RESULT
+  )
+  
+  if(NOT CHMOD_RESULT EQUAL 0)
+    message(WARNING "Failed to make script executable: ${SCRIPT_SCRIPT}")
+  endif()
+  
+  # Construct command
+  set(COMMAND "${SCRIPT_SCRIPT}" ${SCRIPT_ARGS})
+  
+  # Execute command
+  if(SCRIPT_OUTPUT_VAR)
+    execute_process(
+      COMMAND ${COMMAND}
+      OUTPUT_VARIABLE SCRIPT_OUTPUT
+      ERROR_VARIABLE SCRIPT_ERROR
+      RESULT_VARIABLE SCRIPT_RESULT
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    
+    # Set output variable
+    set(${SCRIPT_OUTPUT_VAR} ${SCRIPT_OUTPUT} PARENT_SCOPE)
+    
+    # Check result
+    if(NOT SCRIPT_RESULT EQUAL 0)
+      if(NOT SCRIPT_QUIET)
+        message(WARNING "Shell script execution failed: ${SCRIPT_ERROR}")
+      endif()
+    endif()
+  else()
+    execute_process(
+      COMMAND ${COMMAND}
+      RESULT_VARIABLE SCRIPT_RESULT
+    )
+    
+    # Check result
+    if(NOT SCRIPT_RESULT EQUAL 0)
+      if(NOT SCRIPT_QUIET)
+        message(WARNING "Shell script execution failed with code ${SCRIPT_RESULT}")
+      endif()
+    endif()
+  endif()
+endfunction()
+
+# Define a logging function
+function(polycall_log)
+  cmake_parse_arguments(
+    LOG
+    "ERROR;WARNING;STATUS;DEBUG"
+    "FILE;PREFIX"
+    "MESSAGE"
+    ${ARGN}
+  )
+  
+  # Set default message prefix
+  if(NOT LOG_PREFIX)
+    set(LOG_PREFIX "LibPolyCall")
+  endif()
+  
+  # Construct message
+  set(LOG_TEXT "[${LOG_PREFIX}] ${LOG_MESSAGE}")
+  
+  # Log to console based on level
+  if(LOG_ERROR)
+    message(ERROR "${LOG_TEXT}")
+  elseif(LOG_WARNING)
+    message(WARNING "${LOG_TEXT}")
+  elseif(LOG_STATUS)
+    message(STATUS "${LOG_TEXT}")
+  elseif(LOG_DEBUG)
+    if(CMAKE_VERBOSE_MAKEFILE)
+      message(STATUS "[DEBUG] ${LOG_TEXT}")
+    endif()
+  else
+    message(STATUS "${LOG_TEXT}")
+  endif()
+  
+  # Log to file if specified
+  if(LOG_FILE)
+    polycall_ensure_directory(${POLYCALL_LOG_DIR})
+    file(APPEND ${LOG_FILE} "${LOG_TEXT}\n")
+  endif()
+endfunction()
+
+# Generate a unified header file
+function(polycall_generate_unified_header)
+  cmake_parse_arguments(
+    HEADER
+    ""
+    "OUTPUT;TEMPLATE"
+    "COMPONENTS"
+    ${ARGN}
+  )
+  
+  # Validate arguments
+  if(NOT HEADER_OUTPUT)
+    set(HEADER_OUTPUT "${POLYCALL_BUILD_DIR}/include/polycall.h")
+  endif()
+  
+  # Ensure output directory exists
+  polycall_ensure_directory(${CMAKE_CURRENT_BINARY_DIR}/include)
+  
+  # Set default components if not provided
+  if(NOT HEADER_COMPONENTS)
+    get_property(HEADER_COMPONENTS GLOBAL PROPERTY POLYCALL_REGISTERED_COMPONENTS)
+  endif()
+  
+  # Generate unified header using Python script
+  polycall_run_python_script(
+    SCRIPT "${POLYCALL_PROJECT_ROOT}/scripts/generation/generate_unified_header.py"
+    ARGS
+      --project-root ${POLYCALL_PROJECT_ROOT}
+      --output ${HEADER_OUTPUT}
+      $<$<BOOL:${HEADER_TEMPLATE}>:--template ${HEADER_TEMPLATE}>
+  )
+  
+  polycall_log(
+    STATUS
+    MESSAGE "Generated unified header: ${HEADER_OUTPUT}"
+  )
+endfunction()
+
+# Check for code style compliance
+function(polycall_check_code_style)
+  cmake_parse_arguments(
+    STYLE
+    "FIX"
+    "OUTPUT"
+    "FILES;EXCLUDE"
+    ${ARGN}
+  )
+  
+  # Set default output file
+  if(NOT STYLE_OUTPUT)
+    polycall_timestamp(TIMESTAMP)
+    set(STYLE_OUTPUT "${POLYCALL_LOG_DIR}/style_check_${TIMESTAMP}.log")
+  endif()
+  
+  # Set default files if not provided
+  if(NOT STYLE_FILES)
+    # Find all source files
+    file(GLOB_RECURSE STYLE_FILES 
+      "${POLYCALL_SRC_DIR}/*.c"
+      "${POLYCALL_SRC_DIR}/*.h"
+      "${POLYCALL_INCLUDE_DIR}/*.h"
+    )
+  endif()
+  
+  # Exclude files if specified
+  if(STYLE_EXCLUDE)
+    foreach(EXCLUDE_PATTERN ${STYLE_EXCLUDE})
+      list(FILTER STYLE_FILES EXCLUDE REGEX "${EXCLUDE_PATTERN}")
+    endforeach()
+  endif()
+  
+  # Run clang-format if available
+  find_program(CLANG_FORMAT clang-format)
+  if(CLANG_FORMAT)
+    if(STYLE_FIX)
+      # Fix style issues
+      foreach(FILE ${STYLE_FILES})
+        execute_process(
+          COMMAND ${CLANG_FORMAT} -i ${FILE}
+          RESULT_VARIABLE FORMAT_RESULT
+        )
+        
+        if(NOT FORMAT_RESULT EQUAL 0)
+          polycall_log(
+            WARNING
+            FILE ${STYLE_OUTPUT}
+            MESSAGE "Failed to format file: ${FILE}"
+          )
+        endif()
+      endforeach()
+      
+      polycall_log(
+        STATUS
+        FILE ${STYLE_OUTPUT}
+        MESSAGE "Fixed code style issues in ${STYLE_FILES}"
+      )
+    else()
+      # Check style without fixing
+      set(STYLE_ERRORS FALSE)
+      foreach(FILE ${STYLE_FILES})
+        execute_process(
+          COMMAND ${CLANG_FORMAT} --dry-run --Werror ${FILE}
+          RESULT_VARIABLE FORMAT_RESULT
+        )
+        
+        if(NOT FORMAT_RESULT EQUAL 0)
+          set(STYLE_ERRORS TRUE)
+          polycall_log(
+            WARNING
+            FILE ${STYLE_OUTPUT}
+            MESSAGE "Style issues found in file: ${FILE}"
+          )
+        endif()
+      endforeach()
+      
+      if(STYLE_ERRORS)
+        polycall_log(
+          WARNING
+          FILE ${STYLE_OUTPUT}
+          MESSAGE "Code style issues found. Run with FIX option to fix them."
+        )
+      else()
+        polycall_log(
+          STATUS
+          FILE ${STYLE_OUTPUT}
+          MESSAGE "No code style issues found."
+        )
+      endif()
+    endif()
+  else()
+    polycall_log(
+      WARNING
+      FILE ${STYLE_OUTPUT}
+      MESSAGE "clang-format not found. Skipping code style check."
+    )
+  endif()
+endfunction()
+
+# Find build dependencies
+function(polycall_find_dependencies)
+  # Find Python interpreter
+  find_package(Python3 COMPONENTS Interpreter REQUIRED)
+  set(POLYCALL_PYTHON_EXECUTABLE ${Python3_EXECUTABLE} PARENT_SCOPE)
+  
+  # Find threads package
+  find_package(Threads REQUIRED)
+  
+  # Find other dependencies
+  if(BUILD_TESTING)
+    # Find test dependencies
+  endif()
+  
+  # Report found dependencies
+  polycall_log(
+    STATUS
+    MESSAGE "Found Python3: ${Python3_EXECUTABLE} (version ${Python3_VERSION})"
+  )
+  
+  polycall_log(
+    STATUS
+    MESSAGE "Found Threads: ${CMAKE_THREAD_LIBS_INIT}"
+  )
+endfunction()

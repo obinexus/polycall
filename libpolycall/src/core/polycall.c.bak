@@ -1,0 +1,202 @@
+/**
+ * @file polycall.c
+ * @brief Main implementation file for LibPolyCall
+ * @author Nnamdi Okpala (OBINexusComputing)
+ *
+ * This file implements the main LibPolyCall interface and CLI entry point.
+ */
+
+ #include "polycall/core/polycall/polycall.h"
+
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
+ 
+ #include "polycall/cli/command.h"
+ #include "polycall/cli/commands/command_registry.h"
+ #include "polycall/core/polycall/polycall_core.h"
+ #include "polycall/core/polycall/polycall_context.h"
+ #include "polycall/core/polycall/polycall_error.h"
+ 
+ /* Event system implementation */
+ #define MAX_EVENT_HANDLERS 32
+ #define MAX_EVENT_TYPES 16
+ 
+ typedef struct {
+     int event_type;
+     void (*handler)(void* event, void* user_data);
+     void* user_data;
+ } event_handler_t;
+ 
+ static event_handler_t event_handlers[MAX_EVENT_HANDLERS];
+ static int event_handler_count = 0;
+ 
+ /* Global context for the LibPolyCall system */
+ static polycall_core_context_t* g_core_context = NULL;
+ 
+ /**
+  * @brief Initialize the LibPolyCall system
+  */
+ int polycall_initialize(void* config) {
+     /* Initialize all event handlers */
+     memset(event_handlers, 0, sizeof(event_handlers));
+     event_handler_count = 0;
+     
+     /* Initialize the core context */
+     polycall_core_error_t result = polycall_core_init(&g_core_context, config);
+     if (result != POLYCALL_CORE_SUCCESS) {
+         fprintf(stderr, "Failed to initialize LibPolyCall core: %d\n", result);
+         return result;
+     }
+     
+     /* Initialize each subsystem */
+     /* FFI subsystem initialization */
+     /* Protocol subsystem initialization */
+     /* Micro command subsystem initialization */
+     /* Edge computing subsystem initialization */
+     /* Network subsystem initialization */
+     /* Telemetry subsystem initialization */
+     
+     return POLYCALL_CORE_SUCCESS;
+ }
+ 
+ /**
+  * @brief Shut down the LibPolyCall system
+  */
+ int polycall_shutdown(void) {
+     if (!g_core_context) {
+         return POLYCALL_CORE_ERROR_INVALID_STATE;
+     }
+     
+     /* Shut down each subsystem in reverse order of initialization */
+     /* Telemetry subsystem cleanup */
+     /* Network subsystem cleanup */
+     /* Edge computing subsystem cleanup */
+     /* Micro command subsystem cleanup */
+     /* Protocol subsystem cleanup */
+     /* FFI subsystem cleanup */
+     
+     /* Clean up the core context */
+     polycall_core_cleanup(g_core_context);
+     g_core_context = NULL;
+     
+     return POLYCALL_CORE_SUCCESS;
+ }
+ 
+ /**
+  * @brief Get the version of LibPolyCall
+  */
+ void polycall_get_version(int* major, int* minor, int* patch) {
+     if (major) *major = POLYCALL_VERSION_MAJOR;
+     if (minor) *minor = POLYCALL_VERSION_MINOR;
+     if (patch) *patch = POLYCALL_VERSION_PATCH;
+ }
+ 
+ /**
+  * @brief Register an event handler for LibPolyCall events
+  */
+ int polycall_register_event_handler(int event_type, void (*handler)(void* event, void* user_data), void* user_data) {
+     if (!handler) {
+         return POLYCALL_CORE_ERROR_INVALID_PARAMETERS;
+     }
+     
+     if (event_handler_count >= MAX_EVENT_HANDLERS) {
+         return POLYCALL_CORE_ERROR_CAPACITY_EXCEEDED;
+     }
+     
+     event_handlers[event_handler_count].event_type = event_type;
+     event_handlers[event_handler_count].handler = handler;
+     event_handlers[event_handler_count].user_data = user_data;
+     event_handler_count++;
+     
+     return POLYCALL_CORE_SUCCESS;
+ }
+ 
+ /**
+  * @brief Unregister an event handler
+  */
+ int polycall_unregister_event_handler(int event_type, void (*handler)(void* event, void* user_data)) {
+     if (!handler) {
+         return POLYCALL_CORE_ERROR_INVALID_PARAMETERS;
+     }
+     
+     for (int i = 0; i < event_handler_count; i++) {
+         if (event_handlers[i].event_type == event_type && event_handlers[i].handler == handler) {
+             /* Remove this handler by shifting all subsequent handlers down */
+             for (int j = i; j < event_handler_count - 1; j++) {
+                 event_handlers[j] = event_handlers[j + 1];
+             }
+             event_handler_count--;
+             return POLYCALL_CORE_SUCCESS;
+         }
+     }
+     
+     return POLYCALL_CORE_ERROR_NOT_FOUND;
+ }
+ 
+ /**
+  * @brief Dispatch an event to all registered handlers
+  * 
+  * This function is used internally by the LibPolyCall system to dispatch events.
+  * 
+  * @param event_type Type of event to dispatch
+  * @param event Event data to pass to handlers
+  */
+ void polycall_dispatch_event(int event_type, void* event) {
+     for (int i = 0; i < event_handler_count; i++) {
+         if (event_handlers[i].event_type == event_type) {
+             event_handlers[i].handler(event, event_handlers[i].user_data);
+         }
+     }
+ }
+ 
+ /**
+  * @brief CLI entry point
+  */
+ int main(int argc, char** argv) {
+     printf("LibPolyCall v%d.%d.%d\n", 
+            POLYCALL_VERSION_MAJOR, 
+            POLYCALL_VERSION_MINOR, 
+            POLYCALL_VERSION_PATCH);
+     
+     /* Process command line arguments */
+     if (argc < 2) {
+         printf("Usage: %s [command] [options]\n", argv[0]);
+         printf("Type '%s help' for a list of commands\n", argv[0]);
+         return 0;
+     }
+     
+     /* Register all commands */
+     int result = cli_register_all_commands();
+     if (result != POLYCALL_CORE_SUCCESS) {
+         fprintf(stderr, "Failed to register commands: %d\n", result);
+         return 1;
+     }
+     
+     /* Initialize the LibPolyCall system */
+     result = polycall_initialize(NULL);
+     if (result != POLYCALL_CORE_SUCCESS) {
+         fprintf(stderr, "Failed to initialize LibPolyCall: %d\n", result);
+         return 1;
+     }
+     
+     /* Create argument vector for command execution */
+     /* Skip the program name (argv[0]) */
+     char** cmd_argv = &argv[1];
+     int cmd_argc = argc - 1;
+     
+     /* Execute the command */
+     command_result_t cmd_result = cli_execute_command(cmd_argc, cmd_argv, g_core_context);
+     
+     /* Check for error */
+     if (cmd_result != COMMAND_SUCCESS) {
+         fprintf(stderr, "Command execution failed: %d\n", cmd_result);
+         polycall_shutdown();
+         return 1;
+     }
+     
+     /* Shut down the LibPolyCall system */
+     polycall_shutdown();
+     
+     return 0;
+ }
