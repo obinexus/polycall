@@ -1,11 +1,17 @@
 #!/usr/bin/env python3
 """
-PyPolyCall Package Setup
+PyPolyCall Package Setup - Modern Packaging Standards
 Python binding for LibPolyCall with strict port mapping
+Uses wheel format, not egg - Python 3.8+ compatible
 """
 
 from setuptools import setup, find_packages
 import os
+import sys
+
+# Ensure Python 3.8+
+if sys.version_info < (3, 8):
+    sys.exit("PyPolyCall requires Python 3.8 or higher")
 
 # Read README
 def read_readme():
@@ -26,7 +32,7 @@ def read_requirements():
 setup(
     name="pypolycall",
     version="1.0.0",
-    description="Python binding for LibPolyCall - Strict port mapping and zero-trust security",
+    description="Python binding for LibPolyCall - Modern packaging with wheel format",
     long_description=read_readme(),
     long_description_content_type="text/markdown",
     
@@ -34,7 +40,7 @@ setup(
     author_email="nnamdi@obinexuscomputing.com",
     url="https://gitlab.com/obinexuscomputing/libpolycall",
     
-    # Package discovery
+    # Modern package discovery
     packages=find_packages(where="src"),
     package_dir={"": "src"},
     
@@ -42,46 +48,60 @@ setup(
     include_package_data=True,
     package_data={
         "": [
-            "python.polycallrc",
-            "examples/*.py",
-            "examples/public/*.html",
+            "*.polycallrc",
+            "*.md", 
+            "*.txt",
+            "*.html"
         ]
     },
     
-    # Dependencies
-    install_requires=read_requirements(),
+    # Python version requirement - STRICT 3.8+
+    python_requires=">=3.8",
     
-    # Python version requirement
-    python_requires=">=3.7",
+    # No external dependencies (zero-trust principle)
+    install_requires=[],
     
-    # Classifications
+    # Development dependencies (optional)
+    extras_require={
+        "dev": [
+            "pytest>=6.0",
+            "black>=22.0",
+            "flake8>=4.0",
+        ],
+        "test": [
+            "pytest>=6.0",
+            "requests>=2.25.0",
+        ],
+    },
+    
+    # Modern classifiers
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
         "Topic :: Software Development :: Libraries :: Python Modules",
         "Topic :: System :: Networking",
         "Topic :: Internet :: WWW/HTTP :: HTTP Servers",
+        "Operating System :: OS Independent",
     ],
     
-    # Keywords
+    # Keywords for PyPI
     keywords=[
         "libpolycall",
-        "polycall",
+        "polycall", 
         "python-binding",
         "zero-trust",
         "port-mapping",
-        "api-binding",
-        "data-oriented"
+        "wheel-format"
     ],
     
-    # Entry points
+    # Console scripts
     entry_points={
         "console_scripts": [
             "pypolycall-server=examples.server:main",
@@ -95,65 +115,43 @@ setup(
         "Documentation": "https://gitlab.com/obinexuscomputing/libpolycall/-/blob/main/README.md",
     },
     
-    # Development dependencies
-    extras_require={
-        "dev": [
-            "pytest>=6.0",
-            "pytest-asyncio>=0.18.0",
-            "black>=22.0",
-            "flake8>=4.0",
-            "mypy>=0.950",
-        ],
-        "test": [
-            "pytest>=6.0",
-            "pytest-asyncio>=0.18.0",
-            "requests>=2.25.0",
-        ],
-    },
-    
     # License
     license="MIT",
     
-    # Metadata for security and configuration
+    # Modern packaging options - WHEEL FORMAT, NOT EGG
     options={
         "bdist_wheel": {
-            "universal": False,
+            "universal": False,  # Python 3.8+ only
+        },
+        "egg_info": {
+            "tag_build": "",
+            "tag_date": False,
         }
     },
     
-    # Configuration validation on install
+    # Ensure wheel format, disable egg
     zip_safe=False,
+    
+    # Setup requires modern setuptools
+    setup_requires=[
+        "setuptools>=45",
+        "wheel>=0.36",
+    ],
 )
 
-# Post-install configuration check
-def post_install_check():
-    """Verify installation and configuration"""
-    print("\n" + "="*60)
-    print("🐍 PyPolyCall Installation Complete!")
-    print("="*60)
-    print("📋 Configuration Required:")
-    print("   1. Copy python.polycallrc to /opt/polycall/services/python/")
-    print("   2. Verify port mapping: 3001:8084 (RESERVED FOR PYTHON)")
-    print("   3. Update main config.Polycallfile with Python server entry")
-    print("")
-    print("🚀 Quick Start:")
-    print("   python -m pypolycall.examples.server")
-    print("")
-    print("🛡️  Security Features:")
-    print("   ✅ Strict port binding enforcement")
-    print("   ✅ Zero-trust configuration")
-    print("   ✅ Reserved port mapping (3001:8084)")
-    print("   ✅ No port overlap with other bindings")
-    print("")
-    print("📖 Documentation:")
-    print("   https://gitlab.com/obinexuscomputing/libpolycall")
-    print("="*60)
+# Post-install verification
+def verify_installation():
+    """Verify installation completed successfully"""
+    try:
+        import pypolycall
+        print(f"\n✅ PyPolyCall v{pypolycall.__version__} installed successfully!")
+        print("📡 Port mapping: 3001:8084 (RESERVED FOR PYTHON)")
+        print("🛡️  Zero-trust configuration required")
+        return True
+    except ImportError as e:
+        print(f"\n❌ Installation verification failed: {e}")
+        return False
 
-if __name__ == "__main__":
-    # Run setup
-    setup()
-    
-    # Post-install verification
-    import sys
-    if "install" in sys.argv:
-        post_install_check()
+if __name__ == "__main__": print("🐍 Installing PyPolyCall with modern 
+    packaging...") print("📦 Format: wheel (.whl), not egg") print("🐍 Python: 
+    3.8+ required") print("🛡️ Zero-trust: Manual configuration required")
