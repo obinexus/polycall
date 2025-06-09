@@ -1,1 +1,0 @@
-gcc -Wall -Wextra -I./include -fPIC -std=c11 -c src/core/accessibility/accessibility_audio.c -o build/obj/core/accessibility/accessibility_audio.o
