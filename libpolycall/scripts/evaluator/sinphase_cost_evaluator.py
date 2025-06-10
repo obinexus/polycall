@@ -3,7 +3,17 @@
 Sinphasé Cost Function Automation - OBINexus Implementation
 Evaluates component complexity and triggers architectural isolation when thresholds exceeded.
 """
-
+__version__ = "1.0.0"
+__ci_check__ = """
+# Add to CI pipeline - BLOCK any commit with C > 0.6
+#!/bin/bash
+python3 scripts/evaluator/sinphase_cost_evaluator.py --project-root .
+if grep -q "GOVERNANCE ZONE" SINPHASE_GOVERNANCE_REPORT.md; then
+    echo "❌ SINPHASÉ VIOLATION: Components exceed governance threshold"
+    echo "🚫 COMMIT BLOCKED - Fix violations before proceeding"
+    exit 1
+fi
+"""
 import os
 import re
 import json
