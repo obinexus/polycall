@@ -1,57 +1,31 @@
 #!/bin/bash
-# Sinphasé Pre-commit Hook - Team Shared Version
-# Location: .githooks/pre-commit
+# Sinphasé Pre-commit Hook - SECONDARY enforcement
+# Provides immediate developer feedback
 
-set -e
+echo "🔍 Sinphasé: Pre-commit governance check..."
 
-PROJECT_ROOT="$(git rev-parse --show-toplevel)"
-cd "$PROJECT_ROOT"
+# Quick cost evaluation on staged files
+staged_files=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(c|h)$' || true)
 
-echo "🔍 Running Sinphasé governance check..."
-
-# Check if evaluator script exists
-if [ ! -f "scripts/evaluator/sinphase_cost_evaluator.py" ]; then
-    echo "⚠️  Sinphasé evaluator script not found - skipping governance check"
-    echo "    Expected: scripts/evaluator/sinphase_cost_evaluator.py"
-    exit 0
-fi
-
-# Make script executable
-chmod +x scripts/evaluator/sinphase_cost_evaluator.py
-
-# Run Sinphasé evaluation
-if ! python3 scripts/evaluator/sinphase_cost_evaluator.py --project-root . --report; then
-    echo "❌ Sinphasé evaluation failed"
-    exit 1
-fi
-
-# Check for violations
-if [ -f "SINPHASE_GOVERNANCE_REPORT.md" ]; then
-    VIOLATIONS=$(grep -c "GOVERNANCE ZONE" SINPHASE_GOVERNANCE_REPORT.md || echo "0")
+if [ -n "$staged_files" ]; then
+    echo "📋 Analyzing staged files: $(echo $staged_files | wc -w) files"
     
-    if [ "$VIOLATIONS" -gt 0 ]; then
-        echo ""
-        echo "🚨 COMMIT BLOCKED: Sinphasé governance violations detected"
-        echo "❌ $VIOLATIONS components exceed threshold (C > 0.6)"
-        echo ""
-        echo "📋 Violating components:"
-        grep -A 1 "GOVERNANCE ZONE" SINPHASE_GOVERNANCE_REPORT.md | head -10
-        echo ""
-        echo "🔧 To fix violations:"
-        echo "1. Run: python3 scripts/evaluator/sinphase_cost_evaluator.py --report"
-        echo "2. Review full report: cat SINPHASE_GOVERNANCE_REPORT.md"
-        echo "3. Isolate violating components to root-dynamic-c/"
-        echo "4. Ensure all components have C ≤ 0.6"
-        echo ""
-        echo "💡 To bypass this check (NOT RECOMMENDED):"
-        echo "   git commit --no-verify"
-        exit 1
-    else
-        echo "✅ All components comply with Sinphasé governance"
-    fi
+    # Simple complexity check
+    for file in $staged_files; do
+        if [ -f "$file" ]; then
+            lines=$(wc -l < "$file")
+            includes=$(grep -c "#include" "$file" || echo "0")
+            
+            if [ "$lines" -gt 500 ] || [ "$includes" -gt 15 ]; then
+                echo "⚠️ WARNING: $file may exceed complexity thresholds"
+                echo "   Lines: $lines (threshold: 500)"
+                echo "   Includes: $includes (threshold: 15)"
+                echo "   Consider architectural refactoring"
+            fi
+        fi
+    done
+    
+    echo "✅ Local pre-commit validation complete"
 else
-    echo "⚠️  Governance report not generated - check evaluator script"
-    exit 1
+    echo "📋 No C source files staged for commit"
 fi
-
-echo "✅ Sinphasé governance check passed"

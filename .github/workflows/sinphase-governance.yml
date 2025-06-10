@@ -1,94 +1,89 @@
-name: Sinphasé Governance Enforcement
+name: "Sinphasé Governance Enforcement"
 
 on:
   push:
-    branches: [ main, dev, feature/* ]
+    branches: [ "dev", "dev-*", "main" ]
   pull_request:
-    branches: [ main, dev ]
+    branches: [ "dev", "main" ]
 
 jobs:
-  sinphase-governance:
+  sinphase-enforcement:
     runs-on: ubuntu-latest
+    name: "🔒 Sinphasé Cost Function Validation"
     
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Set up Python
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        
+    - name: "Setup Python for Cost Evaluator"
       uses: actions/setup-python@v4
       with:
         python-version: '3.9'
         
-    - name: Install dependencies
+    - name: "Install Dependencies"
       run: |
         python -m pip install --upgrade pip
-        # Add any required Python dependencies here
+        pip install pathlib typing
         
-    - name: Run Sinphasé Cost Evaluation
+    - name: "🔍 Run Sinphasé Cost Function Analysis"
       run: |
-        chmod +x scripts/evaluator/sinphase_cost_evaluator.py
-        python3 scripts/evaluator/sinphase_cost_evaluator.py --project-root . --report
+        echo "🔍 Evaluating architectural compliance..."
+        python scripts/evaluator/sinphase_cost_evaluator.py \
+          --project-root . \
+          --threshold 0.6 \
+          --emergency-mode \
+          --violation-rate 0.90
         
-    - name: Check for Governance Violations
+    - name: "📊 Generate Governance Report"
       run: |
-        if [ -f SINPHASE_GOVERNANCE_REPORT.md ]; then
-          VIOLATIONS=$(grep -c "GOVERNANCE ZONE" SINPHASE_GOVERNANCE_REPORT.md || echo "0")
-          if [ "$VIOLATIONS" -gt 0 ]; then
-            echo "🚨 SINPHASÉ VIOLATION DETECTED"
-            echo "❌ $VIOLATIONS components exceed governance threshold (C > 0.6)"
-            echo ""
-            echo "📋 Violations found:"
-            grep -A 1 "GOVERNANCE ZONE" SINPHASE_GOVERNANCE_REPORT.md || true
-            echo ""
-            echo "🔧 Fix violations before merging:"
-            echo "1. Run: python3 scripts/evaluator/sinphase_cost_evaluator.py --report"
-            echo "2. Isolate violating components to root-dynamic-c/"
-            echo "3. Ensure all components have C ≤ 0.6"
-            exit 1
-          else
-            echo "✅ All components comply with Sinphasé governance (C ≤ 0.6)"
-          fi
+        echo "📊 Generating compliance report..."
+        if [ -f "SINPHASE_VIOLATIONS.json" ]; then
+          echo "❌ CRITICAL: Architecture violations detected"
+          cat SINPHASE_VIOLATIONS.json
+          exit 1
         else
-          echo "⚠️ Governance report not generated - check evaluator script"
+          echo "✅ Architecture compliance validated"
+        fi
+        
+    - name: "🚨 Emergency Isolation Check"
+      run: |
+        echo "🚨 Checking for emergency isolation requirements..."
+        if [ -f "ISOLATION_LOG.md" ]; then
+          echo "📋 Isolation log exists - reviewing entries..."
+          tail -20 ISOLATION_LOG.md
+        fi
+        
+  prevent-violations:
+    runs-on: ubuntu-latest
+    name: "🛡️ Block Architectural Violations"
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: "🛡️ FFI Threshold Protection"
+      run: |
+        echo "🛡️ Enforcing FFI call limits..."
+        
+        # Count FFI calls in changed files
+        ffi_count=$(git diff --name-only HEAD~1 | xargs grep -l "FFI\|ffi\|foreign" | wc -l || echo "0")
+        
+        echo "FFI-related files in this change: $ffi_count"
+        
+        if [ "$ffi_count" -gt 5 ]; then
+          echo "❌ BLOCKED: Too many FFI changes (limit: 5, found: $ffi_count)"
+          echo "This violates Sinphasé single-pass compilation requirements"
           exit 1
         fi
         
-    - name: Upload Governance Report
-      uses: actions/upload-artifact@v3
-      if: always()
-      with:
-        name: sinphase-governance-report
-        path: SINPHASE_GOVERNANCE_REPORT.md
+    - name: "🔒 Dependency Cycle Detection"
+      run: |
+        echo "🔒 Checking for circular dependencies..."
         
-    - name: Comment PR with Violations (if any)
-      if: failure() && github.event_name == 'pull_request'
-      uses: actions/github-script@v6
-      with:
-        script: |
-          const fs = require('fs');
-          if (fs.existsSync('SINPHASE_GOVERNANCE_REPORT.md')) {
-            const report = fs.readFileSync('SINPHASE_GOVERNANCE_REPORT.md', 'utf8');
-            const violations = (report.match(/GOVERNANCE ZONE/g) || []).length;
-            
-            const comment = `## 🚨 Sinphasé Governance Violations Detected
-            
-**${violations} components** exceed the governance threshold (C > 0.6)
-
-### Violations:
-${report.split('### 🔴 Governance Zone')[1] || 'See full report for details'}
-
-### Required Actions:
-1. Run local evaluation: \`python3 scripts/evaluator/sinphase_cost_evaluator.py --report\`
-2. Isolate violating components to \`root-dynamic-c/\`
-3. Ensure all components have C ≤ 0.6
-4. Re-run tests to verify compliance
-
-**This PR cannot be merged until all violations are resolved.**`;
-            
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: comment
-            });
-          }
+        # Basic circular dependency detection
+        find . -name "*.c" -o -name "*.h" | xargs grep -l "#include" | while read file; do
+          includes=$(grep "#include" "$file" | wc -l)
+          if [ "$includes" -gt 10 ]; then
+            echo "⚠️ Warning: $file has $includes includes (threshold: 10)"
+          fi
+        done

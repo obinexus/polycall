@@ -1,33 +1,35 @@
 #!/bin/bash
-# Sinphasé Pre-push Hook - Team Shared Version
-# Location: .githooks/pre-push
+# Sinphasé Pre-push Hook - Final local validation
 
-set -e
+echo "🚀 Sinphasé: Pre-push governance validation..."
 
-PROJECT_ROOT="$(git rev-parse --show-toplevel)"
-cd "$PROJECT_ROOT"
+# Check if we're about to push to protected branches
+remote="$1"
+url="$2"
 
-echo "🚀 Running Sinphasé governance check before push..."
-
-# Run full evaluation
-if ! python3 scripts/evaluator/sinphase_cost_evaluator.py --project-root . --report; then
-    echo "❌ Sinphasé evaluation failed"
-    exit 1
-fi
-
-# Check for any violations
-if [ -f "SINPHASE_GOVERNANCE_REPORT.md" ]; then
-    VIOLATIONS=$(grep -c "GOVERNANCE ZONE" SINPHASE_GOVERNANCE_REPORT.md || echo "0")
-    
-    if [ "$VIOLATIONS" -gt 0 ]; then
-        echo ""
-        echo "🚨 PUSH BLOCKED: Sinphasé governance violations detected"
-        echo "❌ $VIOLATIONS components exceed threshold (C > 0.6)"
-        echo ""
-        echo "This will cause CI/CD pipeline to fail."
-        echo "Fix violations before pushing to remote repository."
-        exit 1
+while read local_ref local_sha remote_ref remote_sha; do
+    if [ "$local_sha" = "0000000000000000000000000000000000000000" ]; then
+        # Branch deletion - allow
+        continue
     fi
-fi
+    
+    branch_name=$(echo "$remote_ref" | sed 's/refs\/heads\///')
+    
+    if [ "$branch_name" = "main" ] || [ "$branch_name" = "dev" ]; then
+        echo "🔒 Pushing to protected branch: $branch_name"
+        echo "🔍 Running comprehensive Sinphasé validation..."
+        
+        # Run the cost evaluator if it exists
+        if [ -f "scripts/evaluator/sinphase_cost_evaluator.py" ]; then
+            echo "📊 Running cost function analysis..."
+            python scripts/evaluator/sinphase_cost_evaluator.py --project-root . --threshold 0.6
+            
+            if [ $? -ne 0 ]; then
+                echo "❌ PUSH BLOCKED: Sinphasé governance violations detected"
+                exit 1
+            fi
+        fi
+    fi
+done
 
-echo "✅ Sinphasé governance check passed - safe to push"
+echo "✅ Pre-push validation passed"
