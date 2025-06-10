@@ -1,0 +1,118 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sinphase-toolkit"
+version = "0.1.0"
+description = "🔍 Sinphasé Governance Toolkit - OBINexus Computing Unified Framework"
+authors = [
+    {name = "OBINexus Computing", email = "governance@obinexuscomputing.com"}
+]
+readme = "README.md"
+license = {text = "MIT"}
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Quality Assurance",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+requires-python = ">=3.8"
+dependencies = [
+    "typer>=0.9.0",
+    "rich>=13.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "black>=22.0.0",
+    "flake8>=4.0.0",
+    "mypy>=0.900",
+    "coverage>=6.0.0",
+]
+ci = [
+    "pytest-xdist>=3.0.0",
+    "pytest-cov>=4.0.0",
+]
+
+[project.scripts]
+sinphase = "sinphase_toolkit.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/obinexuscomputing/sinphase-toolkit"
+Repository = "https://github.com/obinexuscomputing/sinphase-toolkit"
+Documentation = "https://sinphase-toolkit.readthedocs.io"
+Issues = "https://github.com/obinexuscomputing/sinphase-toolkit/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["sinphase_toolkit*"]
+exclude = ["tests*"]
+
+[tool.setuptools.package-data]
+sinphase_toolkit = ["*.txt", "*.md", "*.yml", "*.yaml"]
+
+# Development tool configurations
+[tool.black]
+line-length = 88
+target-version = ["py38", "py39", "py310", "py311", "py312"]
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short --strict-markers"
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+]
+
+[tool.coverage.run]
+source = ["sinphase_toolkit"]
+omit = ["tests/*", "setup.py"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+]
