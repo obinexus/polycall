@@ -1,15 +1,6 @@
+# Main Branch Configuration
 branch: main
 governance:
-  threshold_multiplier: 1.0  # Strict enforcement
+  threshold_multiplier: 1.0
   required_approvals: 2
   mandatory_review: true
-  
-validation:
-  pre_commit_checks: true
-  architectural_review: true
-  security_scan: true
-  
-policies:
-  no_experimental_features: true
-  full_test_coverage_required: true
-  documentation_mandatory: true

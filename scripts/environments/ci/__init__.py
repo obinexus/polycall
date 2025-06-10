@@ -1,0 +1,1 @@
+"""Sinphasé modular governance component."""
