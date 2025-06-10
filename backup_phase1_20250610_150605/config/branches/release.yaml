@@ -1,0 +1,18 @@
+branch_pattern: "release/*"
+governance:
+  threshold_multiplier: 0.95  # Stricter than main
+  required_approvals: 3
+  mandatory_review: true
+  freeze_dependencies: true
+  
+validation:
+  comprehensive_testing: true
+  performance_validation: true
+  security_audit: true
+  compatibility_matrix: true
+  
+policies:
+  no_new_features: true
+  bug_fixes_only: true
+  full_documentation: true
+  change_log_required: true

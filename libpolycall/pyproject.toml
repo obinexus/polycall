@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sinphase-governance"
+version = "2.1.0"
+description = "Enterprise-grade governance framework for software architecture compliance"
+authors = [
+    {name = "OBINexus Computing", email = "governance@obinexuscomputing.com"}
+]
+readme = "README.md"
+license = {text = "MIT"}
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+requires-python = ">=3.8"
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "black>=22.0.0", 
+    "flake8>=4.0.0",
+    "mypy>=0.900"
+]
+
+[project.scripts]
+sinphase = "sinphase_governance.cli.main:main"
+
+[project.urls]
+Homepage = "https://github.com/obinexuscomputing/sinphase-governance"
+Repository = "https://github.com/obinexuscomputing/sinphase-governance"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["sinphase_governance*"]
