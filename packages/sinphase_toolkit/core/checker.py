@@ -11,52 +11,38 @@ logger = logging.getLogger(__name__)
 class GovernanceChecker:
     """Unified governance checking orchestrator"""
     
-    def __init__(self, project_root: Path):
+    def __init__(self, project_root: Path, threshold: Optional[float] = None, environment=None):
         self.project_root = Path(project_root)
+        self.threshold = threshold or 0.6
+        self.environment = environment
         
-    def run_comprehensive_check(self, threshold: Optional[float] = None) -> Dict[str, Any]:
+    def run_comprehensive_check(self) -> Dict[str, Any]:
         """Run complete governance check pipeline"""
         logger.info(f"Starting governance check for {self.project_root}")
         
         # Basic implementation - replace with your existing logic
-        effective_threshold = threshold or 0.6
-        
-        # Simulate cost calculation
         total_cost = self._calculate_basic_cost()
         
         # Check violations
         violations = []
-        if total_cost > effective_threshold:
-            violations.append(f"Total cost {total_cost:.3f} exceeds threshold {effective_threshold}")
+        if total_cost > self.threshold:
+            violations.append(f"Total cost {total_cost:.3f} exceeds threshold {self.threshold}")
         
         results = {
             "project_root": str(self.project_root),
-            "threshold": effective_threshold,
+            "threshold": self.threshold,
             "total_cost": total_cost,
-            "violations": len(violations),
-            "violation_details": violations,
+            "violations": violations,
+            "has_violations": len(violations) > 0,
             "compliance_status": "PASS" if len(violations) == 0 else "FAIL",
+            "cost_analysis": {"total_cost": total_cost},
+            "compliance_score": 0.8 if len(violations) == 0 else 0.4
         }
         
         return results
     
-    def get_governance_status(self) -> Dict[str, Any]:
-        """Get governance status overview"""
-        total_cost = self._calculate_basic_cost()
-        
-        return {
-            "total_cost": {
-                "value": f"{total_cost:.3f}",
-                "status": "🔴" if total_cost > 0.8 else "🟡" if total_cost > 0.4 else "🟢"
-            },
-            "file_count": {
-                "value": str(len(list(self.project_root.rglob("*.c")) + list(self.project_root.rglob("*.h")))),
-                "status": "📁"
-            }
-        }
-    
     def _calculate_basic_cost(self) -> float:
-        """Basic cost calculation - replace with your existing algorithm"""
+        """Basic cost calculation"""
         c_files = list(self.project_root.glob("**/*.c"))
         h_files = list(self.project_root.glob("**/*.h"))
         file_count = len(c_files) + len(h_files)

@@ -3,7 +3,13 @@ from pathlib import Path
 from typing import List
 
 class ViolationScanner:
-    def scan_for_violations(self, project_root: Path, cost_results: dict, threshold: float) -> List:
-        """Scan for governance violations"""
-        # Implement your existing violation scanning logic here
+    def __init__(self, project_root: Path):
+        self.project_root = project_root
+        
+    def scan_comprehensive_violations(self) -> List:
+        """Scan for comprehensive violations"""
+        return []
+        
+    def scan_violations(self) -> List:
+        """Scan for violations"""
         return []

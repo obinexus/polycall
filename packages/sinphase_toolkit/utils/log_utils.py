@@ -1,7 +1,6 @@
 """Logging Utilities"""
 import logging
 
-def setup_logging(level: str = "INFO") -> logging.Logger:
+def setup_logging(level: str = "INFO") -> None:
     """Setup logging configuration"""
     logging.basicConfig(level=getattr(logging, level.upper()))
-    return logging.getLogger('sinphase')

@@ -1,9 +1,16 @@
 """Environment Configuration"""
 import os
+from enum import Enum
+
+class Environment(Enum):
+    DEVELOPMENT = "development"
+    TEST = "test"
+    CI = "ci"
+    PRODUCTION = "production"
 
 class EnvironmentDetector:
-    def detect_current_environment(self) -> str:
+    def detect_environment(self) -> Environment:
         """Detect current environment"""
         if os.environ.get('CI'):
-            return "ci"
-        return "dev"
+            return Environment.CI
+        return Environment.DEVELOPMENT
