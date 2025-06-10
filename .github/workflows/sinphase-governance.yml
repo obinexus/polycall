@@ -1,0 +1,94 @@
+name: Sinphasé Governance Enforcement
+
+on:
+  push:
+    branches: [ main, dev, feature/* ]
+  pull_request:
+    branches: [ main, dev ]
+
+jobs:
+  sinphase-governance:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        # Add any required Python dependencies here
+        
+    - name: Run Sinphasé Cost Evaluation
+      run: |
+        chmod +x scripts/evaluator/sinphase_cost_evaluator.py
+        python3 scripts/evaluator/sinphase_cost_evaluator.py --project-root . --report
+        
+    - name: Check for Governance Violations
+      run: |
+        if [ -f SINPHASE_GOVERNANCE_REPORT.md ]; then
+          VIOLATIONS=$(grep -c "GOVERNANCE ZONE" SINPHASE_GOVERNANCE_REPORT.md || echo "0")
+          if [ "$VIOLATIONS" -gt 0 ]; then
+            echo "🚨 SINPHASÉ VIOLATION DETECTED"
+            echo "❌ $VIOLATIONS components exceed governance threshold (C > 0.6)"
+            echo ""
+            echo "📋 Violations found:"
+            grep -A 1 "GOVERNANCE ZONE" SINPHASE_GOVERNANCE_REPORT.md || true
+            echo ""
+            echo "🔧 Fix violations before merging:"
+            echo "1. Run: python3 scripts/evaluator/sinphase_cost_evaluator.py --report"
+            echo "2. Isolate violating components to root-dynamic-c/"
+            echo "3. Ensure all components have C ≤ 0.6"
+            exit 1
+          else
+            echo "✅ All components comply with Sinphasé governance (C ≤ 0.6)"
+          fi
+        else
+          echo "⚠️ Governance report not generated - check evaluator script"
+          exit 1
+        fi
+        
+    - name: Upload Governance Report
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: sinphase-governance-report
+        path: SINPHASE_GOVERNANCE_REPORT.md
+        
+    - name: Comment PR with Violations (if any)
+      if: failure() && github.event_name == 'pull_request'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          if (fs.existsSync('SINPHASE_GOVERNANCE_REPORT.md')) {
+            const report = fs.readFileSync('SINPHASE_GOVERNANCE_REPORT.md', 'utf8');
+            const violations = (report.match(/GOVERNANCE ZONE/g) || []).length;
+            
+            const comment = `## 🚨 Sinphasé Governance Violations Detected
+            
+**${violations} components** exceed the governance threshold (C > 0.6)
+
+### Violations:
+${report.split('### 🔴 Governance Zone')[1] || 'See full report for details'}
+
+### Required Actions:
+1. Run local evaluation: \`python3 scripts/evaluator/sinphase_cost_evaluator.py --report\`
+2. Isolate violating components to \`root-dynamic-c/\`
+3. Ensure all components have C ≤ 0.6
+4. Re-run tests to verify compliance
+
+**This PR cannot be merged until all violations are resolved.**`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+          }
