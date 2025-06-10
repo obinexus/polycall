@@ -1,0 +1,8 @@
+# .github/workflows/sinphase-governance.yml
+- name: Sinphasé Governance Check
+  run: |
+    python3 scripts/sinphase_cost_evaluator.py --report
+    if grep -q "GOVERNANCE ZONE" SINPHASE_GOVERNANCE_REPORT.md; then
+      echo "❌ Sinphasé violations detected"
+      exit 1
+    fi
