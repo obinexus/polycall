@@ -1,0 +1,33 @@
+#!/bin/bash
+# Sinphasé Pre-push Hook - Team Shared Version
+# Location: .githooks/pre-push
+
+set -e
+
+PROJECT_ROOT="$(git rev-parse --show-toplevel)"
+cd "$PROJECT_ROOT"
+
+echo "🚀 Running Sinphasé governance check before push..."
+
+# Run full evaluation
+if ! python3 scripts/evaluator/sinphase_cost_evaluator.py --project-root . --report; then
+    echo "❌ Sinphasé evaluation failed"
+    exit 1
+fi
+
+# Check for any violations
+if [ -f "SINPHASE_GOVERNANCE_REPORT.md" ]; then
+    VIOLATIONS=$(grep -c "GOVERNANCE ZONE" SINPHASE_GOVERNANCE_REPORT.md || echo "0")
+    
+    if [ "$VIOLATIONS" -gt 0 ]; then
+        echo ""
+        echo "🚨 PUSH BLOCKED: Sinphasé governance violations detected"
+        echo "❌ $VIOLATIONS components exceed threshold (C > 0.6)"
+        echo ""
+        echo "This will cause CI/CD pipeline to fail."
+        echo "Fix violations before pushing to remote repository."
+        exit 1
+    fi
+fi
+
+echo "✅ Sinphasé governance check passed - safe to push"
