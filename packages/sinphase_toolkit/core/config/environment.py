@@ -1,4 +1,4 @@
-"""Environment Configuration"""
+"""Environment Detection - Context Analysis Engine"""
 import os
 from enum import Enum
 

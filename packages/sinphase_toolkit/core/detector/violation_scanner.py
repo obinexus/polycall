@@ -1,4 +1,4 @@
-"""Violation Scanner"""
+"""Violation Scanner - Compliance Detection Engine"""
 from pathlib import Path
 from typing import List
 

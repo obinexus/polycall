@@ -2,6 +2,7 @@ README.md
 pyproject.toml
 setup.py
 sinphase_toolkit/__init__.py
+sinphase_toolkit/cli.py
 sinphase_toolkit/setup.py
 sinphase_toolkit.egg-info/PKG-INFO
 sinphase_toolkit.egg-info/SOURCES.txt

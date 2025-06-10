@@ -1,4 +1,4 @@
-"""Cost Calculator"""
+"""Cost Calculator - Quantitative Analysis Engine"""
 from pathlib import Path
 from typing import Dict, Any
 
