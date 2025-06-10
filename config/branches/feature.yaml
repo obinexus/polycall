@@ -1,0 +1,15 @@
+branch_pattern: "feature/*"
+governance:
+  threshold_multiplier: 1.7  # Permissive enforcement
+  required_approvals: 0
+  mandatory_review: false
+  
+validation:
+  basic_checks_only: true
+  smoke_tests: true
+  syntax_validation: true
+  
+policies:
+  rapid_prototyping: true
+  test_coverage_minimum: 60
+  documentation_optional: true

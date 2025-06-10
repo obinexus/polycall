@@ -1,0 +1,16 @@
+environment: development
+governance:
+  base_threshold: 0.8
+  autonomous_limit: 0.5
+  fail_on_violations: false
+  isolation_enabled: false
+  
+reporting:
+  level: "summary"
+  format: "console"
+  fast_feedback: true
+  
+features:
+  auto_fix_suggestions: true
+  interactive_mode: true
+  real_time_validation: true
