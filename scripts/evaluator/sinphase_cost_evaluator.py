@@ -409,7 +409,7 @@ class EnhancedSinphaseCostEvaluator:
             
         # Find source files with enhanced patterns
         file_patterns = ['*.c', '*.h', '*.py', '*.js', '*.jsx', '*.vue', '*.wasm']
-        source_files = []
+        source_files: list[Path] = []
         for pattern in file_patterns:
             source_files.extend(self.project_root.rglob(pattern))
             
@@ -477,10 +477,15 @@ class EnhancedSinphaseCostEvaluator:
         # Calculate component type distribution
         for component in components:
             comp_type = component.component_type.name
-            stats['component_type_distribution'][comp_type] = stats['component_type_distribution'].get(comp_type, 0) + 1
+            if comp_type not in stats['component_type_distribution']:
+                stats['component_type_distribution'][comp_type] = 0
+            stats['component_type_distribution'][comp_type] += 1
             
+            # Calculate isolation level distribution
             isolation_level = component.isolation_level.name
-            stats['isolation_requirements'][isolation_level] = stats['isolation_requirements'].get(isolation_level, 0) + 1
+            if isolation_level not in stats['isolation_requirements']:
+                stats['isolation_requirements'][isolation_level] = 0
+            stats['isolation_requirements'][isolation_level] += 1
             
         report = {
             'timestamp': time.strftime('%Y-%m-%d %H:%M:%S'),
