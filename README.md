@@ -1,5 +1,7 @@
-# LibPolyCall v2.0.0
 ![LibPolyCall Logo](./favicon.png)
+
+# LibPolyCall v2.0.0
+
 
 **Command-Driven Polymorphic Runtime System for Multi-Language Application Integration**
 
@@ -24,7 +26,11 @@ LibPolyCall v2.0.0 delivers enterprise-grade polymorphic API abstraction through
 
 ## Visual Architecture Overview
 
+<div style="padding: 50px 0">
+
 ![LibPolyCall Architecture](./graph.png)
+
+</div>
 *Core architecture diagram showing key runtime components and binding interfaces*
 
 
