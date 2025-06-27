@@ -1,6 +1,5 @@
 # LibPolyCall v2 Git LFS Configuration
 # OBINexus Computing - Professional Asset Management
-
 # =============================================================================
 # DOCUMENTATION ASSETS
 # =============================================================================
@@ -9,7 +8,6 @@
 *.docx filter=lfs diff=lfs merge=lfs -text
 *.pptx filter=lfs diff=lfs merge=lfs -text
 *.xlsx filter=lfs diff=lfs merge=lfs -text
-
 # =============================================================================
 # BINARY ARTIFACTS & LIBRARIES
 # =============================================================================
@@ -21,7 +19,6 @@
 *.a filter=lfs diff=lfs merge=lfs -text
 *.lib filter=lfs diff=lfs merge=lfs -text
 *.bin filter=lfs diff=lfs merge=lfs -text
-
 # =============================================================================
 # VISUAL ASSETS & MEDIA
 # =============================================================================
@@ -34,12 +31,10 @@
 *.bmp filter=lfs diff=lfs merge=lfs -text
 *.tiff filter=lfs diff=lfs merge=lfs -text
 *.webp filter=lfs diff=lfs merge=lfs -text
-
 # Favicon and project graphics
 favicon.* filter=lfs diff=lfs merge=lfs -text
 logo.* filter=lfs diff=lfs merge=lfs -text
 *.icon filter=lfs diff=lfs merge=lfs -text
-
 # =============================================================================
 # AUDIO & VIDEO ASSETS
 # =============================================================================
@@ -50,7 +45,6 @@ logo.* filter=lfs diff=lfs merge=lfs -text
 *.mp3 filter=lfs diff=lfs merge=lfs -text
 *.wav filter=lfs diff=lfs merge=lfs -text
 *.flac filter=lfs diff=lfs merge=lfs -text
-
 # =============================================================================
 # ARCHIVE & COMPRESSION
 # =============================================================================
@@ -63,7 +57,6 @@ logo.* filter=lfs diff=lfs merge=lfs -text
 *.bz2 filter=lfs diff=lfs merge=lfs -text
 *.7z filter=lfs diff=lfs merge=lfs -text
 *.rar filter=lfs diff=lfs merge=lfs -text
-
 # =============================================================================
 # DATABASE & DATA FILES
 # =============================================================================
@@ -71,11 +64,9 @@ logo.* filter=lfs diff=lfs merge=lfs -text
 *.sqlite filter=lfs diff=lfs merge=lfs -text
 *.sqlite3 filter=lfs diff=lfs merge=lfs -text
 *.mdb filter=lfs diff=lfs merge=lfs -text
-
 # Large data files
 *.dat filter=lfs diff=lfs merge=lfs -text
 *.data filter=lfs diff=lfs merge=lfs -text
-
 # =============================================================================
 # BACKUP & TEMPORARY FILES (Size-Based)
 # =============================================================================
@@ -83,27 +74,22 @@ logo.* filter=lfs diff=lfs merge=lfs -text
 *.backup filter=lfs diff=lfs merge=lfs -text
 *.old filter=lfs diff=lfs merge=lfs -text
 *.orig filter=lfs diff=lfs merge=lfs -text
-
 # =============================================================================
 # LIBPOLYCALL-SPECIFIC ASSETS
 # =============================================================================
 # Banking system demonstration assets
 projects/banking-system/**/*.data filter=lfs diff=lfs merge=lfs -text
 projects/banking-system/**/*.db filter=lfs diff=lfs merge=lfs -text
-
 # v1trial large artifacts  
 libpolycall-v1trial/**/*.bin filter=lfs diff=lfs merge=lfs -text
 libpolycall-v1trial/**/*.so filter=lfs diff=lfs merge=lfs -text
-
 # Build artifacts over 1MB
 build/**/*.so filter=lfs diff=lfs merge=lfs -text
 build/**/*.a filter=lfs diff=lfs merge=lfs -text
 dist/**/*.tar.gz filter=lfs diff=lfs merge=lfs -text
-
 # Test data files
 test/**/*.data filter=lfs diff=lfs merge=lfs -text
 tests/**/*.bin filter=lfs diff=lfs merge=lfs -text
-
 # =============================================================================
 # EXCLUSIONS (Keep in Git)
 # =============================================================================
