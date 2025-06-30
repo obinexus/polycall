@@ -141,3 +141,8 @@ Hot-wiring architecture embodies "Computing from the Heart" philosophy through:
 **OBINexus Computing**: Hot-wiring architecture represents systematic compassion encoded in protocol, ensuring technology serves human outcomes while maintaining technical excellence.
 
 *Computing from the Heart. Building with Purpose. Running with Heart.*
+For adapter integration details see [hotwiring_adapter_integration_spec.md](./hotwiring_adapter_integration_spec.md).
+
+
+The multi-agent development workflow is described in [../code_ai_4agent_framework.md](../code_ai_4agent_framework.md).
+
