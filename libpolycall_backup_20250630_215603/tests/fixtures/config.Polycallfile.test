@@ -1,0 +1,56 @@
+# LibPolyCall Test Configuration File
+# Zero-Trust Architecture Testing Configuration
+
+# ----- Test Server Definitions -----
+server node 18080:18084       # Test Node.js endpoint binding
+server python 13001:18084     # Test Python endpoint binding
+server java 13002:18082       # Test Java endpoint binding
+server go 13003:18083         # Test Go endpoint binding
+
+# ----- Test Network Configuration -----
+network start
+network_timeout=2000
+max_connections=100
+retry_interval=500
+reconnect_attempts=2
+packet_validation=strict
+
+# ----- Test Global Settings -----
+log_directory=/tmp/polycall_test_logs
+workspace_root=/tmp/polycall_test
+base_protocol_version=1.0
+message_encoding=utf-8
+state_persistence=false
+
+# ----- Test Security Configuration -----
+tls_enabled=false
+auth_required=false
+default_policy=allow
+
+# ----- Test Resource Limits -----
+max_memory_per_service=256M
+max_cpu_per_service=1
+max_message_size=4M
+rate_limit_requests=50/s
+rate_limit_window=30
+
+# ----- Test Monitoring & Alerts -----
+enable_metrics=true
+metrics_port=19090
+health_check_interval=10
+dead_service_timeout=30
+
+# ----- Test Logging & Auditing -----
+log_level=debug
+audit_enabled=true
+audit_log=/tmp/polycall_test_logs/audit.log
+log_rotation=none
+log_retention=1
+structured_logging=true
+log_format=json
+
+# ----- Test Error Handling -----
+graceful_degradation=true
+circuit_breaker_enabled=true
+failure_threshold=3
+circuit_reset_timeout=30

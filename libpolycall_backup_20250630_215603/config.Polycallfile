@@ -1,0 +1,84 @@
+# LibPolyCall Main Configuration File
+# Zero-Trust Architecture Configuration
+
+# ----- Server Definitions -----
+server node 8080:8084       # Node.js endpoint binding
+server python 3001:8084     # Python endpoint binding
+server java 3002:8082       # Java endpoint binding
+server go 3003:8083         # Go endpoint binding
+
+# ----- Network Configuration -----
+network start
+network_timeout=5000
+max_connections=1000
+retry_interval=1500
+reconnect_attempts=3
+packet_validation=strict
+
+# ----- Global Settings -----
+log_directory=/var/log/polycall
+workspace_root=/opt/polycall
+base_protocol_version=1.0
+message_encoding=utf-8
+state_persistence=true
+
+# ----- Zero-Trust Security Configuration -----
+tls_enabled=true
+cert_file=/etc/polycall/certs/cert.pem
+key_file=/etc/polycall/certs/key.pem
+ca_file=/etc/polycall/certs/ca.pem
+mutual_tls=true
+cert_verification=true
+min_tls_version=1.3
+cipher_list=TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256
+
+# ----- Authentication Settings -----
+auth_required=true
+auth_method=token
+token_expiry=3600
+token_renewal=true
+session_timeout=7200
+max_failed_attempts=5
+lockout_period=300
+
+# ----- Access Control -----
+default_policy=deny
+acl_file=/etc/polycall/acl.json
+role_based_access=true
+principle_of_least_privilege=true
+
+# ----- Resource Limits -----
+max_memory_per_service=1G
+max_cpu_per_service=2
+max_message_size=16M
+rate_limit_requests=100/s
+rate_limit_window=60
+
+# ----- Monitoring & Alerts -----
+enable_metrics=true
+metrics_port=9090
+alert_threshold_cpu=80
+alert_threshold_memory=85
+health_check_interval=30
+dead_service_timeout=90
+
+# ----- Service Discovery -----
+auto_discover=true
+discovery_interval=60
+service_registry=/var/lib/polycall/registry
+heartbeat_interval=15
+
+# ----- Logging & Auditing -----
+log_level=info
+audit_enabled=true
+audit_log=/var/log/polycall/audit.log
+log_rotation=daily
+log_retention=30
+structured_logging=true
+log_format=json
+
+# ----- Error Handling -----
+graceful_degradation=true
+circuit_breaker_enabled=true
+failure_threshold=5
+circuit_reset_timeout=60
