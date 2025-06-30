@@ -1,10 +1,16 @@
 # Core library source files
 set(CORE_SOURCES
-	${CMAKE_CURRENT_SOURCE_DIR}/polycall.c
-	${CMAKE_CURRENT_SOURCE_DIR}/polycall/polycall_config.c
-	${CMAKE_CURRENT_SOURCE_DIR}/polycall/polycall_context.c
-	${CMAKE_CURRENT_SOURCE_DIR}/polycall/polycall_error.c
-	${CMAKE_CURRENT_SOURCE_DIR}/polycall/polycall_memory.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/polycall.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/polycall/polycall_config.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/polycall/polycall_context.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/polycall/polycall_error.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/polycall/polycall_memory.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/adapters/adapter_base.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/adapters/adapter_registry.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/adapters/adapter_orchestrator.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/adapters/python_adapter.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/adapters/go_adapter.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/adapters/nodejs_adapter.c
 )
 # Create development workflow target
 add_custom_target(dev_workflow
