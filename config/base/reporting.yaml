@@ -1,9 +1,0 @@
-# Sinphasé Reporting Configuration
-reporting:
-  formats:
-    console:
-      colored_output: true
-      summary_only: true
-    markdown:
-      include_graphs: true
-      detailed_metrics: true

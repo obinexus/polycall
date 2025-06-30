@@ -1,6 +1,0 @@
-{
-    "files.associations": {
-        "fallback.h": "c",
-        "protocol_commands.h": "c"
-    }
-}

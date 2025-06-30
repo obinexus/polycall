@@ -1,1 +1,0 @@
-"""Sinphasé detector module."""
