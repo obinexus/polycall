@@ -6,7 +6,7 @@ CFLAGS = -Wall -Werror -fPIC -O2 -I./include -I../../include
 LDFLAGS = -shared
 
 # Component identification
-COMPONENT = 'ffi'
+COMPONENT = ffi
 
 # Source discovery
 SRCS = $(wildcard src/*.c src/**/*.c)
