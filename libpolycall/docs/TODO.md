@@ -363,3 +363,5 @@ endif()
 5. The security policy enforcement system must provide comprehensive audit logging for compliance verification and security incident investigation.
 
 This architecture integrates with the existing LibPolyCall networking protocol while extending its capabilities through the micro and edge commands, maintaining the program-first approach that characterizes the project.
+### Pending TODO Items
+- [ ] Outline integration points with the Hotwire Architecture for cross-language execution.
