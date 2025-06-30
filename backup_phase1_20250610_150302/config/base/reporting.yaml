@@ -1,0 +1,27 @@
+reporting:
+  formats:
+    console:
+      colored_output: true
+      progress_indicators: true
+      summary_only: true
+      
+    markdown:
+      include_graphs: true
+      detailed_metrics: true
+      recommendations: true
+      
+    json:
+      structured_data: true
+      machine_readable: true
+      api_compatible: true
+      
+    formal:
+      executive_summary: true
+      technical_details: true
+      compliance_sections: true
+  
+  outputs:
+    governance_report: "SINPHASE_GOVERNANCE_REPORT.md"
+    violations_json: "SINPHASE_VIOLATIONS.json"
+    metrics_csv: "SINPHASE_METRICS.csv"
+    audit_log: "SINPHASE_AUDIT.log"

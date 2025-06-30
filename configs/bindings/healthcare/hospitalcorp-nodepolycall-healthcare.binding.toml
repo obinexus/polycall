@@ -1,0 +1,52 @@
+# CUSTOM BINDING CONFIGURATION
+# Generated: 2025-06-17T21:08:16+01:00
+# Domain: healthcare
+# Compliance Level: enhanced
+
+[metadata]
+binding_name = "hospitalcorp-nodepolycall-healthcare"
+base_language = "node"
+domain = "healthcare"
+organization = "hospitalcorp"
+compliance_level = "enhanced"
+sinphase_version = "2.0.0"
+
+[inheritance]
+base_binding = "node-polycall-secure"
+zero_trust_required = true
+sinphase_governance = true
+telemetry_mandatory = true
+
+[domain_specific]
+hipaa_compliance = true
+phi_encryption_required = true
+audit_trail_immutable = true
+data_anonymization = true
+consent_management = true
+breach_notification_automated = true
+minimum_password_complexity = "enterprise"
+
+[security_overrides]
+crypto_mode = "aes-256-gcm-enhanced"
+identity_verification = true
+multi_factor_required = true
+session_timeout_minutes = 15
+token_rotation_hours = 4
+certificate_pinning = true
+perfect_forward_secrecy = true
+
+[compliance_requirements]
+# Compliance Requirements for healthcare domain at enhanced level
+audit_logging = true
+telemetry_encryption = true
+data_retention_policy = "domain_specific"
+privacy_controls = true
+incident_response_automation = true
+compliance_reporting = "regulatory_standard"
+vulnerability_scanning = "continuous"
+penetration_testing = "quarterly"
+
+[deployment_targets]
+development = "configs/development/healthcare/"
+staging = "configs/staging/healthcare/"
+production = "configs/production/healthcare/"

@@ -1,0 +1,13 @@
+cost_function:
+  complexity_weights:
+    lines_factor: 0.001
+    dependency_factor: 0.05
+    include_factor: 0.02
+    function_factor: 0.01
+  
+  cost_multipliers:
+    c_files: 1.0
+    header_files: 0.8
+    test_files: 0.6
+    
+  phases: DESIGN: 0.5 IMPLEMENTATION: 1.0 VALIDATION: 1.2 DEPLOYMENT: 1.1

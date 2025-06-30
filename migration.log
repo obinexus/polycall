@@ -1,0 +1,94 @@
+2025-06-10 15:03:02,548 - sinphase.migration - INFO - run_migration:80 - 🚀 Starting Sinphasé Phase 1 Migration
+2025-06-10 15:03:02,548 - sinphase.migration - INFO - run_migration:81 - Project root: /mnt/c/Users/OBINexus/Projects/github/libpolycall
+2025-06-10 15:03:02,549 - sinphase.migration - INFO - run_migration:82 - Dry run mode: False
+2025-06-10 15:03:02,549 - sinphase.migration - INFO - _create_backup:118 - 📦 Creating backup of existing structure
+2025-06-10 15:03:03,157 - sinphase.migration - INFO - _create_backup:129 - Backed up scripts to /mnt/c/Users/OBINexus/Projects/github/libpolycall/backup_phase1_20250610_150302/scripts
+2025-06-10 15:03:03,353 - sinphase.migration - INFO - _create_backup:135 - Backed up config to /mnt/c/Users/OBINexus/Projects/github/libpolycall/backup_phase1_20250610_150302/config
+2025-06-10 15:03:03,353 - sinphase.migration - INFO - _create_backup:138 - Backup created at: /mnt/c/Users/OBINexus/Projects/github/libpolycall/backup_phase1_20250610_150302
+2025-06-10 15:03:03,353 - sinphase.migration - INFO - _create_directory_structure:142 - 📁 Creating new modular directory structure
+2025-06-10 15:03:03,360 - sinphase.migration - INFO - _create_directory_structure:156 - Created directory: scripts/core/cost-evaluator
+2025-06-10 15:03:03,366 - sinphase.migration - INFO - _create_directory_structure:156 - Created directory: scripts/core/violation-detector
+2025-06-10 15:03:03,371 - sinphase.migration - INFO - _create_directory_structure:156 - Created directory: scripts/core/governance-reporter
+2025-06-10 15:03:03,376 - sinphase.migration - INFO - _create_directory_structure:156 - Created directory: scripts/core/config
+2025-06-10 15:03:03,382 - sinphase.migration - INFO - _create_directory_structure:156 - Created directory: scripts/environments/dev
+2025-06-10 15:03:03,387 - sinphase.migration - INFO - _create_directory_structure:156 - Created directory: scripts/environments/ci
+2025-06-10 15:03:03,392 - sinphase.migration - INFO - _create_directory_structure:156 - Created directory: scripts/environments/test
+2025-06-10 15:03:03,397 - sinphase.migration - INFO - _create_directory_structure:156 - Created directory: scripts/environments/production
+2025-06-10 15:03:03,399 - sinphase.migration - INFO - _create_directory_structure:156 - Created directory: config/environments
+2025-06-10 15:03:03,400 - sinphase.migration - INFO - _create_directory_structure:156 - Created directory: config/branches
+2025-06-10 15:03:03,402 - sinphase.migration - INFO - _create_directory_structure:156 - Created directory: config/base
+2025-06-10 15:03:03,402 - sinphase.migration - INFO - _extract_monolithic_components:160 - 🔧 Extracting monolithic components
+2025-06-10 15:03:03,403 - sinphase.migration - INFO - _extract_monolithic_components:166 - Found existing evaluator: /mnt/c/Users/OBINexus/Projects/github/libpolycall/scripts/evaluator/sinphase_cost_evaluator.py
+2025-06-10 15:03:03,404 - sinphase.migration - INFO - _extract_cost_evaluator:196 - ⚙️ Extracting cost evaluation logic
+2025-06-10 15:03:03,406 - sinphase.migration - INFO - _extract_cost_evaluator:205 - Extracted cost evaluator to: /mnt/c/Users/OBINexus/Projects/github/libpolycall/scripts/core/cost-evaluator/evaluate.py
+2025-06-10 15:03:03,407 - sinphase.migration - INFO - _extract_violation_detector:209 - 🔍 Extracting violation detection logic
+2025-06-10 15:03:03,410 - sinphase.migration - INFO - _extract_violation_detector:216 - Extracted violation detector to: /mnt/c/Users/OBINexus/Projects/github/libpolycall/scripts/core/violation-detector/scan.py
+2025-06-10 15:03:03,410 - sinphase.migration - INFO - _extract_reporter:220 - 📊 Extracting reporting logic
+2025-06-10 15:03:03,413 - sinphase.migration - INFO - _extract_reporter:227 - Extracted reporter to: /mnt/c/Users/OBINexus/Projects/github/libpolycall/scripts/core/governance-reporter/generate.py
+2025-06-10 15:03:03,414 - sinphase.migration - INFO - _create_environment_entry_points:231 - 🌍 Creating environment-specific entry points
+2025-06-10 15:03:03,418 - sinphase.migration - INFO - _create_environment_entry_points:241 - Created dev environment entry point: /mnt/c/Users/OBINexus/Projects/github/libpolycall/scripts/environments/dev/governance.py
+2025-06-10 15:03:03,423 - sinphase.migration - INFO - _create_environment_entry_points:241 - Created ci environment entry point: /mnt/c/Users/OBINexus/Projects/github/libpolycall/scripts/environments/ci/governance.py
+2025-06-10 15:03:03,428 - sinphase.migration - INFO - _create_environment_entry_points:241 - Created test environment entry point: /mnt/c/Users/OBINexus/Projects/github/libpolycall/scripts/environments/test/governance.py
+2025-06-10 15:03:03,432 - sinphase.migration - INFO - _create_environment_entry_points:241 - Created production environment entry point: /mnt/c/Users/OBINexus/Projects/github/libpolycall/scripts/environments/production/governance.py
+2025-06-10 15:03:03,432 - sinphase.migration - INFO - _create_configuration_system:245 - ⚙️ Creating configuration system
+2025-06-10 15:03:03,437 - sinphase.migration - INFO - _create_configuration_system:265 - Created config file: config/base/cost_function.yaml
+2025-06-10 15:03:03,441 - sinphase.migration - INFO - _create_configuration_system:265 - Created config file: config/base/violation_rules.yaml
+2025-06-10 15:03:03,445 - sinphase.migration - INFO - _create_configuration_system:265 - Created config file: config/base/reporting.yaml
+2025-06-10 15:03:03,449 - sinphase.migration - INFO - _create_configuration_system:265 - Created config file: config/environments/dev.yaml
+2025-06-10 15:03:03,453 - sinphase.migration - INFO - _create_configuration_system:265 - Created config file: config/environments/ci.yaml
+2025-06-10 15:03:03,457 - sinphase.migration - INFO - _create_configuration_system:265 - Created config file: config/branches/main.yaml
+2025-06-10 15:03:03,461 - sinphase.migration - INFO - _create_configuration_system:265 - Created config file: config/branches/develop.yaml
+2025-06-10 15:03:03,465 - sinphase.migration - INFO - _create_configuration_system:265 - Created config file: config/branches/feature.yaml
+2025-06-10 15:03:03,465 - sinphase.migration - INFO - _update_build_integration:269 - 🔨 Updating build integration
+2025-06-10 15:03:03,469 - sinphase.migration - INFO - _update_build_integration:283 - Updated build integration scripts
+2025-06-10 15:03:03,470 - sinphase.migration - INFO - _validate_migration:287 - ✅ Validating migration results
+2025-06-10 15:03:03,481 - sinphase.migration - INFO - _test_new_system:307 - 🧪 Testing new governance system
+2025-06-10 15:03:03,497 - sinphase.migration - ERROR - run_migration:111 - ❌ Migration failed: Failed to import new modules: No module named 'core.cost_evaluator'
+2025-06-10 15:03:03,497 - sinphase.migration - INFO - _restore_backup:527 - Restoring from backup due to migration failure
+2025-06-10 15:06:05,168 - sinphase.migration - INFO - run_migration:80 - 🚀 Starting Sinphasé Phase 1 Migration
+2025-06-10 15:06:05,169 - sinphase.migration - INFO - run_migration:81 - Project root: /mnt/c/Users/OBINexus/Projects/github/libpolycall
+2025-06-10 15:06:05,169 - sinphase.migration - INFO - run_migration:82 - Dry run mode: False
+2025-06-10 15:06:05,169 - sinphase.migration - INFO - _create_backup:118 - 📦 Creating backup of existing structure
+2025-06-10 15:06:06,188 - sinphase.migration - INFO - _create_backup:129 - Backed up scripts to /mnt/c/Users/OBINexus/Projects/github/libpolycall/backup_phase1_20250610_150605/scripts
+2025-06-10 15:06:06,411 - sinphase.migration - INFO - _create_backup:135 - Backed up config to /mnt/c/Users/OBINexus/Projects/github/libpolycall/backup_phase1_20250610_150605/config
+2025-06-10 15:06:06,412 - sinphase.migration - INFO - _create_backup:138 - Backup created at: /mnt/c/Users/OBINexus/Projects/github/libpolycall/backup_phase1_20250610_150605
+2025-06-10 15:06:06,412 - sinphase.migration - INFO - _create_directory_structure:142 - 📁 Creating new modular directory structure
+2025-06-10 15:06:06,416 - sinphase.migration - INFO - _create_directory_structure:156 - Created directory: scripts/core/cost-evaluator
+2025-06-10 15:06:06,421 - sinphase.migration - INFO - _create_directory_structure:156 - Created directory: scripts/core/violation-detector
+2025-06-10 15:06:06,425 - sinphase.migration - INFO - _create_directory_structure:156 - Created directory: scripts/core/governance-reporter
+2025-06-10 15:06:06,430 - sinphase.migration - INFO - _create_directory_structure:156 - Created directory: scripts/core/config
+2025-06-10 15:06:06,434 - sinphase.migration - INFO - _create_directory_structure:156 - Created directory: scripts/environments/dev
+2025-06-10 15:06:06,439 - sinphase.migration - INFO - _create_directory_structure:156 - Created directory: scripts/environments/ci
+2025-06-10 15:06:06,443 - sinphase.migration - INFO - _create_directory_structure:156 - Created directory: scripts/environments/test
+2025-06-10 15:06:06,447 - sinphase.migration - INFO - _create_directory_structure:156 - Created directory: scripts/environments/production
+2025-06-10 15:06:06,449 - sinphase.migration - INFO - _create_directory_structure:156 - Created directory: config/environments
+2025-06-10 15:06:06,451 - sinphase.migration - INFO - _create_directory_structure:156 - Created directory: config/branches
+2025-06-10 15:06:06,453 - sinphase.migration - INFO - _create_directory_structure:156 - Created directory: config/base
+2025-06-10 15:06:06,453 - sinphase.migration - INFO - _extract_monolithic_components:160 - 🔧 Extracting monolithic components
+2025-06-10 15:06:06,455 - sinphase.migration - INFO - _extract_monolithic_components:166 - Found existing evaluator: /mnt/c/Users/OBINexus/Projects/github/libpolycall/scripts/evaluator/sinphase_cost_evaluator.py
+2025-06-10 15:06:06,455 - sinphase.migration - INFO - _extract_cost_evaluator:196 - ⚙️ Extracting cost evaluation logic
+2025-06-10 15:06:06,458 - sinphase.migration - INFO - _extract_cost_evaluator:205 - Extracted cost evaluator to: /mnt/c/Users/OBINexus/Projects/github/libpolycall/scripts/core/cost-evaluator/evaluate.py
+2025-06-10 15:06:06,458 - sinphase.migration - INFO - _extract_violation_detector:209 - 🔍 Extracting violation detection logic
+2025-06-10 15:06:06,461 - sinphase.migration - INFO - _extract_violation_detector:216 - Extracted violation detector to: /mnt/c/Users/OBINexus/Projects/github/libpolycall/scripts/core/violation-detector/scan.py
+2025-06-10 15:06:06,461 - sinphase.migration - INFO - _extract_reporter:220 - 📊 Extracting reporting logic
+2025-06-10 15:06:06,464 - sinphase.migration - INFO - _extract_reporter:227 - Extracted reporter to: /mnt/c/Users/OBINexus/Projects/github/libpolycall/scripts/core/governance-reporter/generate.py
+2025-06-10 15:06:06,464 - sinphase.migration - INFO - _create_environment_entry_points:231 - 🌍 Creating environment-specific entry points
+2025-06-10 15:06:06,469 - sinphase.migration - INFO - _create_environment_entry_points:241 - Created dev environment entry point: /mnt/c/Users/OBINexus/Projects/github/libpolycall/scripts/environments/dev/governance.py
+2025-06-10 15:06:06,473 - sinphase.migration - INFO - _create_environment_entry_points:241 - Created ci environment entry point: /mnt/c/Users/OBINexus/Projects/github/libpolycall/scripts/environments/ci/governance.py
+2025-06-10 15:06:06,478 - sinphase.migration - INFO - _create_environment_entry_points:241 - Created test environment entry point: /mnt/c/Users/OBINexus/Projects/github/libpolycall/scripts/environments/test/governance.py
+2025-06-10 15:06:06,482 - sinphase.migration - INFO - _create_environment_entry_points:241 - Created production environment entry point: /mnt/c/Users/OBINexus/Projects/github/libpolycall/scripts/environments/production/governance.py
+2025-06-10 15:06:06,482 - sinphase.migration - INFO - _create_configuration_system:245 - ⚙️ Creating configuration system
+2025-06-10 15:06:06,486 - sinphase.migration - INFO - _create_configuration_system:265 - Created config file: config/base/cost_function.yaml
+2025-06-10 15:06:06,490 - sinphase.migration - INFO - _create_configuration_system:265 - Created config file: config/base/violation_rules.yaml
+2025-06-10 15:06:06,494 - sinphase.migration - INFO - _create_configuration_system:265 - Created config file: config/base/reporting.yaml
+2025-06-10 15:06:06,498 - sinphase.migration - INFO - _create_configuration_system:265 - Created config file: config/environments/dev.yaml
+2025-06-10 15:06:06,502 - sinphase.migration - INFO - _create_configuration_system:265 - Created config file: config/environments/ci.yaml
+2025-06-10 15:06:06,506 - sinphase.migration - INFO - _create_configuration_system:265 - Created config file: config/branches/main.yaml
+2025-06-10 15:06:06,511 - sinphase.migration - INFO - _create_configuration_system:265 - Created config file: config/branches/develop.yaml
+2025-06-10 15:06:06,515 - sinphase.migration - INFO - _create_configuration_system:265 - Created config file: config/branches/feature.yaml
+2025-06-10 15:06:06,515 - sinphase.migration - INFO - _update_build_integration:269 - 🔨 Updating build integration
+2025-06-10 15:06:06,519 - sinphase.migration - INFO - _update_build_integration:283 - Updated build integration scripts
+2025-06-10 15:06:06,520 - sinphase.migration - INFO - _validate_migration:287 - ✅ Validating migration results
+2025-06-10 15:06:06,531 - sinphase.migration - INFO - _test_new_system:307 - 🧪 Testing new governance system
+2025-06-10 15:06:06,545 - sinphase.migration - ERROR - run_migration:111 - ❌ Migration failed: Failed to import new modules: No module named 'core.cost_evaluator'
+2025-06-10 15:06:06,545 - sinphase.migration - INFO - _restore_backup:527 - Restoring from backup due to migration failure

@@ -1,0 +1,35 @@
+#!/bin/bash
+# Sinphasé Pre-push Hook - Final local validation
+
+echo "🚀 Sinphasé: Pre-push governance validation..."
+
+# Check if we're about to push to protected branches
+remote="$1"
+url="$2"
+
+while read local_ref local_sha remote_ref remote_sha; do
+    if [ "$local_sha" = "0000000000000000000000000000000000000000" ]; then
+        # Branch deletion - allow
+        continue
+    fi
+    
+    branch_name=$(echo "$remote_ref" | sed 's/refs\/heads\///')
+    
+    if [ "$branch_name" = "main" ] || [ "$branch_name" = "dev" ]; then
+        echo "🔒 Pushing to protected branch: $branch_name"
+        echo "🔍 Running comprehensive Sinphasé validation..."
+        
+        # Run the cost evaluator if it exists
+        if [ -f "scripts/evaluator/sinphase_cost_evaluator.py" ]; then
+            echo "📊 Running cost function analysis..."
+            python scripts/evaluator/sinphase_cost_evaluator.py --project-root . --threshold 0.6
+            
+            if [ $? -ne 0 ]; then
+                echo "❌ PUSH BLOCKED: Sinphasé governance violations detected"
+                exit 1
+            fi
+        fi
+    fi
+done
+
+echo "✅ Pre-push validation passed"

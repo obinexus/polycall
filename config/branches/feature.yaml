@@ -1,0 +1,6 @@
+# Feature Branch Configuration
+branch_pattern: "feature/*"
+governance:
+  threshold_multiplier: 1.7
+  required_approvals: 0
+  mandatory_review: false

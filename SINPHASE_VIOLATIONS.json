@@ -1,0 +1,452 @@
+{
+  "timestamp": "/mnt/c/Users/OBINexus/Projects/github/libpolycall",
+  "threshold": 0.6,
+  "total_violations": 74,
+  "violations": [
+    {
+      "file": "backup/pre-isolation/libpolycall/emergency-ffi-recovery/original-ffi/c_bridge.c",
+      "cost": 1.095,
+      "threshold": 0.6,
+      "violation_ratio": 1.825
+    },
+    {
+      "file": "backup/pre-isolation/libpolycall/emergency-ffi-recovery/original-ffi/ffi_config.c",
+      "cost": 1.2237,
+      "threshold": 0.6,
+      "violation_ratio": 2.0395000000000003
+    },
+    {
+      "file": "backup/pre-isolation/libpolycall/emergency-ffi-recovery/original-ffi/python_bridge.c",
+      "cost": 1.0833,
+      "threshold": 0.6,
+      "violation_ratio": 1.8054999999999999
+    },
+    {
+      "file": "backup/pre-isolation/libpolycall/emergency-isolation/ffi-critical/c_bridge.c",
+      "cost": 1.095,
+      "threshold": 0.6,
+      "violation_ratio": 1.825
+    },
+    {
+      "file": "backup/pre-isolation/libpolycall/emergency-isolation/ffi-critical/ffi_config.c",
+      "cost": 1.2237,
+      "threshold": 0.6,
+      "violation_ratio": 2.0395000000000003
+    },
+    {
+      "file": "backup/pre-isolation/libpolycall/emergency-isolation/ffi-critical/python_bridge.c",
+      "cost": 1.0833,
+      "threshold": 0.6,
+      "violation_ratio": 1.8054999999999999
+    },
+    {
+      "file": "backup/pre-isolation/libpolycall/lost+found/ffi/c_bridge.c",
+      "cost": 1.0869,
+      "threshold": 0.6,
+      "violation_ratio": 1.8115
+    },
+    {
+      "file": "backup/pre-isolation/libpolycall/lost+found/ffi/ffi_config.c",
+      "cost": 1.317,
+      "threshold": 0.6,
+      "violation_ratio": 2.195
+    },
+    {
+      "file": "backup/pre-isolation/libpolycall/lost+found/ffi/python_bridge.c",
+      "cost": 1.0755,
+      "threshold": 0.6,
+      "violation_ratio": 1.7925
+    },
+    {
+      "file": "backup/pre-isolation/libpolycall/src/core/ffi/c_bridge.c",
+      "cost": 1.095,
+      "threshold": 0.6,
+      "violation_ratio": 1.825
+    },
+    {
+      "file": "backup/pre-isolation/libpolycall/src/core/ffi/ffi_config.c",
+      "cost": 1.2237,
+      "threshold": 0.6,
+      "violation_ratio": 2.0395000000000003
+    },
+    {
+      "file": "backup/pre-isolation/libpolycall/src/core/ffi/python_bridge.c",
+      "cost": 1.0833,
+      "threshold": 0.6,
+      "violation_ratio": 1.8054999999999999
+    },
+    {
+      "file": "backup/pre-isolation/libpolycall/src/core/micro/micro_config.c",
+      "cost": 1.0688,
+      "threshold": 0.6,
+      "violation_ratio": 1.7813333333333334
+    },
+    {
+      "file": "libpolycall/emergency-ffi-recovery/original-ffi/cobol_bridge.c",
+      "cost": 0.831,
+      "threshold": 0.6,
+      "violation_ratio": 1.385
+    },
+    {
+      "file": "libpolycall/emergency-ffi-recovery/original-ffi/ffi_core.c",
+      "cost": 0.8292,
+      "threshold": 0.6,
+      "violation_ratio": 1.3820000000000001
+    },
+    {
+      "file": "libpolycall/emergency-ffi-recovery/original-ffi/js_bridge.c",
+      "cost": 1.0209000000000001,
+      "threshold": 0.6,
+      "violation_ratio": 1.7015000000000002
+    },
+    {
+      "file": "libpolycall/emergency-ffi-recovery/original-ffi/jvm_bridge.c",
+      "cost": 0.9746999999999999,
+      "threshold": 0.6,
+      "violation_ratio": 1.6244999999999998
+    },
+    {
+      "file": "libpolycall/emergency-ffi-recovery/original-ffi/memory_bridge.c",
+      "cost": 0.9438,
+      "threshold": 0.6,
+      "violation_ratio": 1.573
+    },
+    {
+      "file": "libpolycall/emergency-ffi-recovery/original-ffi/performance.c",
+      "cost": 0.897,
+      "threshold": 0.6,
+      "violation_ratio": 1.495
+    },
+    {
+      "file": "libpolycall/emergency-ffi-recovery/original-ffi/protocol_bridge.c",
+      "cost": 0.8822999999999999,
+      "threshold": 0.6,
+      "violation_ratio": 1.4705
+    },
+    {
+      "file": "libpolycall/emergency-ffi-recovery/original-ffi/security.c",
+      "cost": 0.7454999999999999,
+      "threshold": 0.6,
+      "violation_ratio": 1.2425
+    },
+    {
+      "file": "libpolycall/emergency-isolation/auth-critical/auth_policy.c",
+      "cost": 0.6146,
+      "threshold": 0.6,
+      "violation_ratio": 1.0243333333333335
+    },
+    {
+      "file": "libpolycall/emergency-isolation/ffi-critical/cobol_bridge.c",
+      "cost": 0.831,
+      "threshold": 0.6,
+      "violation_ratio": 1.385
+    },
+    {
+      "file": "libpolycall/emergency-isolation/ffi-critical/ffi_core.c",
+      "cost": 0.8292,
+      "threshold": 0.6,
+      "violation_ratio": 1.3820000000000001
+    },
+    {
+      "file": "libpolycall/emergency-isolation/ffi-critical/js_bridge.c",
+      "cost": 1.0209000000000001,
+      "threshold": 0.6,
+      "violation_ratio": 1.7015000000000002
+    },
+    {
+      "file": "libpolycall/emergency-isolation/ffi-critical/jvm_bridge.c",
+      "cost": 0.9746999999999999,
+      "threshold": 0.6,
+      "violation_ratio": 1.6244999999999998
+    },
+    {
+      "file": "libpolycall/emergency-isolation/ffi-critical/memory_bridge.c",
+      "cost": 0.9438,
+      "threshold": 0.6,
+      "violation_ratio": 1.573
+    },
+    {
+      "file": "libpolycall/emergency-isolation/ffi-critical/performance.c",
+      "cost": 0.897,
+      "threshold": 0.6,
+      "violation_ratio": 1.495
+    },
+    {
+      "file": "libpolycall/emergency-isolation/ffi-critical/protocol_bridge.c",
+      "cost": 0.8822999999999999,
+      "threshold": 0.6,
+      "violation_ratio": 1.4705
+    },
+    {
+      "file": "libpolycall/emergency-isolation/ffi-critical/security.c",
+      "cost": 0.7454999999999999,
+      "threshold": 0.6,
+      "violation_ratio": 1.2425
+    },
+    {
+      "file": "libpolycall/emergency-isolation/network-critical/network.c",
+      "cost": 0.7247000000000001,
+      "threshold": 0.6,
+      "violation_ratio": 1.2078333333333335
+    },
+    {
+      "file": "libpolycall/emergency-isolation/network-critical/network_client.c",
+      "cost": 0.6161,
+      "threshold": 0.6,
+      "violation_ratio": 1.0268333333333333
+    },
+    {
+      "file": "libpolycall/emergency-isolation/network-critical/network_server.c",
+      "cost": 0.8717,
+      "threshold": 0.6,
+      "violation_ratio": 1.4528333333333334
+    },
+    {
+      "file": "libpolycall/emergency-isolation/polycall-critical/polycall.c",
+      "cost": 0.7119,
+      "threshold": 0.6,
+      "violation_ratio": 1.1865
+    },
+    {
+      "file": "libpolycall/emergency-isolation/protocol-critical/command.c",
+      "cost": 0.6176,
+      "threshold": 0.6,
+      "violation_ratio": 1.0293333333333334
+    },
+    {
+      "file": "libpolycall/emergency-isolation/protocol-critical/communication.c",
+      "cost": 0.6258,
+      "threshold": 0.6,
+      "violation_ratio": 1.0430000000000001
+    },
+    {
+      "file": "libpolycall/emergency-isolation/protocol-critical/protocol_config.c",
+      "cost": 0.7046,
+      "threshold": 0.6,
+      "violation_ratio": 1.1743333333333335
+    },
+    {
+      "file": "libpolycall/lost+found/ffi/cobol_bridge.c",
+      "cost": 0.8229000000000001,
+      "threshold": 0.6,
+      "violation_ratio": 1.3715000000000002
+    },
+    {
+      "file": "libpolycall/lost+found/ffi/ffi_core.c",
+      "cost": 0.8292,
+      "threshold": 0.6,
+      "violation_ratio": 1.3820000000000001
+    },
+    {
+      "file": "libpolycall/lost+found/ffi/js_bridge.c",
+      "cost": 1.0128,
+      "threshold": 0.6,
+      "violation_ratio": 1.688
+    },
+    {
+      "file": "libpolycall/lost+found/ffi/jvm_bridge.c",
+      "cost": 0.9666,
+      "threshold": 0.6,
+      "violation_ratio": 1.611
+    },
+    {
+      "file": "libpolycall/lost+found/ffi/memory_bridge.c",
+      "cost": 0.936,
+      "threshold": 0.6,
+      "violation_ratio": 1.56
+    },
+    {
+      "file": "libpolycall/lost+found/ffi/performance.c",
+      "cost": 0.8892,
+      "threshold": 0.6,
+      "violation_ratio": 1.482
+    },
+    {
+      "file": "libpolycall/lost+found/ffi/protocol_bridge.c",
+      "cost": 0.8742,
+      "threshold": 0.6,
+      "violation_ratio": 1.457
+    },
+    {
+      "file": "libpolycall/lost+found/ffi/security.c",
+      "cost": 0.7374,
+      "threshold": 0.6,
+      "violation_ratio": 1.229
+    },
+    {
+      "file": "libpolycall/src/cli/repl.c",
+      "cost": 0.6883999999999999,
+      "threshold": 0.6,
+      "violation_ratio": 1.1473333333333333
+    },
+    {
+      "file": "libpolycall/src/cli/repl/repl_commands.c",
+      "cost": 0.6233,
+      "threshold": 0.6,
+      "violation_ratio": 1.0388333333333333
+    },
+    {
+      "file": "libpolycall/src/core/auth/auth_policy.c",
+      "cost": 0.6146,
+      "threshold": 0.6,
+      "violation_ratio": 1.0243333333333335
+    },
+    {
+      "file": "libpolycall/src/core/config/config_factory.c",
+      "cost": 0.7265999999999999,
+      "threshold": 0.6,
+      "violation_ratio": 1.2109999999999999
+    },
+    {
+      "file": "libpolycall/src/core/config/config_factory_mergers.c",
+      "cost": 0.6619999999999999,
+      "threshold": 0.6,
+      "violation_ratio": 1.1033333333333333
+    },
+    {
+      "file": "libpolycall/src/core/edge/edge_config.c",
+      "cost": 0.7385,
+      "threshold": 0.6,
+      "violation_ratio": 1.2308333333333334
+    },
+    {
+      "file": "libpolycall/src/core/ffi/cobol_bridge.c",
+      "cost": 0.831,
+      "threshold": 0.6,
+      "violation_ratio": 1.385
+    },
+    {
+      "file": "libpolycall/src/core/ffi/ffi_core.c",
+      "cost": 0.8292,
+      "threshold": 0.6,
+      "violation_ratio": 1.3820000000000001
+    },
+    {
+      "file": "libpolycall/src/core/ffi/js_bridge.c",
+      "cost": 1.0209000000000001,
+      "threshold": 0.6,
+      "violation_ratio": 1.7015000000000002
+    },
+    {
+      "file": "libpolycall/src/core/ffi/jvm_bridge.c",
+      "cost": 0.9746999999999999,
+      "threshold": 0.6,
+      "violation_ratio": 1.6244999999999998
+    },
+    {
+      "file": "libpolycall/src/core/ffi/memory_bridge.c",
+      "cost": 0.9438,
+      "threshold": 0.6,
+      "violation_ratio": 1.573
+    },
+    {
+      "file": "libpolycall/src/core/ffi/performance.c",
+      "cost": 0.897,
+      "threshold": 0.6,
+      "violation_ratio": 1.495
+    },
+    {
+      "file": "libpolycall/src/core/ffi/protocol_bridge.c",
+      "cost": 0.8822999999999999,
+      "threshold": 0.6,
+      "violation_ratio": 1.4705
+    },
+    {
+      "file": "libpolycall/src/core/ffi/security.c",
+      "cost": 0.7454999999999999,
+      "threshold": 0.6,
+      "violation_ratio": 1.2425
+    },
+    {
+      "file": "libpolycall/src/core/micro/command_handler.c",
+      "cost": 0.752,
+      "threshold": 0.6,
+      "violation_ratio": 1.2533333333333334
+    },
+    {
+      "file": "libpolycall/src/core/micro/security_policy.c",
+      "cost": 0.7004999999999999,
+      "threshold": 0.6,
+      "violation_ratio": 1.1675
+    },
+    {
+      "file": "libpolycall/src/core/network/network.c",
+      "cost": 0.7247000000000001,
+      "threshold": 0.6,
+      "violation_ratio": 1.2078333333333335
+    },
+    {
+      "file": "libpolycall/src/core/network/network_client.c",
+      "cost": 0.6161,
+      "threshold": 0.6,
+      "violation_ratio": 1.0268333333333333
+    },
+    {
+      "file": "libpolycall/src/core/network/network_server.c",
+      "cost": 0.8717,
+      "threshold": 0.6,
+      "violation_ratio": 1.4528333333333334
+    },
+    {
+      "file": "libpolycall/src/core/polycall/polycall.c",
+      "cost": 0.7119,
+      "threshold": 0.6,
+      "violation_ratio": 1.1865
+    },
+    {
+      "file": "libpolycall/src/core/protocol/command.c",
+      "cost": 0.6176,
+      "threshold": 0.6,
+      "violation_ratio": 1.0293333333333334
+    },
+    {
+      "file": "libpolycall/src/core/protocol/communication.c",
+      "cost": 0.6258,
+      "threshold": 0.6,
+      "violation_ratio": 1.0430000000000001
+    },
+    {
+      "file": "libpolycall/src/core/protocol/protocol_config.c",
+      "cost": 0.7046,
+      "threshold": 0.6,
+      "violation_ratio": 1.1743333333333335
+    },
+    {
+      "file": "libpolycall/src/core/repl/polycall_repl.c",
+      "cost": 0.7044000000000001,
+      "threshold": 0.6,
+      "violation_ratio": 1.1740000000000004
+    },
+    {
+      "file": "libpolycall/src/core/schema/config_schema.c",
+      "cost": 0.8837999999999999,
+      "threshold": 0.6,
+      "violation_ratio": 1.4729999999999999
+    },
+    {
+      "file": "root-dynamic-c/emergency-isolation/tier1-critical/c_bridge.c",
+      "cost": 1.095,
+      "threshold": 0.6,
+      "violation_ratio": 1.825
+    },
+    {
+      "file": "root-dynamic-c/emergency-isolation/tier1-critical/ffi_config.c",
+      "cost": 1.2237,
+      "threshold": 0.6,
+      "violation_ratio": 2.0395000000000003
+    },
+    {
+      "file": "root-dynamic-c/emergency-isolation/tier1-critical/micro_config.c",
+      "cost": 1.0688,
+      "threshold": 0.6,
+      "violation_ratio": 1.7813333333333334
+    },
+    {
+      "file": "root-dynamic-c/emergency-isolation/tier1-critical/python_bridge.c",
+      "cost": 1.0833,
+      "threshold": 0.6,
+      "violation_ratio": 1.8054999999999999
+    }
+  ],
+  "emergency_action_required": true
+}

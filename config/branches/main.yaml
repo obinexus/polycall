@@ -1,0 +1,6 @@
+# Main Branch Configuration
+branch: main
+governance:
+  threshold_multiplier: 1.0
+  required_approvals: 2
+  mandatory_review: true

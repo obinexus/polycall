@@ -1,0 +1,6 @@
+# SINPHASÉ ISOLATION MARKER
+# Original: libpolycall/emergency-ffi-recovery/original-ffi/c_bridge.c
+# Isolation reason: Critical cost violation (> 1.5x threshold)
+# Timestamp: Tue Jun 10 02:14:03 PM BST 2025
+# Action required: Complete architectural refactor
+

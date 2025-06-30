@@ -1,0 +1,16 @@
+environment: ci_cd
+governance:
+  base_threshold: 0.6
+  autonomous_limit: 0.5
+  fail_on_violations: true
+  isolation_enabled: true
+  
+reporting:
+  level: "detailed"
+  format: "structured"
+  export_artifacts: true
+  
+features:
+  github_annotations: true
+  artifact_generation: true
+  performance_tracking: true

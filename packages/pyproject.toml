@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sinphase-toolkit"
+version = "0.1.0"
+description = "🔍 Sinphasé Governance Toolkit - OBINexus Computing Unified Framework"
+authors = [
+    {name = "OBINexus Computing", email = "governance@obinexuscomputing.com"}
+]
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.8"
+dependencies = [
+    "typer>=0.9.0",
+    "rich>=13.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "black>=22.0.0",
+    "flake8>=4.0.0",
+    "mypy>=0.900",
+    "coverage>=6.0.0",
+]
+
+[project.scripts]
+sinphase = "sinphase_toolkit.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["sinphase_toolkit*"]
+exclude = ["tests*"]
