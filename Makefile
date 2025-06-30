@@ -3,24 +3,24 @@
 .PHONY: help install check report refactor test
 
 help:
-\t@echo "Sinphasé Toolkit Commands:"
-\t@echo "  install    - Install package in editable mode"
-\t@echo "  check      - Run governance check"
-\t@echo "  report     - Generate governance report" 
-\t@echo "  refactor   - Run refactoring (dry-run)"
-\t@echo "  test       - Run test suite"
+	@echo "Sinphasé Toolkit Commands:"
+	@echo "  install    - Install package in editable mode"
+	@echo "  check      - Run governance check"
+	@echo "  report     - Generate governance report" 
+	@echo "  refactor   - Run refactoring (dry-run)"
+	@echo "  test       - Run test suite"
 
 install:
-\tpip install -e .
+	pip install -e .
 
 check:
-\tsinphase check
+	sinphase check
 
 report:
-\tsinphase report
+	sinphase report
 
 refactor:
-\tsinphase refactor --dry-run
+	sinphase refactor --dry-run
 
 test:
-\tpytest tests/ -v
+	pytest tests/ -v
