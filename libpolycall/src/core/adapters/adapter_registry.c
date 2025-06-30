@@ -1,5 +1,5 @@
-#include "adapter_registry.h"
-#include <stdlib.h>
+#include "polycall/core/adapters/adapter_registry.h"
+#include <pthread.h>
 
 int adapter_registry_init(adapter_registry_t* registry, topology_manager_t* manager) {
     if (!registry || !manager) return -1;

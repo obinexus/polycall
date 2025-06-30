@@ -12,54 +12,57 @@ set(CORE_SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/adapters/go_adapter.c
         ${CMAKE_CURRENT_SOURCE_DIR}/adapters/nodejs_adapter.c
 )
+
 # Create development workflow target
 add_custom_target(dev_workflow
   DEPENDS validate-includes fix-includes standardize-includes build test:all
   COMMENT "Running complete development workflow"
 )
+
 # Create library from core sources
 add_library(polycall_core_lib STATIC ${CORE_SOURCES})
 
 # Set include directories
 target_include_directories(polycall_core_lib
-	PUBLIC
-		${CMAKE_CURRENT_SOURCE_DIR}/../../../include
-	PRIVATE
-		${CMAKE_CURRENT_SOURCE_DIR}/..
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../../include
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/..
 )
 
 # Add subdirectories if they need their own build definitions
 if(ENABLE_AUTH)
-	add_subdirectory(auth)
+    add_subdirectory(auth)
 endif()
 
 if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/config AND IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/config)
-	add_subdirectory(config)
+    add_subdirectory(config)
 endif()
 
 if(ENABLE_EDGE)
-	add_subdirectory(edge)
+    add_subdirectory(edge)
 endif()
 
 if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/ffi AND IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/ffi)
-	add_subdirectory(ffi)
+    add_subdirectory(ffi)
 endif()
 
 if(ENABLE_MICRO)
-	add_subdirectory(micro)
+    add_subdirectory(micro)
 endif()
 
 if(ENABLE_NETWORK)
-	add_subdirectory(network)
+    add_subdirectory(network)
 endif()
 
 if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/protocol AND IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/protocol)
-	add_subdirectory(protocol)
+    add_subdirectory(protocol)
 endif()
 
 if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/telemetry AND IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/telemetry)
-	add_subdirectory(telemetry)
+    add_subdirectory(telemetry)
 endif()
+
 # CMakeLists.txt for LibPolyCall core directory
 # Coordinates the build of all core components
 
@@ -88,16 +91,16 @@ endforeach()
 if(BUILD_DOCUMENTATION)
     # Create a dot file showing component dependencies
     set(DEPENDENCIES_DOT_FILE "${CMAKE_BINARY_DIR}/docs/component_dependencies.dot")
-    
+
     file(WRITE ${DEPENDENCIES_DOT_FILE} "digraph ComponentDependencies {\n")
     file(APPEND ${DEPENDENCIES_DOT_FILE} "  rankdir=LR;\n")
     file(APPEND ${DEPENDENCIES_DOT_FILE} "  node [shape=box, style=filled, fillcolor=lightblue];\n")
-    
+
     foreach(COMPONENT ${CORE_COMPONENTS})
         # Get component dependencies if they exist
         get_property(COMPONENT_DEPS TARGET polycall_${COMPONENT} 
                                PROPERTY INTERFACE_LINK_LIBRARIES)
-                               
+
         if(COMPONENT_DEPS)
             foreach(DEP ${COMPONENT_DEPS})
                 if(DEP MATCHES "^polycall_.*")
@@ -107,28 +110,29 @@ if(BUILD_DOCUMENTATION)
             endforeach()
         endif()
     endforeach()
-    
+
     file(APPEND ${DEPENDENCIES_DOT_FILE} "}\n")
-    
+
     # If Graphviz is available, generate a PNG from the dot file
     find_program(DOT_EXECUTABLE dot)
     if(DOT_EXECUTABLE)
         add_custom_command(
             OUTPUT "${CMAKE_BINARY_DIR}/docs/component_dependencies.png"
-            COMMAND ${DOT_EXECUTABLE} -Tpng 
-                    -o "${CMAKE_BINARY_DIR}/docs/component_dependencies.png" 
+            COMMAND ${DOT_EXECUTABLE} -Tpng \
+                    -o "${CMAKE_BINARY_DIR}/docs/component_dependencies.png" \
                     "${DEPENDENCIES_DOT_FILE}"
             DEPENDS "${DEPENDENCIES_DOT_FILE}"
             COMMENT "Generating component dependencies graph"
         )
-        
+
         add_custom_target(component_graph
             DEPENDS "${CMAKE_BINARY_DIR}/docs/component_dependencies.png"
         )
-        
+
         add_dependencies(core_components component_graph)
     endif()
 endif()
+
 # Core components
 
 # Collect all core component sources
