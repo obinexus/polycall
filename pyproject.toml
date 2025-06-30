@@ -1,0 +1,149 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "libpolycall"
+version = "0.1.0"
+description = "OBINexus LibPolyCall - Hybrid C/Python polyglot call framework"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "OBINexus Team", email = "engineering@obinexus.com"}
+]
+maintainers = [
+    {name = "Nnamdi Okpala", email = "nnamdi@obinexus.com"}
+]
+keywords = ["polycall", "ffi", "polyglot", "obinexus", "sinphase"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: C",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: System :: Hardware :: Hardware Drivers",
+]
+
+dependencies = [
+    "click>=8.0",
+    "pydantic>=2.0",
+    "rich>=12.0",
+    "httpx>=0.24.0",
+    "structlog>=23.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-asyncio>=0.21",
+    "pytest-cov>=4.0",
+    "pytest-benchmark>=4.0",
+    "pytest-mock>=3.0",
+    "black>=23.0",
+    "mypy>=1.0",
+    "ruff>=0.1.0",
+]
+docs = [
+    "sphinx>=6.0",
+    "sphinx-rtd-theme>=1.0",
+    "myst-parser>=1.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/obinexus/libpolycall"
+Documentation = "https://libpolycall.obinexus.com"
+Repository = "https://github.com/obinexus/libpolycall.git"
+Issues = "https://github.com/obinexus/libpolycall/issues"
+
+[project.scripts]
+polycall = "polycall.cli:main"
+sinphase-check = "sinphase_governance.cli:check"
+
+[tool.setuptools]
+packages = ["polycall", "sinphase_governance"]
+include-package-data = true
+
+[tool.setuptools.package-data]
+"*" = ["*.json", "*.yaml", "*.yml", "*.txt"]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+testpaths = ["tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+addopts = [
+    "-ra",
+    "--strict-markers",
+    "--strict-config",
+    "--cov=polycall",
+    "--cov-branch",
+]
+
+[tool.black]
+line-length = 120
+target-version = ['py38', 'py39', 'py310', 'py311', 'py312']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+  | root-dynamic-c
+)/
+'''
+
+[tool.ruff]
+target-version = "py38"
+line-length = 120
+select = ["E", "F", "W", "C90", "I", "N", "UP", "B", "A", "C4", "ISC", "ICN", "G", "PIE", "T20", "SIM", "RET", "ARG", "PTH", "ERA", "PD", "PGH", "PL", "TRY", "NPY", "RUF"]
+ignore = ["E501", "B008", "C901", "N802", "N803", "N806"]
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+    "root-dynamic-c",
+]
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true

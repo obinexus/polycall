@@ -505,6 +505,1156 @@
 ├── favicon.png
 ├── ISOLATION_LOG.md
 ├── libpolycall
+│   ├── cmake
+│   │   ├── polycall-config.cmake.in
+│   │   └── Utils.cmake.bak
+│   ├── components
+│   │   └── core
+│   │       ├── advanced_security.c
+│   │       ├── auth_audit.c
+│   │       ├── auth_config.c
+│   │       ├── auth_container.c
+│   │       ├── auth_context.c
+│   │       ├── auth_error.c
+│   │       ├── auth_identity.c
+│   │       ├── auth_integration.c
+│   │       ├── auth_policy.c
+│   │       ├── auth_registry.c
+│   │       ├── auth_token.c
+│   │       ├── cobol_bridge.c
+│   │       ├── command.c
+│   │       ├── command_tracking.c
+│   │       ├── communication.c
+│   │       ├── connection_pool.c
+│   │       ├── context.c
+│   │       ├── crypto.c
+│   │       ├── error.c
+│   │       ├── handshake.c
+│   │       ├── hierarchical_state.c
+│   │       ├── js_bridge.c
+│   │       ├── jvm_bridge.c
+│   │       ├── memory_bridge.c
+│   │       ├── memory.c
+│   │       ├── message.c
+│   │       ├── message_optimization.c
+│   │       ├── network.c
+│   │       ├── network_client.c
+│   │       ├── network_config.c
+│   │       ├── network_container.c
+│   │       ├── network_endpoint.c
+│   │       ├── network_error.c
+│   │       ├── network_packet.c
+│   │       ├── network_registry.c
+│   │       ├── network_server.c
+│   │       ├── performance.c
+│   │       ├── polycall_auth_adapter.c
+│   │       ├── polycall_binding.c
+│   │       ├── polycall.c
+│   │       ├── polycall_config.c
+│   │       ├── polycall_config_tools.c
+│   │       ├── polycall_container.c
+│   │       ├── polycall_error.c
+│   │       ├── polycall_guid.c
+│   │       ├── polycall_hierachical_error.c
+│   │       ├── polycall_protocol_context.c
+│   │       ├── polycall_registry.c
+│   │       ├── polycall_token.c
+│   │       ├── protocol_bridge.c
+│   │       ├── protocol_config.c
+│   │       ├── protocol_container.c
+│   │       ├── protocol_enhacements_config.c
+│   │       ├── protocol_error.c
+│   │       ├── protocol_registry.c
+│   │       ├── protocol_state_machine.c
+│   │       ├── python_bride_dop.c
+│   │       ├── route_mapping.c
+│   │       ├── security.c
+│   │       ├── subscription.c
+│   │       └── type_system.c
+│   ├── config
+│   │   ├── build
+│   │   │   ├── CMakeLists.txt
+│   │   │   └── Makefile
+│   │   └── project
+│   │       └── pyproject.toml
+│   ├── config.Polycallfile
+│   ├── config.Polycallfile.ignore
+│   ├── demo
+│   │   ├── isolation-demo
+│   │   │   ├── index.html
+│   │   │   └── styles.css
+│   │   └── web-components
+│   │       ├── ads-component
+│   │       │   ├── index.html
+│   │       │   └── styles.css
+│   │       └── bankcard-component
+│   │           ├── index.html
+│   │           └── styles.css
+│   ├── docs
+│   │   ├── accessibiilty
+│   │   │   └── biafran_uiux.md
+│   │   ├── api
+│   │   ├── assets
+│   │   │   ├── favicon.png
+│   │   │   ├── graph.png
+│   │   │   └── libpolycall.png
+│   │   ├── auth
+│   │   │   ├── API_SECURITY.md
+│   │   │   └── AUTH.md
+│   │   ├── cli
+│   │   │   ├── cli_commands.md
+│   │   │   ├── cli_enhancement(todo).md
+│   │   │   └── commands.md
+│   │   ├── commands.md
+│   │   ├── config
+│   │   │   ├── config_structure.md
+│   │   │   ├── intergration.md
+│   │   │   ├── parser
+│   │   │   │   └── parser.md
+│   │   │   ├── POLYCALL_CONFIG.md
+│   │   │   ├── system
+│   │   │   │   └── configuration_system.md
+│   │   │   ├── testing_strats.md
+│   │   │   └── zero_trust.md
+│   │   ├── contr
+│   │   │   ├── CONTRIBUTION.md
+│   │   │   ├── DEV_WORKFLOW.md
+│   │   │   ├── IGNORE.md
+│   │   │   ├── Include_Path_Standard.md
+│   │   │   └── WORKFLOW.md
+│   │   ├── CRYPTO.md
+│   │   ├── diagrams
+│   │   │   ├── ffi-interactive.tsx
+│   │   │   ├── ffi.md
+│   │   │   ├── fi_extension.tsx
+│   │   │   ├── uml_core.md
+│   │   │   ├── zero_trust.md
+│   │   │   └── zero_trust_model_diagram.md
+│   │   ├── DIALOUGE.md
+│   │   ├── ffi
+│   │   │   ├── archeitcure.md
+│   │   │   ├── architecture.md
+│   │   │   ├── architecture.plantuml
+│   │   │   ├── cobol_bridge.md
+│   │   │   ├── component_archeitcure.md
+│   │   │   ├── diagram.md
+│   │   │   ├── ffi.md
+│   │   │   ├── README.md
+│   │   │   ├── security_model.md
+│   │   │   └── type_mapping.md
+│   │   ├── fixes
+│   │   │   └── fixes.md
+│   │   ├── guides
+│   │   │   ├── biafra-guide.md
+│   │   │   ├── Briding World - Technical Compaticality Solution.md
+│   │   │   ├── CLI.md
+│   │   │   ├── guides.md
+│   │   │   ├── integration_guide.md
+│   │   │   ├── interagation_gude.md
+│   │   │   ├── ISOLATION_LOG.md
+│   │   │   ├── LEGACY_COMPATBILE.md
+│   │   │   ├── QUARANTINE.md
+│   │   │   ├── README(DOP).md
+│   │   │   ├── README.md
+│   │   │   ├── SINPHASE_GOVERNANCE_REPORT.md
+│   │   │   ├── Telemetry Debugging via GUID and Timestamp Integration.md
+│   │   │   └── UNIT_TEST.md
+│   │   ├── handling_error
+│   │   │   ├── bugs.md
+│   │   │   ├── intreeatioon.md
+│   │   │   └── TODO.md
+│   │   ├── hotwiring_adapter_spec.md
+│   │   ├── micro
+│   │   │   └── USAGE.md
+│   │   ├── repl
+│   │   │   ├── REPL_ARCHETCURE.md
+│   │   │   ├── repl_command.md
+│   │   │   ├── REPL_SYSTEM.md
+│   │   │   └── sequence.md
+│   │   ├── requirements
+│   │   ├── specs
+│   │   │   ├── Briding World - Technical Compaticality Solution.pdf
+│   │   │   ├── HOTWIRE_README.pdf
+│   │   │   └── Telemetry Debugging via GUID and Timestamp Integration.pdf
+│   │   ├── TODO.md
+│   │   └── uml
+│   │       ├── edge_computing.md
+│   │       ├── micro_artechture.md
+│   │       └── telemetry_architecture.md
+│   ├── emergency-isolation
+│   │   └── ffi-critical
+│   │       ├── c_bridge.c.ISOLATED
+│   │       ├── ffi_config.c.ISOLATED
+│   │       └── python_bridge.c.ISOLATED
+│   ├── examples
+│   │   ├── basic
+│   │   ├── edge
+│   │   └── micro
+│   │       ├── ads
+│   │       └── bankcard
+│   ├── include
+│   │   └── polycall
+│   │       ├── cli
+│   │       ├── core
+│   │       │   ├── auth
+│   │       │   ├── doctor
+│   │       │   │   └── CMakeLists.txt
+│   │       │   ├── edge
+│   │       │   ├── factory
+│   │       │   ├── network
+│   │       │   ├── polycall
+│   │       │   ├── polycallfile
+│   │       │   ├── polycallrc
+│   │       │   └── telemetry
+│   │       ├── polycall.h.in
+│   │       └── polycall_version.h.in
+│   ├── libpolycall.txt
+│   ├── lost+found
+│   │   └── ffi
+│   │       ├── c_bridge.c.ISOLATED
+│   │       ├── ffi_config.c.ISOLATED
+│   │       └── python_bridge.c.ISOLATED
+│   ├── minimal-viable-libpolycall
+│   │   └── src
+│   │       └── core
+│   │           ├── components
+│   │           │   └── CMakeLists.txt
+│   │           └── config-tools
+│   │               └── CMakeLists.txt
+│   ├── obj
+│   ├── README.md
+│   ├── requirements-dev.txt
+│   ├── requirements.txt
+│   ├── root-dynamic-c
+│   │   ├── c-bridge-isolated
+│   │   │   ├── build
+│   │   │   │   └── Makefile
+│   │   │   └── src
+│   │   │       └── c_bridge.c
+│   │   ├── scripts-orchestration
+│   │   │   ├── ads.js
+│   │   │   ├── bankcard.js
+│   │   │   ├── cli.py
+│   │   │   ├── cost_calculator.py
+│   │   │   ├── devsetup.sh
+│   │   │   ├── DOPAdapter.js
+│   │   │   ├── dop_adapter.py
+│   │   │   ├── enhanced_fix_includes.py
+│   │   │   ├── environment_entry_points.py
+│   │   │   ├── environment.py
+│   │   │   ├── evaluate.py
+│   │   │   ├── evaluator.py
+│   │   │   ├── file_utils.py
+│   │   │   ├── fix_all_includes.sh
+│   │   │   ├── fix_all_paths.py
+│   │   │   ├── fix_implementation_includes.py
+│   │   │   ├── fix_include_paths.py
+│   │   │   ├── fix_include_paths_with_validation.py
+│   │   │   ├── fix_includes.sh
+│   │   │   ├── fix_nested_path_includes.py
+│   │   │   ├── fix_polycall_paths.py
+│   │   │   ├── format.sh
+│   │   │   ├── generate.py
+│   │   │   ├── generate_unified_header.py
+│   │   │   ├── governance.py
+│   │   │   ├── governance_runner.py
+│   │   │   ├── header_include_fixer.py
+│   │   │   ├── include_path_fixer.py
+│   │   │   ├── include_path_standardization.sh
+│   │   │   ├── include_path_standardizer.py
+│   │   │   ├── include_path_validator.py
+│   │   │   ├── __init__.py
+│   │   │   ├── install_fix_script.sh
+│   │   │   ├── install-git-hooks.sh
+│   │   │   ├── install_scripts.sh
+│   │   │   ├── libpolycall_refactor.sh
+│   │   │   ├── log_utils.py
+│   │   │   ├── main.py
+│   │   │   ├── nested_path_fixer.py
+│   │   │   ├── nested_path_include_corrector.py
+│   │   │   ├── polycall_unit_config.py
+│   │   │   ├── refactor_binding.sh
+│   │   │   ├── refactorer.py
+│   │   │   ├── remove_missing_includes.py
+│   │   │   ├── reporter.py
+│   │   │   ├── report_generator.py
+│   │   │   ├── scan.py
+│   │   │   ├── script.js
+│   │   │   ├── setup_ffi.sh
+│   │   │   ├── setup.py
+│   │   │   ├── sinphase_cost_evaluator.py
+│   │   │   ├── standardize_includes.py
+│   │   │   ├── standardize_paths.sh
+│   │   │   ├── violation_detector_module.py
+│   │   │   └── violation_scanner.py
+│   │   └── validation
+│   │       ├── analyze_test_coverage.sh
+│   │       ├── build_command_test.py
+│   │       ├── build_command_tests.py
+│   │       ├── checker.py
+│   │       ├── check_memory_leaks.sh
+│   │       ├── check_quality.sh
+│   │       ├── check_structure.sh
+│   │       ├── conftest.py
+│   │       ├── generate-test-stubs.sh
+│   │       ├── run_ccpcheck.sh
+│   │       ├── run_tests.sh
+│   │       ├── setup_test_directories.sh
+│   │       ├── sinphase_check.py
+│   │       ├── sinphase_cost_evaluatot_test.py
+│   │       ├── sinphases-check.sh
+│   │       ├── test_cli.py
+│   │       ├── test_fixture_config.sh
+│   │       ├── test_include_standadizer.py
+│   │       ├── test_standardize_include.py
+│   │       ├── validate_include_paths.py
+│   │       └── validate_includes.py
+│   ├── scripts
+│   │   └── core
+│   │       └── __pycache__
+│   │           └── __init__.cpython-312.pyc
+│   ├── sinphase_governance.egg-info
+│   │   ├── dependency_links.txt
+│   │   ├── entry_points.txt
+│   │   ├── PKG-INFO
+│   │   ├── requires.txt
+│   │   ├── SOURCES.txt
+│   │   └── top_level.txt
+│   ├── SINPHASE_REFACTOR_LOG.md
+│   ├── src
+│   │   ├── bindings
+│   │   │   ├── binding_config.h
+│   │   │   └── config_binding.h
+│   │   ├── cli
+│   │   │   ├── accessibility
+│   │   │   │   ├── accessibility_commands.c
+│   │   │   │   └── CMakeLists.txt
+│   │   │   ├── auth
+│   │   │   │   ├── auth_commands.c
+│   │   │   │   └── CMakeLists.txt
+│   │   │   ├── CMakeLists.txt.bak
+│   │   │   ├── command.c
+│   │   │   ├── commands
+│   │   │   │   ├── accessibility_commands.c
+│   │   │   │   ├── auth_commands.c
+│   │   │   │   ├── CMakeLists.txt
+│   │   │   │   ├── command_registry.c
+│   │   │   │   ├── command_registry.c.bak
+│   │   │   │   ├── config_commands.c
+│   │   │   │   ├── edge_commands.c
+│   │   │   │   ├── micro_commands.c
+│   │   │   │   ├── network_commands.c
+│   │   │   │   ├── polycall_commands.c
+│   │   │   │   ├── protocol_commands.c
+│   │   │   │   ├── repl_commands.c
+│   │   │   │   └── telemetry_commands.c
+│   │   │   ├── common
+│   │   │   │   ├── CMakeLists.txt
+│   │   │   │   ├── command_registry.c
+│   │   │   │   └── polycall_commands.c
+│   │   │   ├── config
+│   │   │   │   ├── CMakeLists.txt
+│   │   │   │   └── config_commands.c
+│   │   │   ├── edge
+│   │   │   │   ├── CMakeLists.txt
+│   │   │   │   └── edge_commands.c
+│   │   │   ├── ffi
+│   │   │   │   └── CMakeLists.txt
+│   │   │   ├── main.c
+│   │   │   ├── main.c.bak
+│   │   │   ├── micro
+│   │   │   │   ├── CMakeLists.txt
+│   │   │   │   ├── dop_adapter_command.c
+│   │   │   │   └── micro_commands.c
+│   │   │   ├── network
+│   │   │   │   ├── CMakeLists.txt
+│   │   │   │   └── network_commands.c
+│   │   │   ├── polycall
+│   │   │   │   └── polycall_commands.c
+│   │   │   ├── protocol
+│   │   │   │   ├── CMakeLists.txt
+│   │   │   │   └── protocol_commands.c
+│   │   │   ├── providers
+│   │   │   │   └── cli_container.c
+│   │   │   ├── repl
+│   │   │   │   ├── CMakeLists.txt
+│   │   │   │   └── repl_commands.c
+│   │   │   ├── repl.c
+│   │   │   ├── socket
+│   │   │   │   ├── CMakeLists.txt
+│   │   │   │   └── socket_commands.c
+│   │   │   └── telemetry
+│   │   │       ├── CMakeLists.txt
+│   │   │       ├── telemetry_analytics.c
+│   │   │       ├── telemetry_commands.c
+│   │   │       └── telemetry_debug.c
+│   │   ├── core
+│   │   │   ├── accessibility
+│   │   │   │   ├── accessibility_audio.c
+│   │   │   │   ├── accessibility_colors.c
+│   │   │   │   ├── accessibility_config.c
+│   │   │   │   ├── accessibility_container.c
+│   │   │   │   ├── accessibility_error.c
+│   │   │   │   ├── accessibility_interface.c
+│   │   │   │   ├── accessibility_registry.c
+│   │   │   │   ├── accessibility_service_provider.c
+│   │   │   │   ├── CMakeLists.txt
+│   │   │   │   └── polycall_repl_accessibility.c
+│   │   │   ├── adapters
+│   │   │   │   ├── adapter_base.c
+│   │   │   │   ├── adapter_base.h
+│   │   │   │   ├── adapter_orchestrator.c
+│   │   │   │   ├── adapter_registry.c
+│   │   │   │   ├── adapter_registry.h
+│   │   │   │   ├── go_adapter.c
+│   │   │   │   ├── nodejs_adapter.c
+│   │   │   │   └── python_adapter.c
+│   │   │   ├── auth
+│   │   │   │   ├── advanced_security.c
+│   │   │   │   ├── auth_audit.c
+│   │   │   │   ├── auth_config.c
+│   │   │   │   ├── auth_container.c
+│   │   │   │   ├── auth_context.c
+│   │   │   │   ├── auth_error.c
+│   │   │   │   ├── auth_identity.c
+│   │   │   │   ├── auth_integration.c
+│   │   │   │   ├── auth_policy.c
+│   │   │   │   ├── auth_registry.c
+│   │   │   │   ├── auth_token.c
+│   │   │   │   ├── CMakeLists.txt
+│   │   │   │   └── polycall_auth_adapter.c
+│   │   │   ├── common
+│   │   │   │   └── polycall_identifier.c
+│   │   │   ├── components
+│   │   │   │   └── CMakeLists.txt
+│   │   │   ├── config
+│   │   │   │   ├── CMakeLists.txt
+│   │   │   │   ├── config_container.c
+│   │   │   │   ├── config_error.c
+│   │   │   │   ├── config_factory.c
+│   │   │   │   ├── config_factory_mergers.c
+│   │   │   │   ├── config_parser.c
+│   │   │   │   └── config_registry.c
+│   │   │   ├── config-tools
+│   │   │   │   └── CMakeLists.txt
+│   │   │   ├── doctor
+│   │   │   │   └── polycall_doctor.c
+│   │   │   ├── dop
+│   │   │   │   ├── polycall_dop_adapter.c
+│   │   │   │   ├── polycall_dop_adapter_invoke.c
+│   │   │   │   ├── polycall_dop_adapter_lifecycle.c
+│   │   │   │   ├── polycall_dop_adapter_security.c
+│   │   │   │   ├── polycall_dop_adapter_utils.c
+│   │   │   │   ├── polycall_dop_bridge_registry.c
+│   │   │   │   └── polycall_dop_dapter_memory.c
+│   │   │   ├── edge
+│   │   │   │   ├── CMakeLists.txt
+│   │   │   │   ├── compute_router.c
+│   │   │   │   ├── edge.c
+│   │   │   │   ├── edge_component.c
+│   │   │   │   ├── edge_config.c
+│   │   │   │   ├── edge_container.c
+│   │   │   │   ├── edge_error.c
+│   │   │   │   ├── edge_registry.c
+│   │   │   │   ├── edge_runtime.c
+│   │   │   │   ├── fallback.c
+│   │   │   │   ├── Makefile
+│   │   │   │   ├── node_selector.c
+│   │   │   │   └── security.c
+│   │   │   ├── ffi
+│   │   │   │   ├── c_bridge.c.ISOLATED
+│   │   │   │   ├── CMakeLists.txt
+│   │   │   │   ├── ffi_config.c.ISOLATED
+│   │   │   │   ├── Makefile
+│   │   │   │   └── python_bridge.c.ISOLATED
+│   │   │   ├── hotwire
+│   │   │   │   ├── hotwire_router.c
+│   │   │   │   └── polycall.config.hotwire.yaml
+│   │   │   ├── ignore
+│   │   │   │   ├── CMakeLists.txt
+│   │   │   │   ├── Makefile
+│   │   │   │   ├── polycallfile_ignore.c
+│   │   │   │   └── polycall_ignore.c
+│   │   │   ├── micro
+│   │   │   │   ├── CMakeLists.txt
+│   │   │   │   ├── command_handler.c
+│   │   │   │   ├── component_isolation.c
+│   │   │   │   ├── Makefile
+│   │   │   │   ├── micro_config.c.ISOLATED
+│   │   │   │   ├── micro_container.c
+│   │   │   │   ├── micro_error.c
+│   │   │   │   ├── micro_registry.c
+│   │   │   │   ├── resource_limiter.c
+│   │   │   │   └── security_policy.c
+│   │   │   ├── network
+│   │   │   │   ├── CMakeLists.txt
+│   │   │   │   ├── connection_pool.c
+│   │   │   │   ├── Makefile
+│   │   │   │   ├── message_optimization.c
+│   │   │   │   ├── network.c
+│   │   │   │   ├── network_client.c
+│   │   │   │   ├── network_config.c
+│   │   │   │   ├── network_container.c
+│   │   │   │   ├── network_endpoint.c
+│   │   │   │   ├── network_error.c
+│   │   │   │   ├── network_packet.c
+│   │   │   │   ├── network_registry.c
+│   │   │   │   ├── network_server.c
+│   │   │   │   └── subscription.c
+│   │   │   ├── polycall
+│   │   │   │   ├── CMakeLists.txt
+│   │   │   │   ├── context.c
+│   │   │   │   ├── error.c
+│   │   │   │   ├── hierarchical_state.c
+│   │   │   │   ├── memory.c
+│   │   │   │   ├── polycall_binding.c
+│   │   │   │   ├── polycall.c
+│   │   │   │   ├── polycall_config.c
+│   │   │   │   ├── polycall_config_tools.c
+│   │   │   │   ├── polycall_container.c
+│   │   │   │   ├── polycall_error.c
+│   │   │   │   ├── polycall_hierachical_error.c
+│   │   │   │   ├── polycall_protocol_context.c
+│   │   │   │   ├── polycall_registry.c
+│   │   │   │   └── route_mapping.c
+│   │   │   ├── polycall.c
+│   │   │   ├── polycall.c.bak
+│   │   │   ├── polycallfile
+│   │   │   │   ├── ast.c
+│   │   │   │   ├── CMakeLists.txt
+│   │   │   │   ├── expression_evaluator.c
+│   │   │   │   ├── global_config.c
+│   │   │   │   ├── macro_expander.c
+│   │   │   │   ├── Makefile
+│   │   │   │   ├── parser.c
+│   │   │   │   ├── token.c
+│   │   │   │   └── tokenizer.c
+│   │   │   ├── polycallrc
+│   │   │   │   ├── binding_config.c
+│   │   │   │   ├── CMakeLists.txt
+│   │   │   │   ├── ignore
+│   │   │   │   │   ├── CMakeLists.txt
+│   │   │   │   │   ├── Makefile
+│   │   │   │   │   └── polycallrc_ignore.c
+│   │   │   │   └── Makefile
+│   │   │   ├── protocol
+│   │   │   ├── repl
+│   │   │   │   ├── CMakeLists.txt
+│   │   │   │   ├── polycall_repl.c
+│   │   │   │   ├── repl.c
+│   │   │   │   └── repl_service.c
+│   │   │   ├── schema
+│   │   │   │   ├── CMakeLists.txt
+│   │   │   │   ├── config_schema.c
+│   │   │   │   └── schema_security_integration.c
+│   │   │   ├── security
+│   │   │   │   ├── CMakeLists.txt
+│   │   │   │   └── security_validation.c
+│   │   │   ├── socket
+│   │   │   │   ├── CMakeLists.txt
+│   │   │   │   ├── polycall_socket.c
+│   │   │   │   ├── polycall_socket_config.c
+│   │   │   │   ├── polycall_socket_endpoint.c
+│   │   │   │   ├── polycall_socket_protocol.c
+│   │   │   │   ├── polycall_socket_security.c
+│   │   │   │   └── polycall_socket_worker.c
+│   │   │   └── telemetry
+│   │   │       ├── CMakeLists.txt
+│   │   │       ├── polycall_telemetry_adapter.c
+│   │   │       ├── polycall_telemetry.c
+│   │   │       ├── polycall_telemetry_config.c
+│   │   │       ├── polycall_telemetry_reporting.c
+│   │   │       ├── polycall_telemetry_security.c
+│   │   │       ├── telemetry_container.c
+│   │   │       ├── telemetry_error.c
+│   │   │       └── telemetry_registry.c
+│   │   ├── dynamic
+│   │   │   ├── accessibility_test_stub.c
+│   │   │   ├── ads_example.c
+│   │   │   ├── auth_test_stub.c
+│   │   │   ├── bankcard_example.c
+│   │   │   ├── basic_example.c
+│   │   │   ├── bench_micro.c
+│   │   │   ├── config_test_stub.c
+│   │   │   ├── edge_example.c
+│   │   │   ├── edge_test_stub.c
+│   │   │   ├── micro_test_stub.c
+│   │   │   ├── mock_core_context.c
+│   │   │   ├── mock_network_endpoint.c
+│   │   │   ├── mock_protocol_context.c
+│   │   │   ├── network_test_stub.c
+│   │   │   ├── polycall_test_stub.c
+│   │   │   ├── polycall_test_utils.c
+│   │   │   ├── protocol_test_stub.c
+│   │   │   ├── t.c
+│   │   │   ├── telemetry_test_stub.c
+│   │   │   ├── telemetry_validation.c
+│   │   │   ├── test_accessibility.c
+│   │   │   ├── test_accessibility_qa.c
+│   │   │   ├── test_accessibillity_ioc.c
+│   │   │   ├── test_auth.c
+│   │   │   ├── test_auth_core.c
+│   │   │   ├── test_auth_intergration.c
+│   │   │   ├── test_auth_qa.c
+│   │   │   ├── test_auth_security_protocol.c
+│   │   │   ├── test_auth_security_protocol_qa.c
+│   │   │   ├── test_auth_token.c
+│   │   │   ├── test_command.c
+│   │   │   ├── test_config.c
+│   │   │   ├── test_config_qa.c
+│   │   │   ├── test_context.c
+│   │   │   ├── test_crypto.c
+│   │   │   ├── test_dop_adapter.c
+│   │   │   ├── test_edge.c
+│   │   │   ├── test_edge_core.c
+│   │   │   ├── test_edge_network_micro.c
+│   │   │   ├── test_edge_network_micro_qa.c
+│   │   │   ├── test_edge_qa.c
+│   │   │   ├── test_error.c
+│   │   │   ├── test_hierachical_error.c
+│   │   │   ├── test_ignore_intergration.c
+│   │   │   ├── test_isolation.c
+│   │   │   ├── test_memory.c
+│   │   │   ├── test_message.c
+│   │   │   ├── test_micro.c
+│   │   │   ├── test_micro_core.c
+│   │   │   ├── test_micro_qa.c
+│   │   │   ├── test_network.c
+│   │   │   ├── test_network_client.c
+│   │   │   ├── test_network_config.c
+│   │   │   ├── test_network_packet.c
+│   │   │   ├── test_network_qa.c
+│   │   │   ├── test_network_server.c
+│   │   │   ├── test_polycall.c
+│   │   │   ├── test_polycall_core.c
+│   │   │   ├── test_polycallfile.c
+│   │   │   ├── test_polycallfile_qa.c
+│   │   │   ├── test_polycall_qa.c
+│   │   │   ├── test_polycallrc.c
+│   │   │   ├── test_polycallrc_qa.c
+│   │   │   ├── test_protocol.c
+│   │   │   ├── test_protocol_config.c
+│   │   │   ├── test_protocol_core.c
+│   │   │   ├── test_protocol_enhancements.c
+│   │   │   ├── test_protocol_message.c
+│   │   │   ├── test_protocol_network_integration.c
+│   │   │   ├── test_protocol_network_qa.c
+│   │   │   ├── test_protocol_qa.c
+│   │   │   ├── test_protocol_state_machine.c
+│   │   │   ├── test_protocol_token.c
+│   │   │   ├── test_repl.c
+│   │   │   ├── test_repl_protocol_telemetry.c
+│   │   │   ├── test_repl_protocol_telemetry_qa.c
+│   │   │   ├── test_repl_qa.c
+│   │   │   ├── test_schema.c
+│   │   │   ├── test_schema_qa.c
+│   │   │   ├── test_security.c
+│   │   │   ├── test_security_qa.c
+│   │   │   ├── test_socket.c
+│   │   │   ├── test_socket_qa.c
+│   │   │   ├── test_stub_manager.c
+│   │   │   ├── test_telemetry.c
+│   │   │   ├── test_telemetry_core.c
+│   │   │   ├── test_telemetry_qa.c
+│   │   │   └── test_utils.c
+│   │   ├── legacy
+│   │   │   └── test_hierarchical_error_aaa.c
+│   │   └── static
+│   │       ├── accessibility_audio.h
+│   │       ├── accessibility_colors.h
+│   │       ├── accessibility_commands.h
+│   │       ├── accessibility_config.h
+│   │       ├── accessibility_container.h
+│   │       ├── accessibility_error.h
+│   │       ├── accessibility.h
+│   │       ├── accessibility_interface.h
+│   │       ├── accessibility_registry.h
+│   │       ├── accessibility_test_stub.h
+│   │       ├── adapter_base.h
+│   │       ├── adapter_orchestrator.h
+│   │       ├── adapter_registry.h
+│   │       ├── advanced_security.h
+│   │       ├── ast.h
+│   │       ├── auth_commands.h
+│   │       ├── auth_container.h
+│   │       ├── auth_error.h
+│   │       ├── auth_registry.h
+│   │       ├── auth_test_stub.h
+│   │       ├── cli_container.h
+│   │       ├── command.h
+│   │       ├── command_registry.h
+│   │       ├── command_tracking.h
+│   │       ├── communication.h
+│   │       ├── compute_router.h
+│   │       ├── config_commands.h
+│   │       ├── config_container.h
+│   │       ├── config_error.h
+│   │       ├── config_factory.h
+│   │       ├── config_factory_mergers.h
+│   │       ├── config_parser.h
+│   │       ├── config_registry.h
+│   │       ├── config_schema.h
+│   │       ├── config_test_stub.h
+│   │       ├── connection_pool.h
+│   │       ├── edge_commands.h
+│   │       ├── edge_component.h
+│   │       ├── edge_config.h
+│   │       ├── edge_container.h
+│   │       ├── edge_error.h
+│   │       ├── edge.h
+│   │       ├── edge_registry.h
+│   │       ├── edge_runtime.h
+│   │       ├── edge_test_stub.h
+│   │       ├── expression_evaluator.h
+│   │       ├── fallback.h
+│   │       ├── global_config.h
+│   │       ├── hierarchical_state.h
+│   │       ├── macro_expander.h
+│   │       ├── message.h
+│   │       ├── message_optimization.h
+│   │       ├── micro_commands.h
+│   │       ├── micro_container.h
+│   │       ├── micro_error.h
+│   │       ├── micro_registry.h
+│   │       ├── micro_test_stub.h
+│   │       ├── mock_core_context.h
+│   │       ├── mock_network_endpoint.h
+│   │       ├── mock_protocol_context.h
+│   │       ├── network_client.h
+│   │       ├── network_commands.h
+│   │       ├── network_config.h
+│   │       ├── network_container.h
+│   │       ├── network_endpoint.h
+│   │       ├── network_error.h
+│   │       ├── network_event.h
+│   │       ├── network.h
+│   │       ├── network_internal.h
+│   │       ├── network_packet.h
+│   │       ├── network_registry.h
+│   │       ├── network_server.h
+│   │       ├── network_test_stub.h
+│   │       ├── node_selector.h
+│   │       ├── parser.h
+│   │       ├── path_utils.h
+│   │       ├── polycall_accessibility_error.h
+│   │       ├── polycall_auth_adapter.h
+│   │       ├── polycall_auth_audit.h
+│   │       ├── polycall_auth_config.h
+│   │       ├── polycall_auth_context.h
+│   │       ├── polycall_auth_error.h
+│   │       ├── polycall_auth.h
+│   │       ├── polycall_auth_identity.h
+│   │       ├── polycall_auth_integration.h
+│   │       ├── polycall_auth_policy.h
+│   │       ├── polycall_auth_token.h
+│   │       ├── polycall_commands.h
+│   │       ├── polycall_config_error.h
+│   │       ├── polycall_config.h
+│   │       ├── polycall_config_tools.h
+│   │       ├── polycall_container.h
+│   │       ├── polycall_context.h
+│   │       ├── polycall_core.h
+│   │       ├── polycall_core_types.h
+│   │       ├── polycall_doctor.h
+│   │       ├── polycall_dop_adapter.h
+│   │       ├── polycall_dop_adapter_types.h
+│   │       ├── polycall_edge_error.h
+│   │       ├── polycall_edge.h
+│   │       ├── polycall_error.h
+│   │       ├── polycall_event.h
+│   │       ├── polycallfile_ignore.h
+│   │       ├── polycall_guid.h
+│   │       ├── polycall.h
+│   │       ├── polycall_hierarchical_error.h
+│   │       ├── polycall_identifier.h
+│   │       ├── polycall_ignore.h
+│   │       ├── polycall_logger.h
+│   │       ├── polycall_memory.h
+│   │       ├── polycall_micro_component.h
+│   │       ├── polycall_micro_config.h
+│   │       ├── polycall_micro_context.h
+│   │       ├── polycall_micro_error.h
+│   │       ├── polycall_micro_resource.h
+│   │       ├── polycall_micro_security.h
+│   │       ├── polycall_network_error.h
+│   │       ├── polycall_permission.h
+│   │       ├── polycall_polycall_error.h
+│   │       ├── polycall_polycall.h
+│   │       ├── polycall_program.h
+│   │       ├── polycall_protocol_context.h
+│   │       ├── polycall_protocol_error.h
+│   │       ├── polycall_public.h
+│   │       ├── polycallrc_ignore.h
+│   │       ├── polycall_registry.h
+│   │       ├── polycall_repl.h
+│   │       ├── polycall_socket.h
+│   │       ├── polycall_socket_protocol.h
+│   │       ├── polycall_socket_security.h
+│   │       ├── polycall_state_machine.h
+│   │       ├── polycall_telemetry_adapter.h
+│   │       ├── polycall_telemetry_error.h
+│   │       ├── polycall_telemetry.h
+│   │       ├── polycall_telemetry_reporting.h
+│   │       ├── polycall_telemetry_security.h
+│   │       ├── polycall_test_stub.h
+│   │       ├── polycall_test_utils.h
+│   │       ├── polycall_token.h
+│   │       ├── polycall_trace.h
+│   │       ├── polycall_types.h
+│   │       ├── polycall_version.h
+│   │       ├── protocol_command.h
+│   │       ├── protocol_commands.h
+│   │       ├── protocol_config.h
+│   │       ├── protocol_container.h
+│   │       ├── protocol_enhacements_config.h
+│   │       ├── protocol_error.h
+│   │       ├── protocol_registry.h
+│   │       ├── protocol_test_stub.h
+│   │       ├── repl_commands.h
+│   │       ├── repl.h
+│   │       ├── route_mapping.h
+│   │       ├── schema_security_integration.h
+│   │       ├── security.h
+│   │       ├── security_validation.h
+│   │       ├── subscription.h
+│   │       ├── telemetry_analytics.h
+│   │       ├── telemetry_commands.h
+│   │       ├── telemetry_config.h
+│   │       ├── telemetry_container.h
+│   │       ├── telemetry_debug.h
+│   │       ├── telemetry_error.h
+│   │       ├── telemetry_registry.h
+│   │       ├── telemetry_test_stub.h
+│   │       ├── test_framework.h
+│   │       ├── test_stub_manager.h
+│   │       ├── test_utils.h
+│   │       ├── token.h
+│   │       ├── tokenizer.h
+│   │       ├── topology_manager.h
+│   │       └── unit_test_framework.h
+│   ├── templates
+│   │   ├── ComponentTest.cmake.in
+│   │   └── polycall.h.in
+│   ├── __tests__
+│   │   ├── integration
+│   │   │   ├── auth
+│   │   │   └── edge
+│   │   ├── performance
+│   │   ├── security
+│   │   └── unit
+│   │       └── core
+│   │           ├── accessibility
+│   │           │   └── CMakeLists.txt
+│   │           ├── auth
+│   │           │   └── CMakeLists.txt
+│   │           ├── CMakeLists.txt
+│   │           ├── edge
+│   │           │   └── CMakeLists.txt
+│   │           ├── ffi
+│   │           │   └── CMakeLists.txt
+│   │           ├── micro
+│   │           │   └── CMakeLists.txt
+│   │           ├── network
+│   │           │   └── CMakeLists.txt
+│   │           ├── polycall
+│   │           │   └── CMakeLists.txt
+│   │           ├── protocol
+│   │           │   └── CMakeLists.txt
+│   │           └── telemetry
+│   │               └── CMakeLists.txt
+│   ├── tests
+│   │   ├── build
+│   │   │   ├── integration
+│   │   │   │   └── Makefile
+│   │   │   ├── integration_qa
+│   │   │   │   └── Makefile
+│   │   │   ├── Testing
+│   │   │   │   └── Temporary
+│   │   │   │       └── CTestCostData.txt
+│   │   │   ├── unit
+│   │   │   │   ├── cli
+│   │   │   │   │   ├── accessibility
+│   │   │   │   │   │   └── Makefile
+│   │   │   │   │   ├── auth
+│   │   │   │   │   │   └── Makefile
+│   │   │   │   │   ├── config
+│   │   │   │   │   │   └── Makefile
+│   │   │   │   │   ├── edge
+│   │   │   │   │   │   └── Makefile
+│   │   │   │   │   ├── ffi
+│   │   │   │   │   │   └── Makefile
+│   │   │   │   │   ├── Makefile
+│   │   │   │   │   ├── micro
+│   │   │   │   │   │   └── Makefile
+│   │   │   │   │   ├── network
+│   │   │   │   │   │   └── Makefile
+│   │   │   │   │   ├── polycall
+│   │   │   │   │   │   └── Makefile
+│   │   │   │   │   ├── protocol
+│   │   │   │   │   │   └── Makefile
+│   │   │   │   │   ├── repl
+│   │   │   │   │   │   └── Makefile
+│   │   │   │   │   ├── socket
+│   │   │   │   │   │   └── Makefile
+│   │   │   │   │   └── telemetry
+│   │   │   │   │       └── Makefile
+│   │   │   │   ├── core
+│   │   │   │   │   ├── accessibility
+│   │   │   │   │   │   └── Makefile
+│   │   │   │   │   ├── auth
+│   │   │   │   │   │   └── Makefile
+│   │   │   │   │   ├── config
+│   │   │   │   │   │   └── Makefile
+│   │   │   │   │   ├── edge
+│   │   │   │   │   │   └── Makefile
+│   │   │   │   │   ├── ffi
+│   │   │   │   │   │   └── Makefile
+│   │   │   │   │   ├── Makefile
+│   │   │   │   │   ├── micro
+│   │   │   │   │   │   └── Makefile
+│   │   │   │   │   ├── network
+│   │   │   │   │   │   └── Makefile
+│   │   │   │   │   ├── polycall
+│   │   │   │   │   │   └── Makefile
+│   │   │   │   │   ├── polycallfile
+│   │   │   │   │   │   └── Makefile
+│   │   │   │   │   ├── polycallrc
+│   │   │   │   │   │   └── Makefile
+│   │   │   │   │   ├── protocol
+│   │   │   │   │   │   └── Makefile
+│   │   │   │   │   ├── repl
+│   │   │   │   │   │   └── Makefile
+│   │   │   │   │   ├── schema
+│   │   │   │   │   │   └── Makefile
+│   │   │   │   │   ├── security
+│   │   │   │   │   │   └── Makefile
+│   │   │   │   │   ├── socket
+│   │   │   │   │   │   └── Makefile
+│   │   │   │   │   └── telemetry
+│   │   │   │   │       └── Makefile
+│   │   │   │   └── Makefile
+│   │   │   └── unit_qa
+│   │   │       ├── cli
+│   │   │       │   ├── accessibility
+│   │   │       │   │   └── Makefile
+│   │   │       │   ├── auth
+│   │   │       │   │   └── Makefile
+│   │   │       │   ├── config
+│   │   │       │   │   └── Makefile
+│   │   │       │   ├── edge
+│   │   │       │   │   └── Makefile
+│   │   │       │   ├── ffi
+│   │   │       │   │   └── Makefile
+│   │   │       │   ├── Makefile
+│   │   │       │   ├── micro
+│   │   │       │   │   └── Makefile
+│   │   │       │   ├── network
+│   │   │       │   │   └── Makefile
+│   │   │       │   ├── polycall
+│   │   │       │   │   └── Makefile
+│   │   │       │   ├── protocol
+│   │   │       │   │   └── Makefile
+│   │   │       │   ├── repl
+│   │   │       │   │   └── Makefile
+│   │   │       │   ├── socket
+│   │   │       │   │   └── Makefile
+│   │   │       │   └── telemetry
+│   │   │       │       └── Makefile
+│   │   │       ├── core
+│   │   │       │   ├── accessibility
+│   │   │       │   │   └── Makefile
+│   │   │       │   ├── auth
+│   │   │       │   │   └── Makefile
+│   │   │       │   ├── config
+│   │   │       │   │   └── Makefile
+│   │   │       │   ├── edge
+│   │   │       │   │   └── Makefile
+│   │   │       │   ├── ffi
+│   │   │       │   │   └── Makefile
+│   │   │       │   ├── Makefile
+│   │   │       │   ├── micro
+│   │   │       │   │   └── Makefile
+│   │   │       │   ├── network
+│   │   │       │   │   └── Makefile
+│   │   │       │   ├── polycall
+│   │   │       │   │   └── Makefile
+│   │   │       │   ├── polycallfile
+│   │   │       │   │   └── Makefile
+│   │   │       │   ├── polycallrc
+│   │   │       │   │   └── Makefile
+│   │   │       │   ├── protocol
+│   │   │       │   │   └── Makefile
+│   │   │       │   ├── repl
+│   │   │       │   │   └── Makefile
+│   │   │       │   ├── schema
+│   │   │       │   │   └── Makefile
+│   │   │       │   ├── security
+│   │   │       │   │   └── Makefile
+│   │   │       │   ├── socket
+│   │   │       │   │   └── Makefile
+│   │   │       │   └── telemetry
+│   │   │       │       └── Makefile
+│   │   │       └── Makefile
+│   │   ├── fixtures
+│   │   │   ├── config.Polycallfile.test
+│   │   │   └── valgrind.supp
+│   │   ├── __init__.py
+│   │   ├── scripts
+│   │   │   └── profile_performance.sh
+│   │   ├── unit
+│   │   │   ├── cli
+│   │   │   │   ├── accessibility
+│   │   │   │   │   └── CMakeLists.txt
+│   │   │   │   ├── auth
+│   │   │   │   │   └── CMakeLists.txt
+│   │   │   │   ├── CMakeLists.txt
+│   │   │   │   ├── config
+│   │   │   │   │   └── CMakeLists.txt
+│   │   │   │   ├── edge
+│   │   │   │   │   └── CMakeLists.txt
+│   │   │   │   ├── ffi
+│   │   │   │   │   └── CMakeLists.txt
+│   │   │   │   ├── micro
+│   │   │   │   │   └── CMakeLists.txt
+│   │   │   │   ├── network
+│   │   │   │   │   └── CMakeLists.txt
+│   │   │   │   ├── polycall
+│   │   │   │   │   └── CMakeLists.txt
+│   │   │   │   ├── protocol
+│   │   │   │   │   └── CMakeLists.txt
+│   │   │   │   ├── repl
+│   │   │   │   │   └── CMakeLists.txt
+│   │   │   │   ├── socket
+│   │   │   │   │   └── CMakeLists.txt
+│   │   │   │   └── telemetry
+│   │   │   │       └── CMakeLists.txt
+│   │   │   └── core
+│   │   │       ├── accessibility
+│   │   │       │   ├── CMakeLists.txt
+│   │   │       │   └── test_accessibility.c.old
+│   │   │       ├── auth
+│   │   │       │   └── CMakeLists.txt
+│   │   │       ├── CMakeLists.txt
+│   │   │       ├── config
+│   │   │       │   └── CMakeLists.txt
+│   │   │       ├── edge
+│   │   │       │   └── CMakeLists.txt
+│   │   │       ├── ffi
+│   │   │       │   └── CMakeLists.txt
+│   │   │       ├── micro
+│   │   │       │   └── CMakeLists.txt
+│   │   │       ├── network
+│   │   │       │   └── CMakeLists.txt
+│   │   │       ├── polycall
+│   │   │       │   └── CMakeLists.txt
+│   │   │       ├── polycallfile
+│   │   │       │   └── CMakeLists.txt
+│   │   │       ├── polycallrc
+│   │   │       │   └── CMakeLists.txt
+│   │   │       ├── protocol
+│   │   │       │   └── CMakeLists.txt
+│   │   │       ├── repl
+│   │   │       │   └── CMakeLists.txt
+│   │   │       ├── schema
+│   │   │       │   └── CMakeLists.txt
+│   │   │       ├── security
+│   │   │       │   └── CMakeLists.txt
+│   │   │       ├── socket
+│   │   │       │   └── CMakeLists.txt
+│   │   │       └── telemetry
+│   │   │           └── CMakeLists.txt
+│   │   └── unit_qa
+│   │       ├── cli
+│   │       │   ├── accessibility
+│   │       │   │   └── CMakeLists.txt
+│   │       │   ├── auth
+│   │       │   │   └── CMakeLists.txt
+│   │       │   ├── CMakeLists.txt
+│   │       │   ├── config
+│   │       │   │   └── CMakeLists.txt
+│   │       │   ├── edge
+│   │       │   │   └── CMakeLists.txt
+│   │       │   ├── ffi
+│   │       │   │   └── CMakeLists.txt
+│   │       │   ├── micro
+│   │       │   │   └── CMakeLists.txt
+│   │       │   ├── network
+│   │       │   │   └── CMakeLists.txt
+│   │       │   ├── polycall
+│   │       │   │   └── CMakeLists.txt
+│   │       │   ├── protocol
+│   │       │   │   └── CMakeLists.txt
+│   │       │   ├── repl
+│   │       │   │   └── CMakeLists.txt
+│   │       │   ├── socket
+│   │       │   │   └── CMakeLists.txt
+│   │       │   └── telemetry
+│   │       │       └── CMakeLists.txt
+│   │       └── core
+│   │           ├── accessibility
+│   │           │   └── CMakeLists.txt
+│   │           ├── auth
+│   │           │   └── CMakeLists.txt
+│   │           ├── CMakeLists.txt
+│   │           ├── config
+│   │           │   └── CMakeLists.txt
+│   │           ├── edge
+│   │           │   └── CMakeLists.txt
+│   │           ├── ffi
+│   │           │   └── CMakeLists.txt
+│   │           ├── micro
+│   │           │   └── CMakeLists.txt
+│   │           ├── network
+│   │           │   └── CMakeLists.txt
+│   │           ├── polycall
+│   │           │   └── CMakeLists.txt
+│   │           ├── polycallfile
+│   │           │   └── CMakeLists.txt
+│   │           ├── polycallrc
+│   │           │   └── CMakeLists.txt
+│   │           ├── protocol
+│   │           │   └── CMakeLists.txt
+│   │           ├── repl
+│   │           │   └── CMakeLists.txt
+│   │           ├── schema
+│   │           │   └── CMakeLists.txt
+│   │           ├── security
+│   │           │   └── CMakeLists.txt
+│   │           ├── socket
+│   │           │   └── CMakeLists.txt
+│   │           └── telemetry
+│   │               └── CMakeLists.txt
+│   ├── tests_old
+│   │   └── unit
+│   │       └── core
+│   │           ├── accessibility
+│   │           │   └── CMakeLists.txt
+│   │           ├── auth
+│   │           │   └── CMakeLists.txt
+│   │           ├── CMakeLists.txt
+│   │           ├── config
+│   │           │   └── CMakeLists.txt
+│   │           ├── edge
+│   │           │   └── CMakeLists.txt
+│   │           ├── ffi
+│   │           │   └── CMakeLists.txt
+│   │           ├── micro
+│   │           │   └── CMakeLists.txt
+│   │           ├── network
+│   │           │   └── CMakeLists.txt
+│   │           ├── polycall
+│   │           │   └── CMakeLists.txt
+│   │           ├── protocol
+│   │           │   └── CMakeLists.txt
+│   │           └── telemetry
+│   │               └── CMakeLists.txt
+│   └── tools
+│       └── dev
+│           ├── install_fix_script.bat
+│           └── standardize_paths.bat
+├── libpolycall_backup_20250630_214603.tar.gz
+├── libpolycall_backup_20250630_215005.tar.gz
+├── libpolycall_backup_20250630_215603
 │   ├── CLI.md
 │   ├── cmake
 │   │   ├── polycall-config.cmake.in
@@ -1143,6 +2293,7 @@
 │   │   ├── SOURCES.txt
 │   │   └── top_level.txt
 │   ├── SINPHASE_GOVERNANCE_REPORT.md
+│   ├── SINPHASE_REFACTOR_LOG.md
 │   ├── sinphase_toolkit
 │   │   ├── cli.py
 │   │   ├── core
@@ -1890,9 +3041,7 @@
 │       └── testing
 │           ├── analyze_test_coverage.sh
 │           └── setup_test_directories.sh
-├── libpolycall_backup_20250630_214603.tar.gz
-├── libpolycall_backup_20250630_215005.tar.gz
-├── libpolycall-di.txt
+├── libpolycall.txt
 ├── libpolycall-v1trial
 │   ├── bindings
 │   │   ├── cbl-polycall
@@ -2478,7 +3627,7 @@
 │               ├── ffi_config.c
 │               ├── micro_config.c
 │               └── python_bridge.c
-├── refact.sh
+├── refactor.sh
 ├── reports
 │   ├── lfs-migration-assessment.md
 │   └── lfs-performance-report.md
@@ -3131,6 +4280,10 @@
 └── tests
     ├── conftest.py
     ├── __init__.py
+    ├── __pycache__
+    │   ├── conftest.cpython-312-pytest-8.3.5.pyc
+    │   ├── __init__.cpython-312.pyc
+    │   └── test_cli.cpython-312-pytest-8.3.5.pyc
     └── test_cli.py
 
-850 directories, 2284 files
+1134 directories, 3153 files
