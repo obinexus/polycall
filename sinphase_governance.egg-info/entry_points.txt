@@ -1,2 +1,0 @@
-[console_scripts]
-sinphase = sinphase_governance.cli.main:main
