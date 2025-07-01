@@ -1,6 +1,9 @@
 # LibPolyCall v3.3 Zero-Trust Protocol Specification
 
 This document captures the proposed zero-trust protocol architecture for the Aegis Project release scheduled on October 15. It is derived from internal OBINexus cryptographic standards and NASA-STD-8739.8 compliance requirements.
+> **Note:** This specification is conceptual and the code snippets below are illustrative only. They are not part of the production codebase.
+
+
 
 ## 1. Core Protocol Architecture
 
