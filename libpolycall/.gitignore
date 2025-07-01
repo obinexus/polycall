@@ -1,3 +1,13 @@
+# Windows metadata files
+*:Zone.Identifier
+*.Identifier
+desktop.ini
+Thumbs.db
+
+# MacOS metadata
+.DS_Store
+._*
+
 # Build directories
 /build/
 /out/
