@@ -1,0 +1,18 @@
+[2025-04-19 09:15:27] Starting LibPolyCall include path standardization
+[2025-04-19 09:15:27] Project root: /home/nnamdi/Projects/obinexuscomputing/pkg/dev/libpolycall/libpolycall/scripts
+[2025-04-19 09:15:27] Step 1/4: Validating current include paths
+python: can't open file '/home/nnamdi/Projects/obinexuscomputing/pkg/dev/libpolycall/libpolycall/scripts/scripts/validate_include_paths.py': [Errno 2] No such file or directory
+[2025-04-19 09:15:27] Step 2/4: Standardizing include paths
+python: can't open file '/home/nnamdi/Projects/obinexuscomputing/pkg/dev/libpolycall/libpolycall/scripts/scripts/standardize_includes.py': [Errno 2] No such file or directory
+[2025-04-19 09:15:27] Step 3/4: Verifying changes
+python: can't open file '/home/nnamdi/Projects/obinexuscomputing/pkg/dev/libpolycall/libpolycall/scripts/scripts/validate_include_paths.py': [Errno 2] No such file or directory
+[2025-04-19 09:15:27] Step 4/4: Fixing any remaining issues
+python: can't open file '/home/nnamdi/Projects/obinexuscomputing/pkg/dev/libpolycall/libpolycall/scripts/scripts/fix_include_paths.py': [Errno 2] No such file or directory
+python: can't open file '/home/nnamdi/Projects/obinexuscomputing/pkg/dev/libpolycall/libpolycall/scripts/scripts/validate_include_paths.py': [Errno 2] No such file or directory
+[2025-04-19 09:15:27] Include path standardization completed
+[2025-04-19 09:15:27] Summary:
+[2025-04-19 09:15:27]   - Initial validation: /home/nnamdi/Projects/obinexuscomputing/pkg/dev/libpolycall/libpolycall/scripts/logs/validation_before_20250419_091527.log
+[2025-04-19 09:15:27]   - Standardization report: /home/nnamdi/Projects/obinexuscomputing/pkg/dev/libpolycall/libpolycall/scripts/logs/include_report_20250419_091527.json
+[2025-04-19 09:15:27]   - Final validation: /home/nnamdi/Projects/obinexuscomputing/pkg/dev/libpolycall/libpolycall/scripts/logs/validation_final_20250419_091527.log
+[2025-04-19 09:15:27]   - Complete log: /home/nnamdi/Projects/obinexuscomputing/pkg/dev/libpolycall/libpolycall/scripts/logs/include_fix_20250419_091527.log
+[2025-04-19 09:15:27] WARNING: There are still  non-compliant includes
