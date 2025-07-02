@@ -28,10 +28,15 @@ POLYCALL_BIN = bin/polycall
 
 # Default target
 all: help
+
+# Setup target - Initialize environment with ad-hoc compliance
+
 # Setup target - Initialize environment with ad-hoc compliance
 setup: policy-setup adhoc-init
 	@python3 scripts/build/generate_setup.py --project-root .
-	@bash ./setup.sh
+	@bash scripts/build/setup.sh
+
+# Updated build target to use orchestrator and centralized config
 
 # Updated build target to use orchestrator and centralized config
 build: adhoc-validate
