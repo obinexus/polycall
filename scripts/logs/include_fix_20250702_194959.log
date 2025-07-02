@@ -1,0 +1,30 @@
+[2025-07-02 19:49:59] Starting LibPolyCall include path standardization
+[2025-07-02 19:49:59] Project root: /mnt/c/Users/OBINexus/Projects/libpolycall/scripts
+[2025-07-02 19:49:59] Scripts directory: /mnt/c/Users/OBINexus/Projects/libpolycall/scripts/adhoc
+[2025-07-02 19:49:59] Step 1/4: Validating current include paths
+2025-07-02 19:49:59,746 - ERROR - Include directory not found: /mnt/c/Users/OBINexus/Projects/libpolycall/scripts/include
+2025-07-02 19:49:59,746 - ERROR - No header files found
+[2025-07-02 19:49:59] Step 2/4: Standardizing include paths
+2025-07-02 19:49:59,818 - INFO - Creating backup in /mnt/c/Users/OBINexus/Projects/libpolycall/scripts/backup_20250702_194959
+2025-07-02 19:49:59,819 - INFO - Backup completed
+2025-07-02 19:49:59,819 - INFO - Found 0 files to process
+2025-07-02 19:49:59,819 - ERROR - No files found to process
+2025-07-02 19:49:59,821 - INFO - JSON report written to /mnt/c/Users/OBINexus/Projects/libpolycall/scripts/logs/include_report_20250702_194959.json
+[2025-07-02 19:49:59] Step 3/4: Verifying changes
+2025-07-02 19:49:59,892 - ERROR - Include directory not found: /mnt/c/Users/OBINexus/Projects/libpolycall/scripts/include
+2025-07-02 19:49:59,892 - ERROR - No header files found
+[2025-07-02 19:49:59] Step 4/4: Fixing any remaining issues
+2025-07-02 19:49:59,975 - ERROR - Include directory not found: /mnt/c/Users/OBINexus/Projects/libpolycall/scripts/include
+2025-07-02 19:49:59,976 - ERROR - No header files found
+[2025-07-02 19:49:59] Step 5/5: Fixing implementation-specific includes
+2025-07-02 19:50:00,045 - WARNING - Include directory not found: /mnt/c/Users/OBINexus/Projects/libpolycall/scripts/include
+2025-07-02 19:50:00,046 - ERROR - Source directory not found: /mnt/c/Users/OBINexus/Projects/libpolycall/scripts/src
+2025-07-02 19:50:00,046 - ERROR - No implementation files found
+2025-07-02 19:50:00,106 - ERROR - Include directory not found: /mnt/c/Users/OBINexus/Projects/libpolycall/scripts/include
+2025-07-02 19:50:00,106 - ERROR - No header files found
+[2025-07-02 19:50:00] Include path standardization completed
+[2025-07-02 19:50:00] Summary:
+[2025-07-02 19:50:00]   - Initial validation: /mnt/c/Users/OBINexus/Projects/libpolycall/scripts/logs/validation_before_20250702_194959.log
+[2025-07-02 19:50:00]   - Standardization report: /mnt/c/Users/OBINexus/Projects/libpolycall/scripts/logs/include_report_20250702_194959.json
+[2025-07-02 19:50:00]   - Final validation: /mnt/c/Users/OBINexus/Projects/libpolycall/scripts/logs/validation_final_20250702_194959.log
+[2025-07-02 19:50:00]   - Complete log: /mnt/c/Users/OBINexus/Projects/libpolycall/scripts/logs/include_fix_20250702_194959.log

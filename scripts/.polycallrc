@@ -1,0 +1,15 @@
+{
+    "version": "2.0.0",
+    "setup_date": "2025-07-02 18:49:59 UTC",
+    "platform": {
+        "os_type": "linux",
+        "os_distro": "debian",
+        "os_version": "12",
+        "architecture": "x86_64"
+    },
+    "build_system": "unknown",
+    "python_command": "python3",
+    "python_version": "3.12.9",
+    "compiler": "gcc",
+    "aegis_phase": 2
+}

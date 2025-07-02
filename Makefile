@@ -37,7 +37,7 @@ setup: policy-setup adhoc-init dir-map
 	@mkdir -p lib bin logs
 	
 	@echo "Running setup.sh..."
-	@bash ./setup.sh --skip-wizard
+	@bash scripts/build/setup.sh --skip-wizard
 	
 	@echo "Executing available fix scripts..."
 	@find scripts -name "fix_*.py" -o -name "fix_*.sh" | while read script; do \
