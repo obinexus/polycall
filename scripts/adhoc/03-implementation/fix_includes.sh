@@ -196,3 +196,4 @@ if [ -f "${FINAL_VALIDATION}" ]; then
 else
   log "WARNING: Final validation file not found"
   exit 1
+fi

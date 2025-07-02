@@ -211,15 +211,3 @@ if [ "${REMAINING_ISSUES}" -gt 0 ]; then
 else
   exit 0
 fi
-
-echo ""
-echo "Path standardization completed."
-echo "See ${LOG_FILE} for details."
-echo "Final validation report: ${FINAL_VALIDATION}"
-
-# Return appropriate exit code
-if [ "${REMAINING_ISSUES}" -gt 0 ]; then
-  exit 1
-else
-  exit 0
-fi
