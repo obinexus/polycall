@@ -1,3 +1,16 @@
+/* Standard library includes */
+#include <stdint.h>
+#include <stddef.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
+#include <pthread.h>
+#include <unistd.h>
+#include <sys/types.h>
+
+/* Core types */
+#include "polycall/core/types.h"
+
 /**
  * @file test_protocol_network_qa.c
  * @brief INTEGRATION_QA test for multi-module interaction
@@ -15,8 +28,6 @@
 #include <polycall/core/network/network.h>
 #include <assert.h>
 #include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 // Integration test fixture
 typedef struct {

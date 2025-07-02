@@ -1,3 +1,16 @@
+/* Standard library includes */
+#include <stdint.h>
+#include <stddef.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
+#include <pthread.h>
+#include <unistd.h>
+#include <sys/types.h>
+
+/* Core types */
+#include "polycall/core/types.h"
+
 /**
  * @file test_accessibility_ioc.c
  * @brief Accessibility Module IoC Integration Unit Tests
@@ -13,8 +26,6 @@
 #include <polycall/core/config/config.h>
 #include <polycall_test_utils.h>
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 

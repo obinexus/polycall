@@ -1,3 +1,16 @@
+/* Standard library includes */
+#include <stdint.h>
+#include <stddef.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
+#include <pthread.h>
+#include <unistd.h>
+#include <sys/types.h>
+
+/* Core types */
+#include "polycall/core/types.h"
+
 /**
  * @file polycall_error.c
  * @brief Error handling implementation for polycall module
@@ -8,9 +21,6 @@
 #include "polycall/core/polycall/polycall_error.h"
 #include "polycall/core/polycall/polycall_logger.h"
 #include "polycall/core/polycall/polycall_polycall_error.h"
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 /* Error handler context */

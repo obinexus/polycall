@@ -1,9 +1,20 @@
+/* Standard library includes */
+#include <stdint.h>
+#include <stddef.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
+#include <pthread.h>
+#include <unistd.h>
+#include <sys/types.h>
+
+/* Core types */
+#include "polycall/core/types.h"
+
 // polycall_commands.c
 #include "polycall/cli/providers/cli_container.h"
 #include "polycall/cli/common/command_registry.h"
 #include "polycall/core/polycall/polycall.h"
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 // Initialize core context

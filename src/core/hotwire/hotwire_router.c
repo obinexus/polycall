@@ -1,3 +1,16 @@
+/* Standard library includes */
+#include <stdint.h>
+#include <stddef.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
+#include <pthread.h>
+#include <unistd.h>
+#include <sys/types.h>
+
+/* Core types */
+#include "polycall/core/types.h"
+
 /**
  * @file hotwire_router.c
  * @brief OBINexus LibPolyCall v2 Hotwiring Router Implementation
@@ -14,8 +27,6 @@
 #include "telemetry/telemetry_commands.h"
 #include "config/config_commands.h"
 #include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 /*---------------------------------------------------------------------------*/
 /* Constitutional Compliance Constants */

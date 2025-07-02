@@ -1,10 +1,22 @@
+/* Standard library includes */
+#include <stdint.h>
+#include <stddef.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
+#include <pthread.h>
+#include <unistd.h>
+#include <sys/types.h>
+
+/* Core types */
+#include "polycall/core/types.h"
+
 /**
  * @file telemetry_registry.c
  * @brief Registry implementation for telemetry module
  */
 
 #include <string.h>
-#include <stdlib.h>
 #include "polycall/core/telemetry/telemetry_registry.h"
 
 /* Default max services */

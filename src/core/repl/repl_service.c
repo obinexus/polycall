@@ -1,3 +1,16 @@
+/* Standard library includes */
+#include <stdint.h>
+#include <stddef.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
+#include <pthread.h>
+#include <unistd.h>
+#include <sys/types.h>
+
+/* Core types */
+#include "polycall/core/types.h"
+
 // repl_service_provider.c
 #include "polycall/cli/providers/repl_service_provider.h"
 #include "polycall/cli/providers/cli_container.h"

@@ -1,3 +1,16 @@
+/* Standard library includes */
+#include <stdint.h>
+#include <stddef.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
+#include <pthread.h>
+#include <unistd.h>
+#include <sys/types.h>
+
+/* Core types */
+#include "polycall/core/types.h"
+
 /**
  * @file accessibility_audio.c
  * @brief Implementation of audio notification utilities for LibPolyCall CLI
@@ -7,10 +20,7 @@
 
 #include "polycall/core/accessibility/accessibility_audio.h"
 #include "polycall/core/polycall/polycall_memory.h"
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
 #ifdef _WIN32
 #include <windows.h>

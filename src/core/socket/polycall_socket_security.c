@@ -1,3 +1,16 @@
+/* Standard library includes */
+#include <stdint.h>
+#include <stddef.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
+#include <pthread.h>
+#include <unistd.h>
+#include <sys/types.h>
+
+/* Core types */
+#include "polycall/core/types.h"
+
 /**
  * @file polycall_socket_security.c
  * @brief WebSocket Security Integration for LibPolyCall
@@ -11,9 +24,7 @@
 #include "polycall/core/auth/polycall_auth_token.h"
 #include "polycall/core/polycall/polycall_memory.h"
 #include "polycall/core/polycall/polycall_error.h"
-#include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 
 #define POLYCALL_SOCKET_SECURITY_MAGIC 0xD4E5F6A7
 

@@ -1,7 +1,19 @@
+/* Standard library includes */
+#include <stdint.h>
+#include <stddef.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
+#include <pthread.h>
+#include <unistd.h>
+#include <sys/types.h>
+
+/* Core types */
+#include "polycall/core/types.h"
+
 // polycall_repl_accessibility.c
 #include "polycall/core/polycall/polycall_repl.h"
 #include "polycall/core/accessibility/accessibility_interface.h"
-#include <stdio.h>
 #include <string.h>
 
 // Add accessibility context to REPL context

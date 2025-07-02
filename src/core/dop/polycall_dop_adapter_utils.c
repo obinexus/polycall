@@ -1,3 +1,16 @@
+/* Standard library includes */
+#include <stdint.h>
+#include <stddef.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
+#include <pthread.h>
+#include <unistd.h>
+#include <sys/types.h>
+
+/* Core types */
+#include "polycall/core/types.h"
+
 /**
  * @file polycall_dop_adapter_utils.c
  * @brief DOP Adapter Utility Functions Implementation
@@ -17,8 +30,6 @@
 #include "polycall/core/polycall_memory.h"
 
 #include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
 #include <ctype.h>
 #include <assert.h>
 

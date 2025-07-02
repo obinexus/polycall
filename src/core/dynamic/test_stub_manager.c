@@ -1,3 +1,16 @@
+/* Standard library includes */
+#include <stdint.h>
+#include <stddef.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
+#include <pthread.h>
+#include <unistd.h>
+#include <sys/types.h>
+
+/* Core types */
+#include "polycall/core/types.h"
+
 /**
  * @file test_stub_manager.c
  * @brief Test stub manager implementation for LibPolyCall
@@ -6,7 +19,6 @@
 
 #include "test_stub_manager.h"
 #include <string.h>
-#include <stdio.h>
 
 // Include all component test stubs
 #include "polycall_test_stub.h"

@@ -1,17 +1,25 @@
+/* Standard library includes */
+#include <stdint.h>
+#include <stddef.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
+#include <pthread.h>
+#include <unistd.h>
+#include <sys/types.h>
+
+/* Core types */
+#include "polycall/core/types.h"
+
 /**
 #include "polycall/core/config/factory/config_factory.h"
 #include "polycall/core/config/factory/config_factory.h"
 
 #include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 #include "polycall/core/config/factory/config_factory_mergers.h"
 #include "polycall/core/config/polycallfile/parser.h"
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
 #include "polycall/core/polycall/polycall_core.h"
 #include "polycall/core/polycall/polycall_error.h"
 

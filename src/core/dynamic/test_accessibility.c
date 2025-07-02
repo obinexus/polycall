@@ -1,3 +1,16 @@
+/* Standard library includes */
+#include <stdint.h>
+#include <stddef.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
+#include <pthread.h>
+#include <unistd.h>
+#include <sys/types.h>
+
+/* Core types */
+#include "polycall/core/types.h"
+
 /**
  * @file test_accessibility.c
  * @brief Unit Test Suite for Accessibility Module
@@ -10,8 +23,6 @@
  * the modular CMake system, ensuring isolated component testing.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <assert.h>
 #include <string.h>
 

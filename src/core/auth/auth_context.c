@@ -1,8 +1,19 @@
+/* Standard library includes */
+#include <stdint.h>
+#include <stddef.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
+#include <pthread.h>
+#include <unistd.h>
+#include <sys/types.h>
+
+/* Core types */
+#include "polycall/core/types.h"
+
 /**
 #include "polycall/core/auth/auth_context.h"
 #include "polycall/core/auth/polycall_auth_context.h"
-#include <stdbool.h>
-#include <stddef.h>
 #include "polycall/core/polycall/polycall_core.h"
 #include "polycall/core/polycall/polycall_error.h"
 

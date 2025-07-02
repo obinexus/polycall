@@ -1,6 +1,18 @@
+/* Standard library includes */
+#include <stdint.h>
+#include <stddef.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
+#include <pthread.h>
+#include <unistd.h>
+#include <sys/types.h>
+
+/* Core types */
+#include "polycall/core/types.h"
+
 // command_registry.c
 #include "polycall/cli/common/command_registry.h"
-#include <stdlib.h>
 #include <string.h>
 
 #define MAX_MODULES 16

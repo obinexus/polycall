@@ -1,3 +1,16 @@
+/* Standard library includes */
+#include <stdint.h>
+#include <stddef.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
+#include <pthread.h>
+#include <unistd.h>
+#include <sys/types.h>
+
+/* Core types */
+#include "polycall/core/types.h"
+
 /**
  * @file polycall_test_utils.c
  * @brief Enhanced test utilities for IoC-driven libpolycall testing
@@ -8,9 +21,7 @@
 #include <polycall/core/polycall/polycall.h>
 #include <polycall/core/config/config.h>
 #include <polycall/core/telemetry/polycall_telemetry.h>
-#include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 #include <sys/stat.h>
 
 // Global test configuration context

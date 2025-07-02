@@ -1,3 +1,16 @@
+/* Standard library includes */
+#include <stdint.h>
+#include <stddef.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
+#include <pthread.h>
+#include <unistd.h>
+#include <sys/types.h>
+
+/* Core types */
+#include "polycall/core/types.h"
+
 /**
  * @file socket_commands.c
  * @brief CLI Commands for LibPolyCall WebSocket Functionality
@@ -12,8 +25,6 @@
 #include "polycall/core/socket/polycall_socket_protocol.h"
 #include "polycall/core/socket/polycall_socket_security.h"
 #include "polycall/core/polycall/polycall_error.h"
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 // CLI context with socket dependency

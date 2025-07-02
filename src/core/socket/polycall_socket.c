@@ -1,3 +1,16 @@
+/* Standard library includes */
+#include <stdint.h>
+#include <stddef.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
+#include <pthread.h>
+#include <unistd.h>
+#include <sys/types.h>
+
+/* Core types */
+#include "polycall/core/types.h"
+
 /**
  * @file polycall_socket.c
  * @brief Core WebSocket Implementation for LibPolyCall
@@ -10,9 +23,7 @@
 #include "polycall/core/socket/polycall_socket.h"
 #include "polycall/core/polycall/polycall_memory.h"
 #include "polycall/core/polycall/polycall_error.h"
-#include <stdlib.h>
 #include <string.h>
-#include <pthread.h>
 #include <time.h>
 
 #define POLYCALL_SOCKET_MAGIC 0xB1C2D3E4

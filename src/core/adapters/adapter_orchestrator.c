@@ -1,7 +1,18 @@
+/* Standard library includes */
+#include <stdint.h>
+#include <stddef.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
+#include <pthread.h>
+#include <unistd.h>
+#include <sys/types.h>
+
+/* Core types */
+#include "polycall/core/types.h"
+
 #include "polycall/core/adapters/adapter_orchestrator.h"
 #include "adapter_registry.h"
-#include <pthread.h>
-#include <stdlib.h>
 
 int adapter_orchestrate_transition(adapter_registry_t* registry,
                                    uint64_t thread_id,

@@ -1,9 +1,21 @@
+/* Standard library includes */
+#include <stdint.h>
+#include <stddef.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
+#include <pthread.h>
+#include <unistd.h>
+#include <sys/types.h>
+
+/* Core types */
+#include "polycall/core/types.h"
+
 /**
  * @file polycall_container.c
  * @brief IoC Container implementation for polycall module
  */
 
-#include <stdlib.h>
 #include "polycall/core/polycall/polycall_container.h"
 #include "polycall/core/polycall/polycall_registry.h"
 

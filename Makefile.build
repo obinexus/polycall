@@ -1,0 +1,42 @@
+# PolyCall Build Configuration
+CC = gcc
+CFLAGS = -Wall -Wextra -std=c11 -D_GNU_SOURCE -Iinclude
+LDFLAGS = -pthread
+
+# Directories
+SRC_DIR = src
+OBJ_DIR = build/obj
+BIN_DIR = build/bin
+
+# Create directories
+$(shell mkdir -p $(OBJ_DIR)/core/common $(OBJ_DIR)/core/micro $(OBJ_DIR)/core)
+$(shell mkdir -p $(BIN_DIR))
+
+# Source files
+CORE_SOURCES = $(wildcard $(SRC_DIR)/core/*.c)
+COMMON_SOURCES = $(wildcard $(SRC_DIR)/core/common/*.c)
+MICRO_SOURCES = $(wildcard $(SRC_DIR)/core/micro/*.c)
+
+# Object files
+CORE_OBJECTS = $(CORE_SOURCES:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
+COMMON_OBJECTS = $(COMMON_SOURCES:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
+MICRO_OBJECTS = $(MICRO_SOURCES:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
+
+ALL_OBJECTS = $(CORE_OBJECTS) $(COMMON_OBJECTS) $(MICRO_OBJECTS)
+
+# Build rules
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
+	@echo "Compiling: $<"
+	@$(CC) $(CFLAGS) -c $< -o $@
+
+# Test compilation target
+test-build: $(ALL_OBJECTS)
+	@echo ""
+	@echo "✅ Compilation successful!"
+	@echo "Objects created: $(words $(ALL_OBJECTS))"
+
+# Clean target
+clean:
+	rm -rf build
+
+.PHONY: test-build clean

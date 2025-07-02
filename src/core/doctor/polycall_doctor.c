@@ -1,3 +1,16 @@
+/* Standard library includes */
+#include <stdint.h>
+#include <stddef.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
+#include <pthread.h>
+#include <unistd.h>
+#include <sys/types.h>
+
+/* Core types */
+#include "polycall/core/types.h"
+
 /**
  * @file polycall_doctor.c
  * @brief Configuration validation and optimization implementation for LibPolyCall
@@ -11,8 +24,6 @@
 #include "polycall/core/polycall/polycall_core.h"
 #include "polycall/core/polycall/polycall_memory.h"
 #include "polycall/core/polycall/polycall_logger.h"
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <time.h>
 // Helper functions for issue management

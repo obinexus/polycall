@@ -1,6 +1,18 @@
+/* Standard library includes */
+#include <stdint.h>
+#include <stddef.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
+#include <pthread.h>
+#include <unistd.h>
+#include <sys/types.h>
+
+/* Core types */
+#include "polycall/core/types.h"
+
 #include "polycall/core/adapters/adapter_base.h"
 #include "adapter_base.h"
-#include <stdlib.h>
 int adapter_base_init(adapter_base_t* adapter, struct topology_manager* manager)
 {
     if (!adapter || !manager) return -1;

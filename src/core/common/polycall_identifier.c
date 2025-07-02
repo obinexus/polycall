@@ -1,9 +1,20 @@
+/* Standard library includes */
+#include <stdint.h>
+#include <stddef.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
+#include <pthread.h>
+#include <unistd.h>
+#include <sys/types.h>
+
+/* Core types */
+#include "polycall/core/types.h"
+
 // polycall/core/common/polycall_identifier.c
 #include "polycall/core/common/polycall_identifier.h"
 #include "polycall/core/polycall/polycall_memory.h"
 #include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <ctype.h>
 #include <time.h>
 
