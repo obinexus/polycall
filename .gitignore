@@ -1,45 +1,79 @@
-# Python
-__pycache__/
-*.py[cod]
-*.pyo
-*.pyd
-*.pyc
-*.egg-info/
-*.egg
-*.env
-*.venv
-env/
-venv/
-build/
-dist/
-
-# C#
-bin/
-obj/
-*.user
-*.suo
-
-# General
-.DS_Store
+# Windows metadata files
+*:Zone.Identifier
+*.Identifier
+desktop.ini
 Thumbs.db
+
+# MacOS metadata
+.DS_Store
+._*
+
+# Build directories
+/build/
+/out/
+/bin/
+/lib/
+/install/
+/cmake-build*/
+
+# Backup files
+/backup*/
+!backup_20250424_211311/
+!backup_20250424_215614/
+
+# CMake files
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+cmake_install.cmake
+compile_commands.json
+CTestTestfile.cmake
+_deps/
+*.cmake
+!CMakeLists.txt
+
+# Logs
+/logs/
 *.log
-*.tmp
-*.swp
-*.swn
-*.bak
 
-# Model/Generated/Cache files
-*.model
-*.cache
-*.gen
-*.generated
-*.tmp.*
-.cache/
-.generated/
-.idea/
+# Object files and libraries
+*.o
+*.ko
+*.obj
+*.elf
+*.so
+*.so.*
+*.dylib
+*.dll
+*.a
+*.la
+*.lo
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
+
+# Debug files
+*.dSYM/
+*.su
+*.idb
+*.pdb
+
+# Editor files
 .vscode/
-*.db
-
-# Hidden/system files
-.*~
-.*.swp
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

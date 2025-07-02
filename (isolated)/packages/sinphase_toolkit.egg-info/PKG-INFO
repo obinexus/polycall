@@ -1,0 +1,40 @@
+Metadata-Version: 2.4
+Name: sinphase-toolkit
+Version: 0.1.0
+Summary: 🔍 Sinphasé Governance Toolkit - OBINexus Computing Unified Framework
+Author: OBINexus Computing
+Author-email: OBINexus Computing <governance@obinexuscomputing.com>
+License: MIT
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+Requires-Dist: typer>=0.9.0
+Requires-Dist: rich>=13.0.0
+Provides-Extra: dev
+Requires-Dist: pytest>=7.0.0; extra == "dev"
+Requires-Dist: black>=22.0.0; extra == "dev"
+Requires-Dist: flake8>=4.0.0; extra == "dev"
+Requires-Dist: mypy>=0.900; extra == "dev"
+Requires-Dist: coverage>=6.0.0; extra == "dev"
+Dynamic: author
+Dynamic: requires-python
+
+# Sinphasé Toolkit
+
+🔍 Enterprise-grade governance framework for software architecture compliance.
+
+## Installation
+
+```bash
+pip install -e .
+```
+
+## Usage
+
+```bash
+sinphase check --project-root .
+sinphase status
+sinphase report --format markdown
+```
+
+## OBINexus Computing
+Technical Architecture & Governance Framework
