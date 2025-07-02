@@ -1,3 +1,4 @@
+
 #!/bin/bash
 
 # ============================================================================
@@ -66,12 +67,12 @@ while [[ $# -gt 0 ]]; do
             echo "Sinphasé Feature Scaffold Generator v${SCRIPT_VERSION}"
             exit 0
             ;;
-        -*)
+        -* )
             echo "Unknown option: $1" >&2
             show_usage
             exit 1
             ;;
-        *)
+        * )
             # Positional arguments (for backward compatibility)
             if [[ -z "$FEATURE_NAME" ]]; then
                 FEATURE_NAME="$1"
