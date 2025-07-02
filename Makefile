@@ -121,6 +121,10 @@ compile-core: dir-map
                 find src/core -name "*.c" | while read src; do \
                         rel_path=$$(echo "$$src" | sed "s|^src/core/||"); \
                         obj_file="obj/core/$$(echo "$$rel_path" | tr '/' '_' | sed "s|\.c$$|.o|")"; \
+
+                        rel_path="$${src#src/core/}"; \
+                        obj_name="$$(echo $$rel_path | tr '/' '_')"; \
+                        obj_file="obj/core/$${obj_name%.c}.o"; \
                         echo "Compiling: $$src -> $$obj_file"; \
                         $(CC) $(CFLAGS) -c "$$src" -o "$$obj_file" || true; \
                 done; \
@@ -144,6 +148,10 @@ compile-cli: compile-core
                 find src/cli -name "*.c" | while read src; do \
                         rel_path=$$(echo "$$src" | sed "s|^src/cli/||"); \
                         obj_file="obj/cli/$$(echo "$$rel_path" | tr '/' '_' | sed "s|\.c$$|.o|")"; \
+
+                        rel_path="$${src#src/cli/}"; \
+                        obj_name="$$(echo $$rel_path | tr '/' '_')"; \
+                        obj_file="obj/cli/$${obj_name%.c}.o"; \
                         echo "Compiling: $$src -> $$obj_file"; \
                         $(CC) $(CFLAGS) -c "$$src" -o "$$obj_file" || true; \
                 done; \
