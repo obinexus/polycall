@@ -236,6 +236,7 @@ if(DOXYGEN_FOUND)
         ${CMAKE_SOURCE_DIR}/src
         COMMENT "Generating API documentation"
     )
+endif()
 # ==============================================================================
 # Include Root CMake Directory
 # ==============================================================================
