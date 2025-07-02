@@ -1,8 +1,0 @@
-CC = gcc
-CFLAGS = -Wall -Werror -fPIC -O2
-TARGET = libprotocol_isolated.so
-
-all: $(TARGET)
-
-$(TARGET): src/*.c
-	$(CC) $(CFLAGS) -shared -o $@ $^
