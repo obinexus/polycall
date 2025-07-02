@@ -38,9 +38,15 @@ setup: policy-setup adhoc-init
 
 # Updated build target to use orchestrator and centralized config
 
-# Updated build target to use orchestrator and centralized config
-build: adhoc-validate
-	@python3 scripts/build/build_orchestrator.py --project-root . --config $(CMAKE_BUILD_TYPE)
+
+# Updated build target to use CMake and orchestrator integration
+cmake-build:
+	@mkdir -p build/cmake && cd build/cmake && cmake ../.. -DCMAKE_BUILD_TYPE=$(CMAKE_BUILD_TYPE)
+	@cd build/cmake && cmake --build .
+
+# The main build target now delegates to cmake-build (enforcing orchestration via CMake)
+build: adhoc-validate cmake-build
+	@echo "Build complete with CMake orchestration."
 
 # Policy setup - Create missing policy scripts
 policy-setup:
