@@ -13,7 +13,7 @@ BLUE='\033[0;34m'
 NC='\033[0m'
 
 # Project paths
-PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]})"/../.. && pwd)"
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd)"
 BUILD_DIR="$PROJECT_ROOT/build"
 SCRIPTS_DIR="$PROJECT_ROOT/scripts"
 
