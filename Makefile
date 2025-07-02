@@ -247,6 +247,7 @@ waterfall-status:
 	@[ -f "Makefile" ] && echo "  ✓ Build system" || echo "  ✗ Build system"
 	@[ -d "scripts/adhoc" ] && echo "  ✓ Ad-hoc framework" || echo "  ✗ Ad-hoc framework"
 
+
 # Help target
 help:
 	@echo "LibPolyCall Build System - Sinphasé Governance Enabled"
