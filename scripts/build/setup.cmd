@@ -72,4 +72,9 @@ echo === Setup Complete ===
 echo Build artifacts location: %BUILD_DIR%
 echo Run 'nmake' to compile the project
 
+REM Clean up environment variables (optional)
+set PROJECT_ROOT=
+set BUILD_DIR=
+set SCRIPTS_DIR=
+set MISSING_DEPS=
 endlocal

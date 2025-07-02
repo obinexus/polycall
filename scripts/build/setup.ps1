@@ -95,3 +95,8 @@ if (Test-Path $orchestrator) {
 Write-Success "`n=== Setup Complete ==="
 Write-Host "Build artifacts location: $BuildDir"
 Write-Host "Run 'nmake' or use Visual Studio to compile the project"
+
+# Clean up environment variables (optional)
+Remove-Variable -Name ProjectRoot, BuildDir, ScriptsDir -ErrorAction SilentlyContinue
+Write-Info "Environment variables cleaned up (optional)"
+# End of script
