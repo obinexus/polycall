@@ -1,6 +1,6 @@
 @echo off
 REM LibPolyCall v2 Setup Script - Windows CMD
-REM Generated: 2025-07-02 22:26:00
+REM Generated: 2025-07-02 22:32:19
 REM OBINexus Aegis Project - Sinphasé Governance
 
 setlocal enabledelayedexpansion
@@ -72,4 +72,7 @@ echo === Setup Complete ===
 echo Build artifacts location: %BUILD_DIR%
 echo Run 'nmake' to compile the project
 
-endlocal
+REM Clean up environment variables (optional)
+set PROJECT_ROOT=
+set BUILD_DIR=
+set SCRIPTS_DIR=

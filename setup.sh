@@ -1,6 +1,6 @@
 #!/bin/bash
 # LibPolyCall v2 Setup Script - Unix/Linux
-# Generated: 2025-07-02 22:26:00
+# Generated: 2025-07-02 22:32:19
 # OBINexus Aegis Project - Sinphasé Governance
 
 set -e
@@ -13,7 +13,7 @@ BLUE='\033[0;34m'
 NC='\033[0m'
 
 # Project paths
-PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]})"/../.. && pwd)"
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd)"
 BUILD_DIR="$PROJECT_ROOT/build"
 SCRIPTS_DIR="$PROJECT_ROOT/scripts"
 

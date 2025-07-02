@@ -1,5 +1,5 @@
 # LibPolyCall v2 Setup Script - PowerShell
-# Generated: 2025-07-02 22:26:00
+# Generated: 2025-07-02 22:32:19
 # OBINexus Aegis Project - Sinphasé Governance
 
 $ErrorActionPreference = "Stop"
@@ -73,7 +73,6 @@ if (Test-Path $fixScript) {
 # Stage headers
 Write-Info "`nStaging headers..."
 $includeSource = Join-Path $ProjectRoot "include\polycall"
-$includeDest = Join-Path $BuildDir "include\polycall"
 if (Test-Path $includeSource) {
     Copy-Item -Path $includeSource -Destination (Join-Path $BuildDir "include") -Recurse -Force
     Write-Success "✓ Headers staged"
