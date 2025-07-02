@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.egg-info/
+*.egg
+*.env
+*.venv
+env/
+venv/
+build/
+dist/
+
+# C#
+bin/
+obj/
+*.user
+*.suo
+
+# General
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.swp
+*.swn
+*.bak
+
+# Model/Generated/Cache files
+*.model
+*.cache
+*.gen
+*.generated
+*.tmp.*
+.cache/
+.generated/
+.idea/
+.vscode/
+*.db
+
+# Hidden/system files
+.*~
+.*.swp
