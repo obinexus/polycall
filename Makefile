@@ -28,30 +28,14 @@ POLYCALL_BIN = bin/polycall
 
 # Default target
 all: help
-
 # Setup target - Initialize environment with ad-hoc compliance
-setup: policy-setup adhoc-init dir-map
-	@echo "=== LibPolyCall Setup with Ad-hoc Compliance ==="
-	@echo "Initializing Sinphasé policy enforcement..."
-	@mkdir -p $(BUILD_DIR) $(TRACE_DIR)
-	@mkdir -p lib bin logs
-	
-	@echo "Running setup.sh..."
-	@bash scripts/build/setup.sh --skip-wizard
-	
-	@echo "Executing available fix scripts..."
-	@find scripts -name "fix_*.py" -o -name "fix_*.sh" | while read script; do \
-		echo "Running: $$script"; \
-		if [ -x "$$script" ]; then \
-			"$$script" || echo "Warning: $$script failed"; \
-		elif [ "$${script##*.}" = "py" ] && command -v python3 >/dev/null; then \
-			python3 "$$script" || echo "Warning: $$script failed"; \
-		elif [ "$${script##*.}" = "sh" ]; then \
-			bash "$$script" || echo "Warning: $$script failed"; \
-		fi; \
-	done
-	
-	@echo "Setup complete with Sinphasé governance."
+setup: policy-setup adhoc-init
+	@python3 scripts/build/generate_setup.py --project-root .
+	@bash ./setup.sh
+
+# Updated build target to use orchestrator and centralized config
+build: adhoc-validate
+	@python3 scripts/build/build_orchestrator.py --project-root . --config $(CMAKE_BUILD_TYPE)
 
 # Policy setup - Create missing policy scripts
 policy-setup:
