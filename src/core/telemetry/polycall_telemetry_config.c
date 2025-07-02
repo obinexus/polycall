@@ -12,7 +12,7 @@
 #include "polycall/core/types.h"
 
 /**
-#include "polycall/core/telemetry/polycall_telemetry_config.h"
+#include "polycall/telemetry/telemetry_config.h"
 
  * @file polycall_telemetry_config.c
  * @brief Telemetry Configuration System Implementation for LibPolyCall
@@ -22,7 +22,7 @@
  * centralized management of telemetry settings across all components.
  */
 
- #include "polycall/core/polycall/telemetry/polycall_telemetry_config.h"
+ #include "polycall/telemetry/telemetry_config.h"
  #include "polycall/core/polycall/polycall_memory.h"
  #include "polycall/core/polycall/polycall_error.h"
  #include <stdlib.h>

@@ -1,4 +1,128 @@
-src
+include/polycall
+├── cli
+│   ├── command.h
+│   └── repl.h
+├── core
+│   ├── accessibility
+│   │   ├── accessibility_colors.h
+│   │   ├── accessibility_config.h
+│   │   └── accessibility_interface.h
+│   ├── auth
+│   │   ├── advanced_security.h
+│   │   ├── polycall_auth_audit.h
+│   │   ├── polycall_auth_config.h
+│   │   ├── polycall_auth_context.h
+│   │   ├── polycall_auth_identity.h
+│   │   ├── polycall_auth_integration.h
+│   │   ├── polycall_auth_policy.h
+│   │   └── polycall_auth_token.h
+│   ├── config
+│   │   ├── path_utils.h
+│   │   └── polycall_config_tools.h
+│   ├── doctor
+│   │   ├── CMakeLists.txt
+│   │   └── polycall_doctor.h
+│   ├── edge
+│   │   ├── compute_router.h
+│   │   ├── edge_component.h
+│   │   ├── edge_config.h
+│   │   ├── edge.h
+│   │   ├── edge_runtime.h
+│   │   ├── fallback.h
+│   │   ├── node_selector.h
+│   │   ├── polycall_edge.h
+│   │   └── security.h
+│   ├── ffi
+│   │   ├── c_bridge.h
+│   │   ├── cobol_bridge.h
+│   │   ├── dop_adapter.h
+│   │   ├── ffi_config.h
+│   │   ├── ffi_core.h
+│   │   ├── js_bridge.h
+│   │   ├── jvm_bridge.h
+│   │   ├── language_bridge.h
+│   │   ├── memory_bridge.h
+│   │   ├── performance.h
+│   │   ├── protocol_bridge.h
+│   │   ├── python_bridge.h
+│   │   ├── security.h
+│   │   └── type_system.h
+│   ├── ignore
+│   │   └── polycall_ignore.h
+│   ├── micro
+│   │   ├── polycall_micro_component.h
+│   │   ├── polycall_micro_config.h
+│   │   ├── polycall_micro_context.h
+│   │   ├── polycall_micro_resource.h
+│   │   └── polycall_micro_security.h
+│   ├── network
+│   │   ├── connection_pool.h
+│   │   ├── network_client.h
+│   │   ├── network_config.h
+│   │   ├── network_endpoint.h
+│   │   ├── network_event.h
+│   │   ├── network.h
+│   │   ├── network_internal.h
+│   │   ├── network_packet.h
+│   │   ├── network_server.h
+│   │   └── subscription.h
+│   ├── parser
+│   │   └── config_parser.h
+│   ├── polycall
+│   │   ├── hierarchical_state.h
+│   │   ├── polycall_config.h
+│   │   ├── polycall_context.h
+│   │   ├── polycall_core.h
+│   │   ├── polycall_error.h
+│   │   ├── polycall_event.h
+│   │   ├── polycall.h
+│   │   ├── polycall_logger.h
+│   │   ├── polycall_memory.h
+│   │   ├── polycall_permission.h
+│   │   ├── polycall_program.h
+│   │   ├── polycall_public.h
+│   │   ├── polycall_state_machine.h
+│   │   └── polycall_version.h
+│   ├── polycallfile
+│   │   ├── ast.h
+│   │   ├── expression_evaluator.h
+│   │   ├── global_config.h
+│   │   ├── ignore
+│   │   │   ├── polycallfile_ignore.h
+│   │   │   └── polycallfile_ignore.h:Zone.Identifier
+│   │   ├── macro_expander.h
+│   │   ├── parser.h
+│   │   ├── polycall.h
+│   │   ├── token.h
+│   │   └── tokenizer.h
+│   ├── polycallrc
+│   │   ├── binding_config.h
+│   │   └── ignore
+│   │       ├── polycallrc_ignore.h
+│   │       └── polycallrc_ignore.h:Zone.Identifier
+│   ├── protocol
+│   │   ├── command.h
+│   │   ├── communication.h
+│   │   ├── message.h
+│   │   ├── message_optimization.h
+│   │   ├── polycall_protocol_context.h
+│   │   ├── protocol_config.h
+│   │   └── protocol_enhacements_config.h
+│   ├── repl
+│   │   └── polycall_repl.h
+│   ├── schema
+│   │   └── config_schema.h
+│   └── telemetry
+│       ├── polycall_telemetry.h
+│       ├── polycall_telemetry_reporting.h
+│       ├── polycall_telemetry_security.h
+│       └── telemetry_config.h
+├── factory
+│   ├── config_factory.h
+│   └── config_factory_mergers.h
+├── polycall.h.in
+└── polycall_version.h.in
+src/
 ├── cli
 │   ├── accessibility
 │   │   ├── accessibility_commands.c
@@ -556,24 +680,224 @@ src
     │   ├── telemetry_registry.c
     │   └── tracing.c
     └── topo
-include/
-└── polycall
-    ├── cli
-    └── core
-        ├── auth
-        ├── bind
-        │   ├── binding_config.h
-        │   └── config_binding.h
-        ├── doctor
-        │   └── CMakeLists.txt
-        ├── edge
-        ├── factory
-        ├── network
-        ├── polycall
-        ├── polycallfile
-        ├── polycall.h
-        ├── polycallrc
-        ├── polycall_version.h.in
-        └── telemetry
+scripts/
+├── adhoc
+│   ├── 01-requirements
+│   │   ├── adhoc-init.sh
+│   │   ├── fix_include_paths.py
+│   │   ├── fix_include_paths_with_validation.py
+│   │   ├── fix_nested_path_includes.py
+│   │   └── fix_polycall_paths.py
+│   ├── 02-design
+│   │   ├── generate_unified_header.py
+│   │   ├── header_include_fixer.py
+│   │   └── include_path_fixer.py
+│   ├── 03-implementation
+│   │   ├── custom_binding_configurator.sh
+│   │   ├── enhanced_fix_includes.py
+│   │   ├── fix_all_includes.sh
+│   │   ├── fix_all_paths.py
+│   │   ├── fix_implementation_includes.py
+│   │   ├── fix_includes_and_backup.py
+│   │   ├── fix_includes.sh
+│   │   ├── include_path_standardization.sh
+│   │   ├── include_path_standardizer.py
+│   │   ├── install_fix_script.bat
+│   │   ├── nested_path_fixer.py
+│   │   ├── remove_missing_includes.py
+│   │   ├── sinphase_feature_scaffold.sh
+│   │   ├── standardize_includes.py
+│   │   └── standardize_paths.bat
+│   ├── 04-testing
+│   │   ├── build_command_test.py
+│   │   ├── build_command_tests.py
+│   │   ├── repl_test.py
+│   │   ├── test_include_standadizer.py
+│   │   └── test_standardize_include.py
+│   ├── 05-compliance
+│   │   ├── branch_resolver.py
+│   │   ├── clone_commit.py
+│   │   ├── compliance-check.sh
+│   │   ├── include_path_validator.py
+│   │   ├── revert_directories.py
+│   │   ├── revert_modules.py
+│   │   ├── validate_include_paths.py
+│   │   ├── validate_includes.py
+│   │   ├── validate-lfs-compliance.sh
+│   │   └── validate-libpolycall-compliance.sh
+│   ├── 06-audit
+│   │   ├── adhoc-execute.sh
+│   │   ├── adhoc-validator.sh
+│   │   └── tracer-root.sh
+│   ├── 07-waterfall
+│   │   ├── main.sh
+│   │   └── waterfall.sh
+│   ├── backup_20250702_210101
+│   ├── logs
+│   │   ├── include_fix_20250702_210101.log
+│   │   └── include_report_20250702_210101.json
+│   ├── modules
+│   │   ├── accessibility
+│   │   │   ├── 01-requirements
+│   │   │   │   └── main.sh
+│   │   │   ├── 02-design
+│   │   │   │   └── main.sh
+│   │   │   ├── 03-implementation
+│   │   │   │   └── main.sh
+│   │   │   ├── 04-testing
+│   │   │   │   ├── main.sh
+│   │   │   │   └── scripts
+│   │   │   │       └── generate_tests.py
+│   │   │   ├── 05-deployment
+│   │   │   │   └── main.sh
+│   │   │   └── 06-maintenance
+│   │   │       └── main.sh
+│   │   ├── auth
+│   │   │   ├── 01-requirements
+│   │   │   │   └── main.sh
+│   │   │   ├── 02-design
+│   │   │   │   └── main.sh
+│   │   │   ├── 03-implementation
+│   │   │   │   └── main.sh
+│   │   │   ├── 04-testing
+│   │   │   │   ├── main.sh
+│   │   │   │   └── scripts
+│   │   │   │       └── generate_tests.py
+│   │   │   ├── 05-deployment
+│   │   │   │   └── main.sh
+│   │   │   └── 06-maintenance
+│   │   │       └── main.sh
+│   │   ├── config
+│   │   │   ├── 01-requirements
+│   │   │   │   └── main.sh
+│   │   │   ├── 02-design
+│   │   │   │   └── main.sh
+│   │   │   ├── 03-implementation
+│   │   │   │   └── main.sh
+│   │   │   ├── 04-testing
+│   │   │   │   ├── main.sh
+│   │   │   │   └── scripts
+│   │   │   │       └── generate_tests.py
+│   │   │   ├── 05-deployment
+│   │   │   │   └── main.sh
+│   │   │   └── 06-maintenance
+│   │   │       └── main.sh
+│   │   ├── edge
+│   │   │   ├── 01-requirements
+│   │   │   │   └── main.sh
+│   │   │   ├── 02-design
+│   │   │   │   └── main.sh
+│   │   │   ├── 03-implementation
+│   │   │   │   └── main.sh
+│   │   │   ├── 04-testing
+│   │   │   │   ├── main.sh
+│   │   │   │   └── scripts
+│   │   │   │       └── generate_tests.py
+│   │   │   ├── 05-deployment
+│   │   │   │   └── main.sh
+│   │   │   └── 06-maintenance
+│   │   │       └── main.sh
+│   │   ├── ffi
+│   │   │   ├── 01-requirements
+│   │   │   │   └── main.sh
+│   │   │   ├── 02-design
+│   │   │   │   └── main.sh
+│   │   │   ├── 03-implementation
+│   │   │   │   └── main.sh
+│   │   │   ├── 04-testing
+│   │   │   │   ├── main.sh
+│   │   │   │   └── scripts
+│   │   │   │       └── generate_tests.py
+│   │   │   ├── 05-deployment
+│   │   │   │   └── main.sh
+│   │   │   └── 06-maintenance
+│   │   │       └── main.sh
+│   │   ├── micro
+│   │   │   ├── 01-requirements
+│   │   │   │   └── main.sh
+│   │   │   ├── 02-design
+│   │   │   │   └── main.sh
+│   │   │   ├── 03-implementation
+│   │   │   │   └── main.sh
+│   │   │   ├── 04-testing
+│   │   │   │   ├── main.sh
+│   │   │   │   └── scripts
+│   │   │   │       └── generate_tests.py
+│   │   │   ├── 05-deployment
+│   │   │   │   └── main.sh
+│   │   │   └── 06-maintenance
+│   │   │       └── main.sh
+│   │   ├── network
+│   │   │   ├── 01-requirements
+│   │   │   │   └── main.sh
+│   │   │   ├── 02-design
+│   │   │   │   └── main.sh
+│   │   │   ├── 03-implementation
+│   │   │   │   └── main.sh
+│   │   │   ├── 04-testing
+│   │   │   │   ├── main.sh
+│   │   │   │   └── scripts
+│   │   │   │       └── generate_tests.py
+│   │   │   ├── 05-deployment
+│   │   │   │   └── main.sh
+│   │   │   └── 06-maintenance
+│   │   │       └── main.sh
+│   │   ├── protocol
+│   │   │   ├── 01-requirements
+│   │   │   │   └── main.sh
+│   │   │   ├── 02-design
+│   │   │   │   └── main.sh
+│   │   │   ├── 03-implementation
+│   │   │   │   └── main.sh
+│   │   │   ├── 04-testing
+│   │   │   │   ├── main.sh
+│   │   │   │   └── scripts
+│   │   │   │       └── generate_tests.py
+│   │   │   ├── 05-deployment
+│   │   │   │   └── main.sh
+│   │   │   └── 06-maintenance
+│   │   │       └── main.sh
+│   │   ├── registry.json
+│   │   └── telemetry
+│   │       ├── 01-requirements
+│   │       │   └── main.sh
+│   │       ├── 02-design
+│   │       │   └── main.sh
+│   │       ├── 03-implementation
+│   │       │   └── main.sh
+│   │       ├── 04-testing
+│   │       │   ├── main.sh
+│   │       │   └── scripts
+│   │       │       └── generate_tests.py
+│   │       ├── 05-deployment
+│   │       │   └── main.sh
+│   │       └── 06-maintenance
+│   │           └── main.sh
+│   └── README_dev_cycle_structure.txt
+├── build
+│   ├── build_ orchestrator.py
+│   ├── generate_setup.py
+│   ├── setup.cmd
+│   ├── setup.ps1
+│   └── setup.sh
+├── core
+│   ├── integration-test.sh
+│   └── module-waterfall.sh
+├── policies
+│   ├── active
+│   │   └── link-validator.sh
+│   ├── archive
+│   ├── hooks
+│   │   └── dev-hooks-install.sh
+│   ├── policy-injector.sh
+│   ├── policy-wrapper.sh
+│   ├── post
+│   ├── pre
+│   └── validate-policies.sh
+└── report
+    ├── generate-compliance-report.sh
+    ├── generate-dir-mapping.sh
+    ├── test-compliance-report.sh
+    └── validate-mappings.sh
 
-71 directories, 506 files
+173 directories, 728 files

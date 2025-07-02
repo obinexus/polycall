@@ -90,7 +90,7 @@ target_link_libraries(polycall_auth PUBLIC
 # ==============================================================================
 # Command Libraries (Isolated - No Cross-Dependencies)
 # ==============================================================================
-set(COMMANDS micro telemetry guid edge crypto topo)
+set(COMMANDS micro telemetry guid edge crypto topo auth network protocol accessibility)
 
 foreach(CMD ${COMMANDS})
     file(GLOB CMD_SOURCES src/core/commands/${CMD}/*.c)

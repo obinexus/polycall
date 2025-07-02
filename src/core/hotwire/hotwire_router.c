@@ -25,7 +25,7 @@
 #include "core/protocol/protocol_commands.h"
 #include "core/polycall/polycall_core.h"
 #include "telemetry/telemetry_commands.h"
-#include "config/config_commands.h"
+#include "polycall/config/config_commands.h"
 #include <string.h>
 
 /*---------------------------------------------------------------------------*/

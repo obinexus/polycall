@@ -12,7 +12,7 @@
 #include "polycall/core/types.h"
 
 /**
-#include "polycall/core/auth/auth_config.h"
+#include "polycall/polycall_config.h"
 
  * @file auth_config.c
  * @brief Implementation of authentication configuration functions
@@ -22,7 +22,7 @@
  * authentication module, following zero-trust security principles.
  */
 
-#include "polycall/core/auth/polycall_auth_config.h"
+#include "polycall/polycall_config.h"
 /**
  * @brief Authentication configuration validator
  */

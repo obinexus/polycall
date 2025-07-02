@@ -1,0 +1,48 @@
+{
+  "timestamp": "20250702_233950",
+  "project_root": "/home/obinexus/projects/polycall",
+  "command_modules": [
+    "topo",
+    "crypto",
+    "repl",
+    "guid",
+    "edge",
+    "accessibility",
+    "telemetry",
+    "ignore",
+    "micro",
+    "doctor"
+  ],
+  "infrastructure_modules": [
+    "protocol",
+    "auth",
+    "config",
+    "factory",
+    "bridges",
+    "network",
+    "common",
+    "memory",
+    "parser",
+    "schema",
+    "base",
+    "context",
+    "error",
+    "ffi",
+    "hotwire",
+    "polycall"
+  ],
+  "violations": [
+    "/home/obinexus/projects/polycall/src/core/auth/advanced_security.c does not include polycall/auth/advanced_security.h",
+    "/home/obinexus/projects/polycall/src/core/core/polycall.c does not include polycall/core/polycall/polycall.h",
+    "/home/obinexus/projects/polycall/src/core/core/security.c does not include polycall/core/edge/security.h",
+    "Command purity violation: /home/obinexus/projects/polycall/src/core/repl/repl.c (module: repl) includes accessibility",
+    "Command purity violation: /home/obinexus/projects/polycall/src/core/accessibility/polycall_repl_accessibility.c (module: accessibility) includes repl"
+  ],
+  "fixes_applied": [
+    "Generated IoC registry: /home/obinexus/projects/polycall/src/cli/command_registry_ioc.c",
+    "Generated IoC header: /home/obinexus/projects/polycall/src/cli/command_registry_ioc.h",
+    "Generated IoC main: /home/obinexus/projects/polycall/src/cli/main_ioc.c",
+    "Generated: /home/obinexus/projects/polycall/Makefile.purity"
+  ],
+  "status": "FAILED"
+}

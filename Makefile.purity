@@ -1,0 +1,40 @@
+
+# Additional build targets for command purity
+BUILD_DIR = build
+BIN_DIR = $(BUILD_DIR)/bin
+LIB_DIR = $(BUILD_DIR)/lib
+OBJ_DIR = $(BUILD_DIR)/obj
+
+# Ensure build directories exist
+$(shell mkdir -p $(BIN_DIR) $(LIB_DIR) $(OBJ_DIR))
+
+# Library targets
+LIBPOLYCALL_STATIC = $(LIB_DIR)/libpolycall.a
+LIBPOLYCALL_SHARED = $(LIB_DIR)/libpolycall.so
+
+# Main executable
+POLYCALL_BIN = $(BIN_DIR)/polycall
+
+# Command purity validation
+validate-purity:
+	@echo "Validating command module purity..."
+	@python3 scripts/polycall_migration_enforcer.py --check-only
+
+# Build static library
+$(LIBPOLYCALL_STATIC): $(ALL_OBJECTS)
+	@echo "Building static library..."
+	@$(AR) rcs $@ $^
+
+# Build shared library
+$(LIBPOLYCALL_SHARED): $(ALL_OBJECTS)
+	@echo "Building shared library..."
+	@$(CC) -shared -o $@ $^ $(LDFLAGS)
+
+# Build executable with IoC
+$(POLYCALL_BIN): $(OBJ_DIR)/cli/main_ioc.o $(OBJ_DIR)/cli/command_registry_ioc.o $(LIBPOLYCALL_STATIC)
+	@echo "Building polycall executable..."
+	@$(CC) -o $@ $^ $(LDFLAGS)
+
+# Install to build directory
+install-local: $(POLYCALL_BIN) $(LIBPOLYCALL_STATIC) $(LIBPOLYCALL_SHARED)
+	@echo "Installation complete in $(BUILD_DIR)"
