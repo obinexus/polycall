@@ -113,7 +113,7 @@ echo "Run 'make build' to compile the project"
 
     def generate_cmd_setup(self) -> str:
         """Generate setup.cmd for Windows Command Prompt."""
-        return f'''@echo off
+        return rf'''@echo off
 REM LibPolyCall v2 Setup Script - Windows CMD
 REM Generated: {self.timestamp}
 REM OBINexus Aegis Project - Sinphasé Governance
@@ -122,8 +122,8 @@ setlocal enabledelayedexpansion
 
 REM Project paths
 set PROJECT_ROOT=%~dp0..\..
-set BUILD_DIR=%PROJECT_ROOT%\\build
-set SCRIPTS_DIR=%PROJECT_ROOT%\\scripts
+set BUILD_DIR=%PROJECT_ROOT%\build
+set SCRIPTS_DIR=%PROJECT_ROOT%\scripts
 
 echo === LibPolyCall v2 Build Setup ===
 echo Project Root: %PROJECT_ROOT%
@@ -145,18 +145,18 @@ if not "!MISSING_DEPS!"=="" (
 REM Create build directories
 echo.
 echo Creating build directories...
-mkdir "%BUILD_DIR%\\obj\\core" 2>nul
-mkdir "%BUILD_DIR%\\obj\\cli" 2>nul
-mkdir "%BUILD_DIR%\\lib" 2>nul
-mkdir "%BUILD_DIR%\\bin\\debug" 2>nul
-mkdir "%BUILD_DIR%\\bin\\prod" 2>nul
-mkdir "%BUILD_DIR%\\include\\polycall" 2>nul
+mkdir "%BUILD_DIR%\obj\core" 2>nul
+mkdir "%BUILD_DIR%\obj\cli" 2>nul
+mkdir "%BUILD_DIR%\lib" 2>nul
+mkdir "%BUILD_DIR%\bin\debug" 2>nul
+mkdir "%BUILD_DIR%\bin\prod" 2>nul
+mkdir "%BUILD_DIR%\include\polycall" 2>nul
 
 REM Fix include paths
 echo.
 echo Fixing include paths...
-if exist "%SCRIPTS_DIR%\\build\\fix_include_paths.py" (
-    python "%SCRIPTS_DIR%\\build\\fix_include_paths.py" --project-root "%PROJECT_ROOT%"
+if exist "%SCRIPTS_DIR%\build\fix_include_paths.py" (
+    python "%SCRIPTS_DIR%\build\fix_include_paths.py" --project-root "%PROJECT_ROOT%"
 ) else (
     echo Include path fixer not found, skipping...
 )
@@ -164,16 +164,16 @@ if exist "%SCRIPTS_DIR%\\build\\fix_include_paths.py" (
 REM Stage headers
 echo.
 echo Staging headers...
-if exist "%PROJECT_ROOT%\\include\\polycall" (
-    xcopy /E /I /Y "%PROJECT_ROOT%\\include\\polycall" "%BUILD_DIR%\\include\\polycall"
+if exist "%PROJECT_ROOT%\include\polycall" (
+    xcopy /E /I /Y "%PROJECT_ROOT%\include\polycall" "%BUILD_DIR%\include\polycall"
     echo Headers staged
 )
 
 REM Run build orchestrator
 echo.
 echo Running build orchestrator...
-if exist "%SCRIPTS_DIR%\\build\\build_orchestrator.py" (
-    python "%SCRIPTS_DIR%\\build\\build_orchestrator.py" ^
+if exist "%SCRIPTS_DIR%\build\build_orchestrator.py" (
+    python "%SCRIPTS_DIR%\build\build_orchestrator.py" ^
         --project-root "%PROJECT_ROOT%" ^
         --config debug ^
         --verbose
@@ -192,7 +192,7 @@ endlocal
 
     def generate_powershell_setup(self) -> str:
         """Generate setup.ps1 for Windows PowerShell."""
-        return f'''# LibPolyCall v2 Setup Script - PowerShell
+        return rf'''# LibPolyCall v2 Setup Script - PowerShell
 # Generated: {self.timestamp}
 # OBINexus Aegis Project - Sinphasé Governance
 
@@ -216,7 +216,7 @@ Write-Host "Project Root: $ProjectRoot"
 Write-Info "`nChecking dependencies..."
 $missingDeps = @()
 
-$dependencies = @{{
+$dependencies = @{{ 
     "cl.exe" = "Visual Studio C++ Compiler"
     "nmake" = "Visual Studio Build Tools"
     "python" = "Python 3.x"
@@ -242,12 +242,12 @@ if ($missingDeps.Count -gt 0) {{
 # Create build directories
 Write-Info "`nCreating build directories..."
 $directories = @(
-    "$BuildDir\\obj\\core",
-    "$BuildDir\\obj\\cli",
-    "$BuildDir\\lib",
-    "$BuildDir\\bin\\debug",
-    "$BuildDir\\bin\\prod",
-    "$BuildDir\\include\\polycall"
+    "$BuildDir\obj\core",
+    "$BuildDir\obj\cli",
+    "$BuildDir\lib",
+    "$BuildDir\bin\debug",
+    "$BuildDir\bin\prod",
+    "$BuildDir\include\polycall"
 )
 
 foreach ($dir in $directories) {{
@@ -257,7 +257,7 @@ Write-Success "✓ Build directories created"
 
 # Fix include paths
 Write-Info "`nFixing include paths..."
-$fixScript = Join-Path $ScriptsDir "build\\fix_include_paths.py"
+$fixScript = Join-Path $ScriptsDir "build\fix_include_paths.py"
 if (Test-Path $fixScript) {{
     & python $fixScript --project-root $ProjectRoot
 }} else {{
@@ -266,8 +266,8 @@ if (Test-Path $fixScript) {{
 
 # Stage headers
 Write-Info "`nStaging headers..."
-$includeSource = Join-Path $ProjectRoot "include\\polycall"
-$includeDest = Join-Path $BuildDir "include\\polycall"
+$includeSource = Join-Path $ProjectRoot "include\polycall"
+$includeDest = Join-Path $BuildDir "include\polycall"
 if (Test-Path $includeSource) {{
     Copy-Item -Path $includeSource -Destination (Join-Path $BuildDir "include") -Recurse -Force
     Write-Success "✓ Headers staged"
@@ -275,7 +275,7 @@ if (Test-Path $includeSource) {{
 
 # Run build orchestrator
 Write-Info "`nRunning build orchestrator..."
-$orchestrator = Join-Path $ScriptsDir "build\\build_orchestrator.py"
+$orchestrator = Join-Path $ScriptsDir "build\build_orchestrator.py"
 if (Test-Path $orchestrator) {{
     & python $orchestrator `
         --project-root $ProjectRoot `
