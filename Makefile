@@ -118,12 +118,13 @@ compile-core: dir-map
 	# Find and compile all C files
 	@echo "Finding source files..."
 	@if [ -d "src/core" ]; then \
-		find src/core -name "*.c" | while read src; do \
-			obj_file="obj/core/$$(basename $$src .c).o"; \
-			echo "Compiling: $$src -> $$obj_file"; \
-			$(CC) $(CFLAGS) -c "$$src" -o "$$obj_file" || true; \
-		done; \
-	fi
+                find src/core -name "*.c" | while read src; do \
+                        rel_path=$$(echo "$$src" | sed "s|^src/core/||"); \
+                        obj_file="obj/core/$$(echo "$$rel_path" | tr '/' '_' | sed "s|\.c$$|.o|")"; \
+                        echo "Compiling: $$src -> $$obj_file"; \
+                        $(CC) $(CFLAGS) -c "$$src" -o "$$obj_file" || true; \
+                done; \
+        fi
 	
 	# Create static library if object files exist
 	@if [ -n "$$(find obj/core -name '*.o' 2>/dev/null)" ]; then \
@@ -140,12 +141,13 @@ compile-cli: compile-core
 	
 	# Compile CLI if source exists
 	@if [ -d "src/cli" ]; then \
-		find src/cli -name "*.c" | while read src; do \
-			obj_file="obj/cli/$$(basename $$src .c).o"; \
-			echo "Compiling: $$src"; \
-			$(CC) $(CFLAGS) -c "$$src" -o "$$obj_file" || true; \
-		done; \
-	fi
+                find src/cli -name "*.c" | while read src; do \
+                        rel_path=$$(echo "$$src" | sed "s|^src/cli/||"); \
+                        obj_file="obj/cli/$$(echo "$$rel_path" | tr '/' '_' | sed "s|\.c$$|.o|")"; \
+                        echo "Compiling: $$src -> $$obj_file"; \
+                        $(CC) $(CFLAGS) -c "$$src" -o "$$obj_file" || true; \
+                done; \
+        fi
 
 # Full linking process
 link-all: compile-cli
