@@ -112,8 +112,18 @@ dir-map:
 
 # Core library compilation
 compile-core: dir-map
-	@echo "Compiling core library..."
-	@mkdir -p obj/core lib
+	@echo "Compiling core library using polybuild orchestration..."
+	@mkdir -p obj/core lib obj/core/common obj/core/micro
+	
+	# Use Makefile.build for proper dependency resolution
+	@$(MAKE) -f Makefile.build test-build
+	
+	# Create libraries using the objects built by Makefile.build
+	@if [ -n "$$(find obj -name '*.o' 2>/dev/null)" ]; then \
+		$(AR) rcs $(LIBPOLYCALL_STATIC) obj/core/*.o obj/core/common/*.o obj/core/micro/*.o; \
+		$(CC) -shared -o $(LIBPOLYCALL_SHARED) obj/core/*.o obj/core/common/*.o obj/core/micro/*.o $(LDFLAGS); \
+		echo "Libraries created successfully"; \
+	fi
 # Find and compile all C files
 	@echo "Finding source files..."
 	@if [ -d "src/core" ]; then \
