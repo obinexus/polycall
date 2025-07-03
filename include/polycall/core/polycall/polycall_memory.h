@@ -7,7 +7,8 @@
  * providing efficient memory allocation, tracking, and isolation.
  */
 
-#ifndef POLYCALL_POLYCALL_POLYCALL_MEMORY_H_H
+#ifndef POLYCALL_MEMORY_H
+#define POLYCALL_MEMORY_H
 
 #include <stddef.h>
 #include <stdbool.h>
@@ -30,25 +31,25 @@ extern "C" {
 
 
 
-
 /**
  * @brief Memory allocation alignment
  */
-#define POLYCALL_POLYCALL_POLYCALL_MEMORY_H_H
- 
- /**
-  * @brief Memory block header size
-  */
- #define POLYCALL_POLYCALL_POLYCALL_MEMORY_H_H
- 
- /**
-  * @brief Minimum block size
-  */
- #define POLYCALL_POLYCALL_POLYCALL_MEMORY_H_H
- 
+#define POLYCALL_MEMORY_ALIGNMENT 16
+
 /**
-  * @brief Memory block magic number for validation
-  */
+ * @brief Memory block header size
+ */
+#define POLYCALL_MEMORY_BLOCK_HEADER_SIZE sizeof(memory_block_header_t)
+
+/**
+ * @brief Minimum block size
+ */
+#define POLYCALL_MEMORY_MIN_BLOCK_SIZE 32
+
+/**
+ * @brief Memory block magic number for validation
+ */
+#define POLYCALL_MEMORY_BLOCK_MAGIC 0x50434D45 /* 'PCME' */
 #define POLYCALL_POLYCALL_POLYCALL_MEMORY_H_H
  
 
@@ -331,5 +332,6 @@ typedef enum {
  #ifdef __cplusplus
  }
  #endif
- 
+#endif /* POLYCALL_MEMORY_H */
  #endif /* POLYCALL_POLYCALL_POLYCALL_MEMORY_H_H */
+
