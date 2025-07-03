@@ -1,37 +1,13 @@
-/**
-#include <pthread.h>
-/* Forward declarations */
-typedef struct polycall_core_context polycall_core_context_t;
-typedef struct polycall_config_context polycall_config_context_t;
-#include <stdbool.h>
-/* Forward declarations */
-typedef struct polycall_core_context polycall_core_context_t;
-typedef struct polycall_config_context polycall_config_context_t;
+
 #include <stddef.h>
-/* Forward declarations */
-typedef struct polycall_core_context polycall_core_context_t;
-typedef struct polycall_config_context polycall_config_context_t;
 #include <stdint.h>
-/* Forward declarations */
-typedef struct polycall_core_context polycall_core_context_t;
-typedef struct polycall_config_context polycall_config_context_t;
 #include <stdio.h>
-/* Forward declarations */
-typedef struct polycall_core_context polycall_core_context_t;
-typedef struct polycall_config_context polycall_config_context_t;
 #include <stdlib.h>
-/* Forward declarations */
-typedef struct polycall_core_context polycall_core_context_t;
-typedef struct polycall_config_context polycall_config_context_t;
 #include <string.h>
-/* Forward declarations */
-typedef struct polycall_core_context polycall_core_context_t;
-typedef struct polycall_config_context polycall_config_context_t;
 #include <time.h>
 /* Forward declarations */
-typedef struct polycall_core_context polycall_core_context_t;
-typedef struct polycall_config_context polycall_config_context_t;
 
+/**
  * @file performance.h
  * @brief Performance optimization module for LibPolyCall FFI
  * @author Implementation based on Nnamdi Okpala's design (OBINexusComputing)
@@ -49,7 +25,8 @@ typedef struct polycall_config_context polycall_config_context_t;
 extern "C"
 {
 #endif
-
+typedef struct polycall_core_context polycall_core_context_t;
+typedef struct polycall_config_context polycall_config_context_t;
 // Forward declaration of FFI context type
 typedef struct polycall_ffi_context polycall_ffi_context_t;
 typedef struct ffi_value ffi_value_t;
