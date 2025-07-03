@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include "polycall/core/polycall/polycall_error.h"
 
 #define POLYCALL_VERSION "1.0.0"
 #define MAX_ERROR_MESSAGE_LEN 512
@@ -291,6 +292,7 @@ polycall_core_error_t polycall_core_set_user_data(
     return POLYCALL_CORE_SUCCESS;
 }
 
+
 void polycall_core_vlog(
     polycall_core_context_t* ctx,
     polycall_log_level_t level,
@@ -322,7 +324,6 @@ void polycall_core_vlog(
         fprintf(stderr, "[POLYCALL][%s] %s\n", level_str, buffer);
     }
 }
-
 void polycall_core_log(
     polycall_core_context_t* ctx,
     polycall_log_level_t level,
@@ -333,4 +334,44 @@ void polycall_core_log(
     va_start(args, format);
     polycall_core_vlog(ctx, level, format, args);
     va_end(args);
+}
+
+/**
+ * @brief Convert core error to general polycall error
+ */
+polycall_error_t polycall_core_error_to_general(polycall_core_error_t core_error) {
+    switch (core_error) {
+        case POLYCALL_CORE_SUCCESS:
+            return POLYCALL_OK;
+        case POLYCALL_CORE_ERROR_INVALID_PARAMETERS:
+            return POLYCALL_ERROR_INVALID_PARAMETERS;
+        case POLYCALL_CORE_ERROR_OUT_OF_MEMORY:
+            return POLYCALL_ERROR_OUT_OF_MEMORY;
+        case POLYCALL_CORE_ERROR_NOT_INITIALIZED:
+        case POLYCALL_CORE_ERROR_ALREADY_INITIALIZED:
+            return POLYCALL_ERROR_INVALID_STATE;
+        case POLYCALL_CORE_ERROR_UNSUPPORTED_OPERATION:
+            return POLYCALL_ERROR_UNSUPPORTED;
+        default:
+            return POLYCALL_ERROR_INTERNAL;
+    }
+}
+
+/**
+ * @brief Set both core and general error states
+ */
+static polycall_core_error_t polycall_core_set_unified_error(
+    polycall_core_context_t* ctx,
+    polycall_core_error_t error,
+    const char* message) {
+    
+    /* Set core error */
+    polycall_core_set_error(ctx, error, message);
+
+    /* Propagate to general error system */
+    polycall_error_t general_error = polycall_core_error_to_general(error);
+    polycall_set_error(general_error, message, __FILE__, __LINE__);
+
+    return error;
+}   va_end(args);
 }
