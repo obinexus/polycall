@@ -114,8 +114,7 @@ dir-map:
 compile-core: dir-map
 	@echo "Compiling core library..."
 	@mkdir -p obj/core lib
-	
-	# Find and compile all C files
+# Find and compile all C files
 	@echo "Finding source files..."
 	@if [ -d "src/core" ]; then \
                 find src/core -name "*.c" | while read src; do \
@@ -141,7 +140,16 @@ compile-core: dir-map
 	else \
 		echo "Warning: No object files found for static library"; \
 	fi
+	# Include the build configuration
+	include Makefile.build
 
+	# Create shared library if object files exist
+		@if [ -n "$$(find obj/core -name '*.o' 2>/dev/null)" ]; then \
+			$(CC) -shared -o $(LIBPOLYCALL_SHARED) obj/core/*.o $(LDFLAGS); \
+			echo "Shared library created: $(LIBPOLYCALL_SHARED)"; \
+		else \
+			echo "Warning: No object files found for shared library"; \
+		fi
 # CLI compilation
 compile-cli: compile-core
 	@echo "Compiling CLI..."
