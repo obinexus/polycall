@@ -25,7 +25,15 @@
  #include "polycall/core/polycall/polycall_event.h"
  #include "polycall/core/polycall/polycall_logger.h"
     
- #ifdef __cplusplus
+// System-wide limits for PolyCall
+#ifndef MAX_CONTEXTS
+#define MAX_CONTEXTS 16
+#endif
+#ifndef MAX_LISTENERS
+#define MAX_LISTENERS 32
+#endif
+
+#ifdef __cplusplus
  extern "C" {
  #endif
 
