@@ -4,7 +4,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
+ #include <time.h>
+#include "polycall/core/ffi/ffi_types.h" // for polycall_ffi_type_t
 /* Forward declarations */
 
 /**
@@ -17,19 +18,22 @@
  * caching, batching, and other techniques.
  */
 
- #ifndef POLYCALL_FFI_PERFORMANCE_H_H
- #define POLYCALL_FFI_PERFORMANCE_H_H
+ #ifndef POLYCALL_FFI_PERFORMANCE_H
+ #define POLYCALL_FFI_PERFORMANCE_H
 
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
+
 typedef struct polycall_core_context polycall_core_context_t;
 typedef struct polycall_config_context polycall_config_context_t;
-// Forward declaration of FFI context type
 typedef struct polycall_ffi_context polycall_ffi_context_t;
 typedef struct ffi_value ffi_value_t;
+typedef struct performance_manager performance_manager_t;
+typedef struct type_cache type_cache_t;
+typedef struct call_cache call_cache_t;
 
 // Forward declare functions
 polycall_core_error_t polycall_performance_queue_call(
@@ -66,16 +70,15 @@ polycall_core_error_t polycall_performance_execute_batch(
         uint32_t access_count;
     } cache_entry_t;
 
-    // Type cache entry
-    typedef struct
-    {
-        polycall_ffi_type_t source_type;
-        polycall_ffi_type_t target_type;
-        const char *source_language;
-        const char *target_language;
-        void *converter_data;
-        uint32_t access_count;
-    } type_cache_entry_t;
+// Type cache entry
+typedef struct {
+    polycall_ffi_type_t source_type;
+    polycall_ffi_type_t target_type;
+    const char *source_language;
+    const char *target_language;
+    void *converter_data;
+    uint32_t access_count;
+} type_cache_entry_t;
 
     // Call batch entry
     typedef struct
@@ -483,4 +486,5 @@ polycall_core_error_t polycall_performance_execute_batch(
 }
  #endif
  
- #endif /* POLYCALL_FFI_PERFORMANCE_H_H */
+ #endif /* POLYCALL_FFI_PERFORMANCE_H*/
+
