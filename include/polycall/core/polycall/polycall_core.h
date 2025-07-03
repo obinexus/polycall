@@ -11,20 +11,25 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/* Forward declarations */
-typedef struct polycall_core_context polycall_core_context_t;
-
+#ifndef POLYCALL_CORE_ERROR_ENUM_DEFINED
+#define POLYCALL_CORE_ERROR_ENUM_DEFINED
 /**
- * @brief Logging levels
+ * @brief Core API error codes
  */
 typedef enum {
-    POLYCALL_LOG_DEBUG = 0,
-    POLYCALL_LOG_INFO,
-    POLYCALL_LOG_WARNING,
+    /* Success code */
+    POLYCALL_CORE_SUCCESS = 0,
+    
+    /* General errors */
+    POLYCALL_CORE_ERROR_INVALID_PARAMETERS,
+    POLYCALL_CORE_ERROR_INITIALIZATION_FAILED,
+    POLYCALL_CORE_ERROR_OUT_OF_MEMORY,
+    POLYCALL_CORE_ERROR_UNSUPPORTED_OPERATION,
+    POLYCALL_CORE_ERROR_INVALID_STATE,
+    POLYCALL_CORE_ERROR_NOT_INITIALIZED,
+    POLYCALL_CORE_ERROR_ALREADY_INITIALIZED,
+    
+/* polycall_core_error_t is defined above with include guard */
     POLYCALL_LOG_ERROR,
     POLYCALL_LOG_FATAL
 } polycall_log_level_t;
@@ -211,3 +216,4 @@ void polycall_core_log(
 #endif
 
 #endif /* POLYCALL_CORE_H */
+
