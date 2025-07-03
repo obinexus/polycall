@@ -15,7 +15,10 @@
 #include <stdbool.h>
 #include <pthread.h>
 #include "polycall/core/ffi/ffi_types.h"
-#include "polycall/core/polycall_error.h"
+#include <polycall/core/polycall.h>
+#include <polycall/core/polycall/polycall_error.h>
+
+
 
 #ifdef __cplusplus
 extern "C" {
