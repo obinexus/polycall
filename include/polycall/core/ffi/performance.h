@@ -14,11 +14,18 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <pthread.h>
-#include "polycall/core/ffi/ffi_types.h"
+
+/* Critical: Include FFI types before using them */
+#include "polycall/core/polycall/polycall_types.h"
 #include "polycall/core/polycall/polycall_error.h"
+#include "polycall/core/polycall/polycall_context.h"
 
+/* Forward declarations to avoid circular dependencies */
+typedef struct polycall_core_context polycall_core_context_t;
+typedef struct polycall_ffi_context polycall_ffi_context_t;
 
-
+/* Include FFI type definitions */
+#include "polycall/core/ffi/ffi_types.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -28,6 +35,8 @@ extern "C" {
 typedef struct performance_manager performance_manager_t;
 typedef struct perf_type_cache perf_type_cache_t;
 typedef struct perf_call_cache perf_call_cache_t;
+typedef struct call_cache call_cache_t;
+typedef struct type_cache type_cache_t;
 
 /**
  * @brief Performance-specific type cache entry
@@ -106,230 +115,260 @@ typedef struct {
     uint64_t total_calls;
     uint64_t cache_hits;
     uint64_t cache_misses;
-    uint64_t total_execution_time_ns;
-    uint64_t total_marshalling_time_ns;
-    uint64_t batched_calls;
     uint64_t type_conversions;
-    uint64_t memory_usage_bytes;
+    uint64_t batched_calls;
+    double avg_call_time_ms;
+    double avg_conversion_time_ms;
 } polycall_performance_metrics_t;
 
 /**
  * @brief Performance configuration
  */
 typedef struct {
-    polycall_optimization_level_t opt_level;
-    bool enable_call_caching;
-    bool enable_type_caching;
-    bool enable_call_batching;
-    bool enable_lazy_initialization;
-    size_t cache_size;
-    size_t batch_size;
+    bool enable_call_cache;
+    bool enable_type_cache;
+    bool enable_batch_optimization;
+    bool enable_profiling;
+    size_t call_cache_size;
+    size_t type_cache_size;
     uint32_t cache_ttl_ms;
-    void *user_data;
-} performance_config_t;
-
-/**
- * @brief Performance trace entry
- */
-typedef struct {
-    const char *function_name;
-    const char *source_language;
-    const char *target_language;
-    uint64_t start_time_ns;
-    uint64_t end_time_ns;
-    uint64_t marshalling_time_ns;
-    uint64_t execution_time_ns;
-    size_t arg_count;
-    bool cached;
-    bool batched;
-    uint32_t sequence;
-} performance_trace_entry_t;
+    polycall_optimization_level_t opt_level;
+} polycall_performance_config_t;
 
 /**
  * @brief Performance manager structure
  */
 struct performance_manager {
-    polycall_core_context_t *core_ctx;
     polycall_ffi_context_t *ffi_ctx;
-    perf_type_cache_t *type_cache;
     perf_call_cache_t *call_cache;
-    batch_entry_t *batch_queue;
-    size_t batch_queue_count;
-    size_t batch_capacity;
-    performance_trace_entry_t *trace_entries;
-    size_t trace_count;
-    size_t trace_capacity;
-    performance_config_t config;
+    perf_type_cache_t *type_cache;
+    polycall_performance_config_t config;
     polycall_performance_metrics_t metrics;
-    uint32_t call_sequence;
-    uint32_t batch_sequence;
-    pthread_mutex_t batch_mutex;
-    pthread_mutex_t trace_mutex;
+    pthread_mutex_t metrics_mutex;
 };
 
 /**
- * @brief Initialize performance manager
+ * @brief Performance trace entry
+ */
+typedef struct {
+    char *function_name;
+    uint64_t start_time_ns;
+    uint64_t end_time_ns;
+    size_t memory_allocated;
+    size_t memory_freed;
+    bool cache_hit;
+} polycall_trace_entry_t;
+
+/**
+ * @brief Initialize performance optimization
+ *
+ * @param ctx Core context
+ * @param ffi_ctx FFI context
+ * @param config Performance configuration
+ * @return Error code
  */
 polycall_core_error_t polycall_performance_init(
     polycall_core_context_t *ctx,
     polycall_ffi_context_t *ffi_ctx,
-    performance_manager_t **perf_mgr,
-    const performance_config_t *config);
+    const polycall_performance_config_t *config);
 
 /**
- * @brief Clean up performance manager
+ * @brief Cleanup performance optimization
+ *
+ * @param ctx Core context
+ * @param ffi_ctx FFI context
  */
 void polycall_performance_cleanup(
     polycall_core_context_t *ctx,
-    polycall_ffi_context_t *ffi_ctx,
-    performance_manager_t *perf_mgr);
+    polycall_ffi_context_t *ffi_ctx);
 
 /**
- * @brief Start tracing a function call
+ * @brief Enable performance profiling
+ *
+ * @param ctx Core context
+ * @param ffi_ctx FFI context
+ * @param enable Enable/disable profiling
+ * @return Error code
  */
-polycall_core_error_t polycall_performance_trace_begin(
+polycall_core_error_t polycall_performance_enable_profiling(
     polycall_core_context_t *ctx,
     polycall_ffi_context_t *ffi_ctx,
-    performance_manager_t *perf_mgr,
-    const char *function_name,
-    const char *source_language,
-    const char *target_language,
-    performance_trace_entry_t **trace_entry);
+    bool enable);
 
 /**
- * @brief End tracing a function call
+ * @brief Get performance metrics
+ *
+ * @param ctx Core context
+ * @param ffi_ctx FFI context
+ * @param metrics Pointer to receive metrics
+ * @return Error code
  */
-polycall_core_error_t polycall_performance_trace_end(
+polycall_core_error_t polycall_performance_get_metrics(
     polycall_core_context_t *ctx,
     polycall_ffi_context_t *ffi_ctx,
-    performance_manager_t *perf_mgr,
-    performance_trace_entry_t *trace_entry);
+    polycall_performance_metrics_t *metrics);
 
 /**
- * @brief Check if a function result is cached
+ * @brief Reset performance metrics
+ *
+ * @param ctx Core context
+ * @param ffi_ctx FFI context
+ * @return Error code
  */
-bool polycall_performance_check_cache(
+polycall_core_error_t polycall_performance_reset_metrics(
+    polycall_core_context_t *ctx,
+    polycall_ffi_context_t *ffi_ctx);
+
+/**
+ * @brief Cache function call result
+ *
+ * @param ctx Core context
+ * @param ffi_ctx FFI context
+ * @param function_name Function name
+ * @param args Function arguments
+ * @param arg_count Argument count
+ * @param result Function result
+ * @param cached_result Pointer to receive cached result
+ * @return Error code
+ */
+polycall_core_error_t polycall_performance_cache_call(
     polycall_core_context_t *ctx,
     polycall_ffi_context_t *ffi_ctx,
-    performance_manager_t *perf_mgr,
     const char *function_name,
     polycall_ffi_value_t *args,
     size_t arg_count,
     polycall_ffi_value_t **cached_result);
 
 /**
- * @brief Cache a function result
+ * @brief Lookup cached function call result
+ *
+ * @param ctx Core context
+ * @param ffi_ctx FFI context
+ * @param function_name Function name
+ * @param args Function arguments
+ * @param arg_count Argument count
+ * @param result Pointer to receive result
+ * @return Error code
  */
-polycall_core_error_t polycall_performance_cache_result(
+polycall_core_error_t polycall_performance_lookup_call(
     polycall_core_context_t *ctx,
     polycall_ffi_context_t *ffi_ctx,
-    performance_manager_t *perf_mgr,
     const char *function_name,
     polycall_ffi_value_t *args,
     size_t arg_count,
     polycall_ffi_value_t *result);
 
 /**
- * @brief Queue a function call for batching
+ * @brief Begin batch optimization
+ *
+ * @param ctx Core context
+ * @param ffi_ctx FFI context
+ * @param batch_id Batch identifier
+ * @param expected_calls Expected number of calls
+ * @return Error code
  */
-polycall_core_error_t polycall_performance_queue_call(
+polycall_core_error_t polycall_performance_begin_batch(
     polycall_core_context_t *ctx,
     polycall_ffi_context_t *ffi_ctx,
-    performance_manager_t *perf_mgr,
-    const char *function_name,
-    polycall_ffi_value_t *args,
-    size_t arg_count,
-    const char *target_language,
-    uint32_t *batch_id);
+    uint32_t batch_id,
+    size_t expected_calls);
 
 /**
- * @brief Execute queued function calls as a batch
+ * @brief Execute batched calls
+ *
+ * @param ctx Core context
+ * @param ffi_ctx FFI context
+ * @param batch_id Batch identifier
+ * @param results Pointer to receive results array
+ * @param result_count Pointer to receive result count
+ * @return Error code
  */
 polycall_core_error_t polycall_performance_execute_batch(
     polycall_core_context_t *ctx,
     polycall_ffi_context_t *ffi_ctx,
-    performance_manager_t *perf_mgr,
+    uint32_t batch_id,
     polycall_ffi_value_t ***results,
     size_t *result_count);
 
 /**
- * @brief Get performance metrics
+ * @brief Clear performance caches
+ *
+ * @param ctx Core context
+ * @param ffi_ctx FFI context
+ * @return Error code
  */
-polycall_core_error_t polycall_performance_get_metrics(
+polycall_core_error_t polycall_performance_clear_caches(
     polycall_core_context_t *ctx,
-    polycall_ffi_context_t *ffi_ctx,
-    performance_manager_t *perf_mgr,
-    polycall_performance_metrics_t *metrics);
+    polycall_ffi_context_t *ffi_ctx);
 
 /**
- * @brief Reset performance metrics
+ * @brief Set cache TTL
+ *
+ * @param ctx Core context
+ * @param ffi_ctx FFI context
+ * @param ttl_ms TTL in milliseconds
+ * @return Error code
  */
-polycall_core_error_t polycall_performance_reset_metrics(
+polycall_core_error_t polycall_performance_set_cache_ttl(
     polycall_core_context_t *ctx,
     polycall_ffi_context_t *ffi_ctx,
-    performance_manager_t *perf_mgr);
+    uint32_t ttl_ms);
 
 /**
- * @brief Register a hot function for special optimization
+ * @brief Set optimization level
+ *
+ * @param ctx Core context
+ * @param ffi_ctx FFI context
+ * @param level Optimization level
+ * @return Error code
  */
-polycall_core_error_t polycall_performance_register_hot_function(
+polycall_core_error_t polycall_performance_set_opt_level(
     polycall_core_context_t *ctx,
     polycall_ffi_context_t *ffi_ctx,
-    performance_manager_t *perf_mgr,
-    const char *function_name,
-    polycall_optimization_level_t opt_level);
+    polycall_optimization_level_t level);
 
 /**
- * @brief Set optimization level for all operations
+ * @brief Get performance trace
+ *
+ * @param ctx Core context
+ * @param ffi_ctx FFI context
+ * @param entries Pointer to receive trace entries
+ * @param entry_count Pointer to receive entry count
+ * @return Error code
  */
-polycall_core_error_t polycall_performance_set_optimization_level(
+polycall_core_error_t polycall_performance_get_trace(
     polycall_core_context_t *ctx,
     polycall_ffi_context_t *ffi_ctx,
-    performance_manager_t *perf_mgr,
-    polycall_optimization_level_t opt_level);
+    polycall_trace_entry_t **entries,
+    size_t *entry_count);
 
 /**
- * @brief Enable/disable performance features
+ * @brief Clear performance trace
+ *
+ * @param ctx Core context
+ * @param ffi_ctx FFI context
+ * @return Error code
  */
-polycall_core_error_t polycall_performance_set_feature(
+polycall_core_error_t polycall_performance_clear_trace(
+    polycall_core_context_t *ctx,
+    polycall_ffi_context_t *ffi_ctx);
+
+/**
+ * @brief Export performance data
+ *
+ * @param ctx Core context
+ * @param ffi_ctx FFI context
+ * @param format Export format (e.g., "json", "csv")
+ * @param buffer Buffer to receive exported data
+ * @param buffer_size Pointer to buffer size (in/out)
+ * @return Error code
+ */
+polycall_core_error_t polycall_performance_export(
     polycall_core_context_t *ctx,
     polycall_ffi_context_t *ffi_ctx,
-    performance_manager_t *perf_mgr,
-    const char *feature_name,
-    bool enabled);
-
-/**
- * @brief Get performance traces
- */
-polycall_core_error_t polycall_performance_get_traces(
-    polycall_core_context_t *ctx,
-    polycall_ffi_context_t *ffi_ctx,
-    performance_manager_t *perf_mgr,
-    performance_trace_entry_t ***traces,
-    size_t *trace_count);
-
-/**
- * @brief Clear performance traces
- */
-polycall_core_error_t polycall_performance_clear_traces(
-    polycall_core_context_t *ctx,
-    polycall_ffi_context_t *ffi_ctx,
-    performance_manager_t *perf_mgr);
-
-/**
- * @brief Export performance data to file
- */
-polycall_core_error_t polycall_performance_export_data(
-    polycall_core_context_t *ctx,
-    polycall_ffi_context_t *ffi_ctx,
-    performance_manager_t *perf_mgr,
-    const char *filename,
-    const char *format);
-
-/**
- * @brief Create a default performance configuration
- */
-performance_config_t polycall_performance_create_default_config(void);
+    const char *format,
+    void *buffer,
+    size_t *buffer_size);
 
 #ifdef __cplusplus
 }
