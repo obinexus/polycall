@@ -18,6 +18,12 @@
  #include <stddef.h>
  #include <stdbool.h>
  #include <stdint.h>
+
+ // Forward declaration for polycall_context_t (opaque handle)
+ typedef struct polycall_context polycall_context_t;
+
+ // Error code type (should match the definition in polycall_error.h)
+ typedef int polycall_error_t;
  
  #ifdef __cplusplus
  extern "C" {

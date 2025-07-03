@@ -15,7 +15,7 @@ typedef enum polycall_core_error {
 // Error severity
 typedef enum polycall_error_severity {
     POLYCALL_ERROR_SEVERITY_INFO = 0,
-    POLYCALL_ERROR_SEVERITY_WARNING,
+    POLYCALL_ERROR_SEVERITY_WARNING,3
     POLYCALL_ERROR_SEVERITY_ERROR,
     POLYCALL_ERROR_SEVERITY_FATAL
 } polycall_error_severity_t;
