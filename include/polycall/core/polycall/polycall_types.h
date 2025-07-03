@@ -15,7 +15,10 @@
  #include <stdbool.h>
  #include <stdint.h>
  #include <limits.h>
- #include "polycall/core/polycall/core/polycall/core/polycall/polycall/polycall_config.h"
+#include <stdio.h>
+ #include <stdlib.h>
+    #include <string.h>
+#include "polycall_config.h"
  #ifdef __cplusplus
  extern "C" {
  #endif
