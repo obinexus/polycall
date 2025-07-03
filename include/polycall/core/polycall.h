@@ -31,6 +31,23 @@
 #include "polycall/core/ffi/ffi_types.h"
 #include "polycall/core/ffi/ffi_core.h"
 
+/* Forward declarations for types used in API */
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+typedef struct language_bridge_t language_bridge_t;
+typedef struct polycall_signature_t polycall_signature_t;
+typedef struct polycall_value_t polycall_value_t;
+typedef struct polycall_stats_t polycall_stats_t;
+typedef struct polycall_security_policy_t polycall_security_policy_t;
+typedef void (*polycall_async_callback_t)(void*);
+typedef void (*polycall_error_handler_t)(void*);
+
+#ifdef __cplusplus
+}
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
