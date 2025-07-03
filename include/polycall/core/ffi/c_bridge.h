@@ -12,7 +12,7 @@
  #define POLYCALL_FFI_C_BRIDGE_H_H
  
  #include "polycall/core/ffi/ffi_core.h"
- #include "polycall/core/polycall/core/polycall.h"
+ #include "polycall/core/polycall.h"
  #include <stddef.h>
  #include <stdbool.h>
  #include <stdint.h>

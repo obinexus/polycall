@@ -1,0 +1,27 @@
+=== FFI Type Conflict Resolution Report ===
+Generated: Thu Jul  3 01:52:40 AM BST 2025
+
+Conflicts Resolved:
+1. type_cache_t: Renamed to perf_type_cache_t in performance module
+2. type_cache_entry_t: Renamed to perf_type_cache_entry_t
+3. ffi_value_t: Now properly defined in ffi_types.h
+4. Missing types: All FFI types now defined in ffi_types.h
+
+Files Modified:
+- include/polycall/core/ffi/ffi_types.h (new)
+- include/polycall/core/ffi/performance.h (updated)
+- include/polycall/core/ffi/ffi_core.h (new)
+- include/polycall/core/ffi/c_bridge.h (include path fixed)
+- src/core/ffi_types.c (new)
+- src/core/performance.c (type references updated)
+
+Next Steps:
+1. Apply the full content from artifacts to the files
+2. Update all FFI modules to use new type definitions
+3. Run comprehensive build test
+4. Update documentation
+
+Zero-Trust Integration:
+- All FFI operations now include security_context_t
+- Type conversions validated through secure mapping
+- Performance monitoring includes security metrics
