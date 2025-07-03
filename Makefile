@@ -139,19 +139,20 @@ compile-core: dir-map
                 done; \
         fi
 	
-	# Create static library if object files exist
-	@if [ -n "$$(find obj/core -name '*.o' 2>/dev/null)" ]; then \
-		mkdir -p lib bin obj; \
-		cp obj/core/*.o obj/; \
-		cp obj/core/*.o $(BUILD_DIR)/ 2>/dev/null || true; \
-		cp obj/core/*.o . 2>/dev/null || true; \
-		$(AR) rcs $(LIBPOLYCALL_STATIC) obj/core/*.o; \
-		echo "Static library created: $(LIBPOLYCALL_STATIC)"; \
-	else \
-		echo "Warning: No object files found for static library"; \
-	fi
-	# Include the build configuration
-	include Makefile.build
+	compile-core: dir-map
+		# Create static library if object files exist
+		@if [ -n "$$(find obj/core -name '*.o' 2>/dev/null)" ]; then \
+			mkdir -p lib bin obj; \
+			cp obj/core/*.o obj/; \
+			cp obj/core/*.o $(BUILD_DIR)/ 2>/dev/null || true; \
+			cp obj/core/*.o . 2>/dev/null || true; \
+			$(AR) rcs $(LIBPOLYCALL_STATIC) obj/core/*.o; \
+			echo "Static library created: $(LIBPOLYCALL_STATIC)"; \
+		else \
+			echo "Warning: No object files found for static library"; \
+		fi
+		# Include the build configuration
+		-include Makefile.build
 
 	# Create shared library if object files exist
 		@if [ -n "$$(find obj/core -name '*.o' 2>/dev/null)" ]; then \
