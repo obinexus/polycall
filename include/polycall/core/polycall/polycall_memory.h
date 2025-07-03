@@ -8,50 +8,20 @@
  */
 
 #ifndef POLYCALL_POLYCALL_POLYCALL_MEMORY_H_H
-#define POLYCALL_POLYCALL_POLYCALL_MEMORY_H_H
+/* Removed redundant macro definition */
 
 #include <stddef.h>
-/* Forward declarations */
-typedef struct polycall_core_context polycall_core_context_t;
-typedef struct polycall_config_context polycall_config_context_t;
 #include <stdbool.h>
-/* Forward declarations */
-typedef struct polycall_core_context polycall_core_context_t;
-typedef struct polycall_config_context polycall_config_context_t;
 #include <stdint.h>
-/* Forward declarations */
-typedef struct polycall_core_context polycall_core_context_t;
-typedef struct polycall_config_context polycall_config_context_t;
 #include <pthread.h>
-/* Forward declarations */
-typedef struct polycall_core_context polycall_core_context_t;
-typedef struct polycall_config_context polycall_config_context_t;
 #include <string.h>
-/* Forward declarations */
-typedef struct polycall_core_context polycall_core_context_t;
-typedef struct polycall_config_context polycall_config_context_t;
 #include <stdlib.h>
-/* Forward declarations */
-typedef struct polycall_core_context polycall_core_context_t;
-typedef struct polycall_config_context polycall_config_context_t;
 #include <stdio.h>
-/* Forward declarations */
-typedef struct polycall_core_context polycall_core_context_t;
-typedef struct polycall_config_context polycall_config_context_t;
 #include <errno.h>
-/* Forward declarations */
-typedef struct polycall_core_context polycall_core_context_t;
-typedef struct polycall_config_context polycall_config_context_t;
 #include "polycall/core/polycall/polycall_core.h"
-/* Forward declarations */
-typedef struct polycall_core_context polycall_core_context_t;
-typedef struct polycall_config_context polycall_config_context_t;
 #include "polycall/core/polycall/polycall_error.h"
-/* Forward declarations */
-typedef struct polycall_core_context polycall_core_context_t;
-typedef struct polycall_config_context polycall_config_context_t;
 #include "polycall/core/polycall/polycall_context.h"
-/* Forward declarations */
+
 typedef struct polycall_core_context polycall_core_context_t;
 typedef struct polycall_config_context polycall_config_context_t;
  
@@ -105,25 +75,25 @@ typedef enum {
      POLYCALL_MEMORY_FLAG_LOCKED = (1 << 2),     /**< Locked memory (cannot be reallocated) */
      POLYCALL_MEMORY_FLAG_PERSISTENT = (1 << 3), /**< Persistent memory (survives resets) */
      POLYCALL_MEMORY_FLAG_SHARED = (1 << 4),     /**< Shared memory */
-     POLYCALL_MEMORY_FLAG_ISOLATED = (1 << 5)    /**< Isolated memory */
- } polycall_memory_flags_t;
+/**
+ * @brief Memory allocation alignment
+ */
+// #define POLYCALL_POLYCALL_POLYCALL_MEMORY_H_H (Removed redundant macro)
 
- // Type cache entry structure
-typedef struct {
-    const char* type_name;
-    void* converter_data;
-    uint32_t access_count;
-} type_cache_entry_t;
+/**
+ * @brief Memory block header size
+ */
+// #define POLYCALL_POLYCALL_POLYCALL_MEMORY_H_H (Removed redundant macro)
 
-// Type cache structure
-typedef struct {
-    type_cache_entry_t* entries;
-    size_t count;
-    size_t capacity;
-    pthread_mutex_t mutex;
-} type_cache_t;
+/**
+ * @brief Minimum block size
+ */
+// #define POLYCALL_POLYCALL_POLYCALL_MEMORY_H_H (Removed redundant macro)
 
- /**
+/**
+ * @brief Memory block magic number for validation
+ */
+// #define POLYCALL_POLYCALL_POLYCALL_MEMORY_H_H (Removed redundant macro)
   * @brief Memory permissions
   */
  typedef enum {
