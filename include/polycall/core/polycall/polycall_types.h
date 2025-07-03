@@ -33,12 +33,6 @@
  typedef struct polycall_state_machine polycall_state_machine_t;
 typedef struct NetworkEndpoint NetworkEndpoint;
 typedef struct polycall_audit_event polycall_audit_event_t;
-// Add to polycall_types.h
-typedef enum {
-    POLYCALL_CONFIG_SECTION_CORE,
-    POLYCALL_CONFIG_SECTION_NETWORK,
-    POLYCALL_CONFIG_SECTION_FFI
-} polycall_config_section_t;
 
 typedef struct polycall_core_context polycall_core_context_t;
 typedef struct polycall_config_context polycall_config_context_t;
