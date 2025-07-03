@@ -405,18 +405,7 @@ polycall_core_error_t polycall_ffi_get_info(
 const char* polycall_ffi_get_version(void);
 
 /* Internal function declarations for performance module */
-static inline uint64_t calculate_hash(const void *data, size_t size);
-static inline uint64_t hash_function_call(const char *function_name, ffi_value_t *args, size_t arg_count);
-static inline uint64_t hash_function_result(ffi_value_t *result);
-static inline polycall_core_error_t init_call_cache(polycall_core_context_t *ctx, call_cache_t **cache, size_t capacity, uint32_t ttl_ms);
-static inline void cleanup_call_cache(polycall_core_context_t *ctx, call_cache_t *cache);
-static inline polycall_core_error_t init_type_cache(polycall_core_context_t *ctx, type_cache_t **cache, size_t capacity);
-static inline void cleanup_type_cache(polycall_core_context_t *ctx, type_cache_t *cache);
-static inline ffi_value_t *clone_ffi_value(polycall_core_context_t *ctx, const ffi_value_t *src);
-static inline void free_ffi_value(polycall_core_context_t *ctx, ffi_value_t *value);
-static inline uint64_t get_current_time_ms(void);
-static inline int compare_trace_entries(const void *a, const void *b);
-static inline void process_cache_expiry(polycall_core_context_t *ctx, call_cache_t *cache);
+/* (Removed unused static inline function declarations to avoid warnings and errors) */
 
 #ifdef __cplusplus
 }
