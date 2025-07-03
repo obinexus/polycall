@@ -1,6 +1,12 @@
 # PolyCall Build Configuration
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c11 -D_GNU_SOURCE -Iinclude -Iinclude/polycall/core -DPOLYCALL_BUILD_VERSION=\"1.0.0\"
+CFLAGS = -Wall -Wextra -std=c11 -D_GNU_SOURCE \
+		 -Iinclude -Iinclude/polycall/core \
+		 -DPOLYCALL_BUILD_VERSION=\"1.0.0\" \
+		 -DPOLYCALL_CORE_ERROR_ENUM_DEFINED \
+		 -DPOLYCALL_ERROR_ENUM_DEFINED \
+		 -DPOLYCALL_CONTEXT_TYPE_EDGE \
+		 -DPOLYCALL_CONTEXT_TYPE_MICRO
 LDFLAGS = -pthread
 
 # Directories
