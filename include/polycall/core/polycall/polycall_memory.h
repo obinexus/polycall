@@ -8,7 +8,6 @@
  */
 
 #ifndef POLYCALL_POLYCALL_POLYCALL_MEMORY_H_H
-/* Removed redundant macro definition */
 
 #include <stddef.h>
 #include <stdbool.h>
@@ -30,20 +29,7 @@ extern "C" {
 #endif
 
 
-/**
- * @brief Memory subsystem error codes
- */
-typedef enum {
-    POLYCALL_MEMORY_SUCCESS = 0,
-    POLYCALL_MEMORY_ERROR_ALLOCATION_FAILED,
-    POLYCALL_MEMORY_ERROR_INVALID_ADDRESS,
-    POLYCALL_MEMORY_ERROR_OUT_OF_BOUNDS,
-    POLYCALL_MEMORY_ERROR_ALIGNMENT,
-    POLYCALL_MEMORY_ERROR_DOUBLE_FREE,
-    POLYCALL_MEMORY_ERROR_LEAK_DETECTED,
-    POLYCALL_MEMORY_ERROR_POOL_EXHAUSTED,
-    POLYCALL_MEMORY_ERROR_INVALID_SIZE
-} polycall_memory_error_t;
+
 
 /**
  * @brief Memory allocation alignment
@@ -65,7 +51,9 @@ typedef enum {
   */
 #define POLYCALL_POLYCALL_POLYCALL_MEMORY_H_H
  
- /**
+
+
+  /**
   * @brief Memory flags
   */
  typedef enum {
@@ -75,27 +63,35 @@ typedef enum {
      POLYCALL_MEMORY_FLAG_LOCKED = (1 << 2),     /**< Locked memory (cannot be reallocated) */
      POLYCALL_MEMORY_FLAG_PERSISTENT = (1 << 3), /**< Persistent memory (survives resets) */
      POLYCALL_MEMORY_FLAG_SHARED = (1 << 4),     /**< Shared memory */
-/**
- * @brief Memory allocation alignment
- */
-// #define POLYCALL_POLYCALL_POLYCALL_MEMORY_H_H (Removed redundant macro)
+        POLYCALL_MEMORY_FLAG_ISOLATED = (1 << 5),   /**< Isolated memory (not shared with other components) */
+        POLYCALL_MEMORY_FLAG_CUSTOM_ALLOC = (1 << 6) /**< Use custom allocation function */
+    } polycall_memory_flags_t;
 
-/**
- * @brief Memory block header size
+    /**
+ * @brief Memory subsystem error codes
  */
-// #define POLYCALL_POLYCALL_POLYCALL_MEMORY_H_H (Removed redundant macro)
-
+typedef enum {
+    POLYCALL_MEMORY_SUCCESS = 0,
+    POLYCALL_MEMORY_ERROR_ALLOCATION_FAILED,
+    POLYCALL_MEMORY_ERROR_INVALID_ADDRESS,
+    POLYCALL_MEMORY_ERROR_OUT_OF_BOUNDS,
+    POLYCALL_MEMORY_ERROR_ALIGNMENT,
+    POLYCALL_MEMORY_ERROR_DOUBLE_FREE,
+    POLYCALL_MEMORY_ERROR_LEAK_DETECTED,
+    POLYCALL_MEMORY_ERROR_POOL_EXHAUSTED,
+    POLYCALL_MEMORY_ERROR_INVALID_SIZE
+} polycall_memory_error_t;
 /**
- * @brief Minimum block size
+ * @brief Memory permissions
+ *
+ * This enum defines the possible permissions for memory regions.
+ * Permissions can be combined using bitwise OR.
+ *
+ * - POLYCALL_MEMORY_PERM_NONE: No permissions.
+ * - POLYCALL_MEMORY_PERM_READ: Read permission.
+ * - POLYCALL_MEMORY_PERM_WRITE: Write permission.
+ * - POLYCALL_MEMORY_PERM_EXECUTE: Execute permission.
  */
-// #define POLYCALL_POLYCALL_POLYCALL_MEMORY_H_H (Removed redundant macro)
-
-/**
- * @brief Memory block magic number for validation
- */
-// #define POLYCALL_POLYCALL_POLYCALL_MEMORY_H_H (Removed redundant macro)
-  * @brief Memory permissions
-  */
  typedef enum {
      POLYCALL_MEMORY_PERM_NONE = 0,
      POLYCALL_MEMORY_PERM_READ = (1 << 0),      /**< Read permission */
