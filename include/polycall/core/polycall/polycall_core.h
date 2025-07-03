@@ -10,26 +10,29 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <stdarg.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief Maximum size for tokens in the PolyCall library
- */
-#define POLYCALL_MAX_TOKEN_SIZE 256
-
-/**
- * @brief Forward declarations
- */
+/* Forward declarations */
 typedef struct polycall_core_context polycall_core_context_t;
 
 /**
- * @brief Error code enumeration for LibPolyCall's core module
+ * @brief Logging levels
  */
-typedef enum polycall_core_error {
+typedef enum {
+    POLYCALL_LOG_DEBUG = 0,
+    POLYCALL_LOG_INFO,
+    POLYCALL_LOG_WARNING,
+    POLYCALL_LOG_ERROR,
+    POLYCALL_LOG_FATAL
+} polycall_log_level_t;
+
+/**
+ * @brief Core API error codes
+ */
+typedef enum {
     /* Success code */
     POLYCALL_CORE_SUCCESS = 0,
     
@@ -44,25 +47,24 @@ typedef enum polycall_core_error {
     
     /* Resource errors */
     POLYCALL_CORE_ERROR_NOT_FOUND,
+    POLYCALL_CORE_ERROR_ALREADY_EXISTS,
+    POLYCALL_CORE_ERROR_RESOURCE_EXISTS,
     POLYCALL_CORE_ERROR_UNAVAILABLE,
-    POLYCALL_CORE_ERROR_TIMEOUT,
     POLYCALL_CORE_ERROR_ACCESS_DENIED,
+    POLYCALL_CORE_ERROR_TIMEOUT,
+    
+    /* Operational errors */
+    POLYCALL_CORE_ERROR_NOT_IMPLEMENTED,
+    POLYCALL_CORE_ERROR_CANCELED,
+    
+    /* I/O errors */
+    POLYCALL_CORE_ERROR_INTERNAL,
+    POLYCALL_CORE_ERROR_NETWORK,
+    POLYCALL_CORE_ERROR_IO,
     
     /* End of enumeration */
     POLYCALL_CORE_ERROR_COUNT
 } polycall_core_error_t;
-
-/**
- * @brief Log level enumeration
- */
-typedef enum polycall_log_level {
-    POLYCALL_LOG_LEVEL_TRACE = 0,
-    POLYCALL_LOG_LEVEL_DEBUG,
-    POLYCALL_LOG_LEVEL_INFO,
-    POLYCALL_LOG_LEVEL_WARN,
-    POLYCALL_LOG_LEVEL_ERROR,
-    POLYCALL_LOG_LEVEL_FATAL
-} polycall_log_level_t;
 
 /**
  * @brief Configuration flags for the core module
@@ -72,68 +74,46 @@ typedef enum {
     POLYCALL_CORE_FLAG_STRICT_MODE = (1 << 0),
     POLYCALL_CORE_FLAG_DEBUG_MODE = (1 << 1),
     POLYCALL_CORE_FLAG_SECURE_MODE = (1 << 2),
-    POLYCALL_CORE_FLAG_ASYNC_OPERATIONS = (1 << 3)
+    POLYCALL_CORE_FLAG_TRACE_MODE = (1 << 3)
 } polycall_core_flags_t;
 
 /**
- * @brief Core configuration structure
- */
-typedef struct {
-    polycall_core_flags_t flags;        /**< Configuration flags */
-    size_t memory_pool_size;            /**< Size of memory pool in bytes */
-    void* user_data;                    /**< User-defined data */
-    void (*error_callback)(             /**< Error handling callback */
-        polycall_core_error_t error,
-        const char* message,
-        void* user_data);
-    void (*log_callback)(               /**< Logging callback */
-        polycall_log_level_t level,
-        const char* message,
-        void* user_data);
-} polycall_core_config_t;
-
-/**
- * @brief Memory allocation function type
- */
-typedef void* (*polycall_core_malloc_fn)(size_t size, void* user_data);
-
-/**
- * @brief Memory free function type
- */
-typedef void (*polycall_core_free_fn)(void* ptr, void* user_data);
-
-/**
- * @brief Initialize the core module
+ * @brief Initialize the core context
  *
- * @param ctx Pointer to receive the created context
- * @param config Pointer to configuration structure
+ * This function must be called before any other polycall functions.
+ * It initializes the core subsystems and allocates necessary resources.
+ *
+ * @param ctx Pointer to receive core context
+ * @param flags Configuration flags
  * @return Error code indicating success or failure
  */
 polycall_core_error_t polycall_core_init(
     polycall_core_context_t** ctx,
-    const polycall_core_config_t* config);
+    polycall_core_flags_t flags
+);
 
 /**
- * @brief Clean up and release resources associated with a core context
+ * @brief Clean up and release resources associated with the core context
  *
- * @param ctx Context to clean up
+ * @param ctx Core context to clean up
  */
 void polycall_core_cleanup(polycall_core_context_t* ctx);
 
 /**
- * @brief Set custom memory allocation functions
+ * @brief Set a core callback function
  *
  * @param ctx Core context
- * @param malloc_fn Custom malloc function
- * @param free_fn Custom free function
- * @param user_data User data to pass to allocation functions
+ * @param callback_type Type of callback to set
+ * @param callback_fn Callback function pointer
+ * @param user_data User data to pass to callback
  * @return Error code indicating success or failure
  */
-polycall_core_error_t polycall_core_set_memory_functions(
+polycall_core_error_t polycall_core_set_callback(
     polycall_core_context_t* ctx,
-    polycall_core_malloc_fn malloc_fn,
-    polycall_core_free_fn free_fn,
-    void* user_data);
+    const char* callback_type,
+    void* callback_fn,
+    void* user_data
+);
 
 /**
  * @brief Allocate memory from the core context
@@ -163,7 +143,8 @@ void polycall_core_free(polycall_core_context_t* ctx, void* ptr);
 polycall_core_error_t polycall_core_set_error(
     polycall_core_context_t* ctx,
     polycall_core_error_t error,
-    const char* message);
+    const char* message
+);
 
 /**
  * @brief Get the last error from the core context
@@ -174,7 +155,8 @@ polycall_core_error_t polycall_core_set_error(
  */
 polycall_core_error_t polycall_core_get_last_error(
     polycall_core_context_t* ctx,
-    const char** message);
+    const char** message
+);
 
 /**
  * @brief Get the core context version
@@ -200,7 +182,8 @@ void* polycall_core_get_user_data(polycall_core_context_t* ctx);
  */
 polycall_core_error_t polycall_core_set_user_data(
     polycall_core_context_t* ctx,
-    void* user_data);
+    void* user_data
+);
 
 /**
  * @brief Log a message using the core logging system
@@ -214,27 +197,14 @@ void polycall_core_log(
     polycall_core_context_t* ctx,
     polycall_log_level_t level,
     const char* format,
-    ...);
-
-/**
- * @brief Log a message with va_list arguments
- *
- * @param ctx Core context
- * @param level Log level
- * @param format Format string
- * @param args Variable argument list
- */
-void polycall_core_vlog(
-    polycall_core_context_t* ctx,
-    polycall_log_level_t level,
-    const char* format,
-    va_list args);
+    ...
+);
 
 /**
  * @brief Convenience macro for logging
  */
-#define POLYCALL_LOG(ctx, level, ...) \
-    polycall_core_log(ctx, level, __VA_ARGS__)
+#define POLYCALL_LOG(ctx, level, format, ...) \
+    polycall_core_log(ctx, level, format, ##__VA_ARGS__)
 
 #ifdef __cplusplus
 }
