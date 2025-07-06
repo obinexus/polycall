@@ -1,0 +1,27 @@
+:root {
+    --obinexus-primary: #1a1a2e;
+    --obinexus-secondary: #16213e;
+    --obinexus-accent: #0f3460;
+    --obinexus-highlight: #e94560;
+    --text-primary: #f5f5f5;
+    --text-secondary: #a8a8a8;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+    background: var(--obinexus-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
