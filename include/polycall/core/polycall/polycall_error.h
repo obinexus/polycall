@@ -7,6 +7,10 @@
 #ifndef POLYCALL_ERROR_H
 
 #include "polycall_shared_core.h"
+
+#include "polycall_shared_core.h"
+
+#include "polycall_shared_core.h"
 #include "polycall_types.h"
 #define POLYCALL_ERROR_H
 
