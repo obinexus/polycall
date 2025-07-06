@@ -1,0 +1,5 @@
+#!/bin/bash
+# PolyCall Placeholder Binary
+echo "PolyCall v0.1.0-dev (Placeholder)"
+echo "Real binary not found. Please build using: make build"
+exit 1

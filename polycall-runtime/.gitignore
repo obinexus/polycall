@@ -1,0 +1,8 @@
+# PolyCall Runtime Files
+logs/
+temp/
+cache/
+*.log
+*.pid
+*.sock
+*.lock
