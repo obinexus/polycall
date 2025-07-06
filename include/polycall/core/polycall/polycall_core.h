@@ -7,6 +7,8 @@
 #ifndef POLYCALL_CORE_H
 #define POLYCALL_CORE_H
 
+#include "polycall_shared_core.h"
+
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdint.h>

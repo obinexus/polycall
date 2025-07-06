@@ -128,3 +128,21 @@
  #endif
  
  #endif /* POLYCALL_ACCESSIBILITY_ACCESSIBILITY_COLORS_H_H */
+/* Biafran color scheme support */
+typedef enum {
+    POLYCALL_BIAFRAN_RED = 0,
+    POLYCALL_BIAFRAN_BLACK,
+    POLYCALL_BIAFRAN_GREEN,
+    POLYCALL_BIAFRAN_YELLOW,
+    POLYCALL_BIAFRAN_ORANGE,
+    POLYCALL_BIAFRAN_WHITE,
+    POLYCALL_BIAFRAN_COLOR_COUNT
+} polycall_biafran_color_t;
+
+/* Biafran theme */
+#define POLYCALL_THEME_BIAFRAN 0x42494146  /* 'BIAF' in hex */
+
+/* Biafran color functions */
+polycall_core_error_t polycall_biafran_colors_init(void);
+const char* polycall_get_biafran_color(polycall_biafran_color_t color);
+void polycall_print_biafran_banner(const char* text);
