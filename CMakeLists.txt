@@ -224,7 +224,15 @@ install(DIRECTORY src/core/
 # ==============================================================================
 enable_testing()
 add_subdirectory(tests)
+option(BUILD_TESTS "Build test suite" ON)
+if(BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+endif()
 
+# Create tests/CMakeLists.txt
+add_subdirectory(unit)
+add_subdirectory(integration)
 # ==============================================================================
 # Documentation
 # ==============================================================================
@@ -237,6 +245,7 @@ if(DOXYGEN_FOUND)
         COMMENT "Generating API documentation"
     )
 endif()
+
 # ==============================================================================
 # Include Root CMake Directory
 # ==============================================================================
