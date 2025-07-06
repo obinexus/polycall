@@ -9,51 +9,42 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 // TODO: Implement polycall_edge_runtime_init
 void polycall_edge_runtime_init_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_edge_runtime_submit_task
 void polycall_edge_runtime_submit_task_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_edge_runtime_check_task
 void polycall_edge_runtime_check_task_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_edge_runtime_cancel_task
 void polycall_edge_runtime_cancel_task_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_edge_runtime_update_metrics
 void polycall_edge_runtime_update_metrics_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_edge_runtime_get_stats
 void polycall_edge_runtime_get_stats_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_edge_runtime_default_config
 void polycall_edge_runtime_default_config_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_edge_runtime_cleanup
 void polycall_edge_runtime_cleanup_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-

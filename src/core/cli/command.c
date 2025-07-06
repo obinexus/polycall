@@ -9,51 +9,42 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 // TODO: Implement process_command_line
 void process_command_line_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement cli_register_command
 void cli_register_command_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement cli_execute_command
 void cli_execute_command_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement show_help
 void show_help_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement parse_flags
 void parse_flags_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement cli_init_commands
 void cli_init_commands_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement cli_cleanup_commands
 void cli_cleanup_commands_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement register_all_commands
 void register_all_commands_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-

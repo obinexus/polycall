@@ -16,9 +16,9 @@ extern "C" {
  * telemetry container structure
  */
 typedef struct telemetry_container {
-    polycall_core_context_t* core_ctx;
-    void* module_data;
-    // Add component-specific fields here
+  polycall_core_context_t *core_ctx;
+  void *module_data;
+  // Add component-specific fields here
 } telemetry_container_t;
 
 /**
@@ -28,7 +28,8 @@ typedef struct telemetry_container {
  * @param container Pointer to receive container
  * @return int 0 on success, error code otherwise
  */
-int telemetry_container_init(polycall_core_context_t* core_ctx, telemetry_container_t** container);
+int telemetry_container_init(polycall_core_context_t *core_ctx,
+                             telemetry_container_t **container);
 
 /**
  * Register telemetry services
@@ -36,14 +37,14 @@ int telemetry_container_init(polycall_core_context_t* core_ctx, telemetry_contai
  * @param container telemetry container
  * @return int 0 on success, error code otherwise
  */
-int telemetry_register_services(telemetry_container_t* container);
+int telemetry_register_services(telemetry_container_t *container);
 
 /**
  * Cleanup telemetry container
  *
  * @param container telemetry container
  */
-void telemetry_container_cleanup(telemetry_container_t* container);
+void telemetry_container_cleanup(telemetry_container_t *container);
 
 #ifdef __cplusplus
 }

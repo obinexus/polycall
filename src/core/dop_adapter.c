@@ -9,33 +9,27 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 // TODO: Implement polycall_component_validator_validate
 void polycall_component_validator_validate_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_component_validator_destroy
 void polycall_component_validator_destroy_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_dop_data_model_destroy
 void polycall_dop_data_model_destroy_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_dop_behavior_model_destroy
 void polycall_dop_behavior_model_destroy_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_dop_adapter_destroy
 void polycall_dop_adapter_destroy_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-

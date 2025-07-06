@@ -12,10 +12,10 @@
 #ifndef POLYCALL_CONTEXT_H
 #define POLYCALL_CONTEXT_H
 
-#include <stddef.h>
-#include <stdbool.h>
-#include <stdint.h>
 #include <pthread.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
 
 /* Forward declarations */
 typedef struct polycall_core_context polycall_core_context_t;
@@ -37,88 +37,84 @@ extern "C" {
  * @brief Context initialization function type
  */
 typedef polycall_core_error_t (*polycall_context_init_fn)(
-    polycall_core_context_t* core_ctx,
-    void* ctx_data,
-    void* init_data
-);
+    polycall_core_context_t *core_ctx, void *ctx_data, void *init_data);
 
 /**
  * @brief Context cleanup function type
  */
-typedef void (*polycall_context_cleanup_fn)(
-    polycall_core_context_t* core_ctx,
-    void* ctx_data
-);
+typedef void (*polycall_context_cleanup_fn)(polycall_core_context_t *core_ctx,
+                                            void *ctx_data);
 
 /**
  * @brief Context types
  */
 typedef enum {
-    POLYCALL_CONTEXT_TYPE_CORE = 0,
-    POLYCALL_CONTEXT_TYPE_PROTOCOL,
-    POLYCALL_CONTEXT_TYPE_NETWORK,
-    POLYCALL_CONTEXT_TYPE_MICRO,
-    POLYCALL_CONTEXT_TYPE_EDGE,
-    POLYCALL_CONTEXT_TYPE_PARSER,
-    POLYCALL_CONTEXT_TYPE_USER = 0x1000   /**< Start of user-defined context types */
+  POLYCALL_CONTEXT_TYPE_CORE = 0,
+  POLYCALL_CONTEXT_TYPE_PROTOCOL,
+  POLYCALL_CONTEXT_TYPE_NETWORK,
+  POLYCALL_CONTEXT_TYPE_MICRO,
+  POLYCALL_CONTEXT_TYPE_EDGE,
+  POLYCALL_CONTEXT_TYPE_PARSER,
+  POLYCALL_CONTEXT_TYPE_USER =
+      0x1000 /**< Start of user-defined context types */
 } polycall_context_type_t;
 
 /**
  * @brief Context flags
  */
 typedef enum {
-    POLYCALL_CONTEXT_FLAG_NONE = 0,
-    POLYCALL_CONTEXT_FLAG_INITIALIZED = (1 << 0),
-    POLYCALL_CONTEXT_FLAG_LOCKED = (1 << 1),
-    POLYCALL_CONTEXT_FLAG_SHARED = (1 << 2),
-    POLYCALL_CONTEXT_FLAG_RESTRICTED = (1 << 3),
-    POLYCALL_CONTEXT_FLAG_ISOLATED = (1 << 4)
+  POLYCALL_CONTEXT_FLAG_NONE = 0,
+  POLYCALL_CONTEXT_FLAG_INITIALIZED = (1 << 0),
+  POLYCALL_CONTEXT_FLAG_LOCKED = (1 << 1),
+  POLYCALL_CONTEXT_FLAG_SHARED = (1 << 2),
+  POLYCALL_CONTEXT_FLAG_RESTRICTED = (1 << 3),
+  POLYCALL_CONTEXT_FLAG_ISOLATED = (1 << 4)
 } polycall_context_flags_t;
 
 /**
  * @brief Context listener structure
  */
 typedef struct {
-    void (*listener)(polycall_context_ref_t* ctx_ref, void* user_data);
-    void* user_data;
+  void (*listener)(polycall_context_ref_t *ctx_ref, void *user_data);
+  void *user_data;
 } context_listener_t;
 
 /**
  * @brief Context registry structure
  */
 typedef struct {
-    polycall_context_ref_t* contexts[MAX_CONTEXTS];
-    size_t context_count;
-    pthread_mutex_t registry_lock;
+  polycall_context_ref_t *contexts[MAX_CONTEXTS];
+  size_t context_count;
+  pthread_mutex_t registry_lock;
 } context_registry_t;
 
 /**
  * @brief Context reference structure
  */
 struct polycall_context_ref {
-    polycall_context_type_t type;
-    const char* name;
-    polycall_context_flags_t flags;
-    void* data;
-    size_t data_size;
-    polycall_context_init_fn init_fn;
-    polycall_context_cleanup_fn cleanup_fn;
-    pthread_mutex_t lock;
-    context_listener_t listeners[MAX_LISTENERS];
-    size_t listener_count;
+  polycall_context_type_t type;
+  const char *name;
+  polycall_context_flags_t flags;
+  void *data;
+  size_t data_size;
+  polycall_context_init_fn init_fn;
+  polycall_context_cleanup_fn cleanup_fn;
+  pthread_mutex_t lock;
+  context_listener_t listeners[MAX_LISTENERS];
+  size_t listener_count;
 };
 
 /**
  * @brief Context initialization structure
  */
 typedef struct {
-    polycall_context_type_t type;          /**< Context type */
-    size_t data_size;                      /**< Size of context data structure */
-    polycall_context_flags_t flags;        /**< Context flags */
-    const char* name;                      /**< Context name */
-    polycall_context_init_fn init_fn;      /**< Initialization function */
-    polycall_context_cleanup_fn cleanup_fn; /**< Cleanup function */
-    void* init_data;                       /**< Initialization data */
+  polycall_context_type_t type;           /**< Context type */
+  size_t data_size;                       /**< Size of context data structure */
+  polycall_context_flags_t flags;         /**< Context flags */
+  const char *name;                       /**< Context name */
+  polycall_context_init_fn init_fn;       /**< Initialization function */
+  polycall_context_cleanup_fn cleanup_fn; /**< Cleanup function */
+  void *init_data;                        /**< Initialization data */
 } polycall_context_init_t;
 
 /**
@@ -129,11 +125,10 @@ typedef struct {
  * @param init Initialization structure
  * @return Error code indicating success or failure
  */
-polycall_core_error_t polycall_context_init(
-    polycall_core_context_t* core_ctx,
-    polycall_context_ref_t** ctx_ref,
-    const polycall_context_init_t* init
-);
+polycall_core_error_t
+polycall_context_init(polycall_core_context_t *core_ctx,
+                      polycall_context_ref_t **ctx_ref,
+                      const polycall_context_init_t *init);
 
 /**
  * @brief Clean up and release resources associated with a context
@@ -141,10 +136,8 @@ polycall_core_error_t polycall_context_init(
  * @param core_ctx Core context
  * @param ctx_ref Context reference to clean up
  */
-void polycall_context_cleanup(
-    polycall_core_context_t* core_ctx,
-    polycall_context_ref_t* ctx_ref
-);
+void polycall_context_cleanup(polycall_core_context_t *core_ctx,
+                              polycall_context_ref_t *ctx_ref);
 
 /**
  * @brief Get context data
@@ -153,10 +146,8 @@ void polycall_context_cleanup(
  * @param ctx_ref Context reference
  * @return Pointer to context data, or NULL on failure
  */
-void* polycall_context_get_data(
-    polycall_core_context_t* core_ctx,
-    polycall_context_ref_t* ctx_ref
-);
+void *polycall_context_get_data(polycall_core_context_t *core_ctx,
+                                polycall_context_ref_t *ctx_ref);
 
 /**
  * @brief Find a context by type
@@ -165,10 +156,9 @@ void* polycall_context_get_data(
  * @param type Context type to find
  * @return Context reference, or NULL if not found
  */
-polycall_context_ref_t* polycall_context_find_by_type(
-    polycall_core_context_t* core_ctx,
-    polycall_context_type_t type
-);
+polycall_context_ref_t *
+polycall_context_find_by_type(polycall_core_context_t *core_ctx,
+                              polycall_context_type_t type);
 
 /**
  * @brief Find a context by name
@@ -177,10 +167,9 @@ polycall_context_ref_t* polycall_context_find_by_type(
  * @param name Context name to find
  * @return Context reference, or NULL if not found
  */
-polycall_context_ref_t* polycall_context_find_by_name(
-    polycall_core_context_t* core_ctx,
-    const char* name
-);
+polycall_context_ref_t *
+polycall_context_find_by_name(polycall_core_context_t *core_ctx,
+                              const char *name);
 
 /**
  * @brief Get context type
@@ -189,10 +178,9 @@ polycall_context_ref_t* polycall_context_find_by_name(
  * @param ctx_ref Context reference
  * @return Context type
  */
-polycall_context_type_t polycall_context_get_type(
-    polycall_core_context_t* core_ctx,
-    polycall_context_ref_t* ctx_ref
-);
+polycall_context_type_t
+polycall_context_get_type(polycall_core_context_t *core_ctx,
+                          polycall_context_ref_t *ctx_ref);
 
 /**
  * @brief Get context name
@@ -201,10 +189,8 @@ polycall_context_type_t polycall_context_get_type(
  * @param ctx_ref Context reference
  * @return Context name
  */
-const char* polycall_context_get_name(
-    polycall_core_context_t* core_ctx,
-    polycall_context_ref_t* ctx_ref
-);
+const char *polycall_context_get_name(polycall_core_context_t *core_ctx,
+                                      polycall_context_ref_t *ctx_ref);
 
 /**
  * @brief Get context flags
@@ -213,10 +199,9 @@ const char* polycall_context_get_name(
  * @param ctx_ref Context reference
  * @return Context flags
  */
-polycall_context_flags_t polycall_context_get_flags(
-    polycall_core_context_t* core_ctx,
-    polycall_context_ref_t* ctx_ref
-);
+polycall_context_flags_t
+polycall_context_get_flags(polycall_core_context_t *core_ctx,
+                           polycall_context_ref_t *ctx_ref);
 
 /**
  * @brief Set context flags
@@ -226,11 +211,10 @@ polycall_context_flags_t polycall_context_get_flags(
  * @param flags Flags to set
  * @return Error code indicating success or failure
  */
-polycall_core_error_t polycall_context_set_flags(
-    polycall_core_context_t* core_ctx,
-    polycall_context_ref_t* ctx_ref,
-    polycall_context_flags_t flags
-);
+polycall_core_error_t
+polycall_context_set_flags(polycall_core_context_t *core_ctx,
+                           polycall_context_ref_t *ctx_ref,
+                           polycall_context_flags_t flags);
 
 /**
  * @brief Check if a context is initialized
@@ -239,10 +223,8 @@ polycall_core_error_t polycall_context_set_flags(
  * @param ctx_ref Context reference
  * @return true if initialized, false otherwise
  */
-bool polycall_context_is_initialized(
-    polycall_core_context_t* core_ctx,
-    polycall_context_ref_t* ctx_ref
-);
+bool polycall_context_is_initialized(polycall_core_context_t *core_ctx,
+                                     polycall_context_ref_t *ctx_ref);
 
 /**
  * @brief Lock a context
@@ -253,10 +235,8 @@ bool polycall_context_is_initialized(
  * @param ctx_ref Context reference
  * @return Error code indicating success or failure
  */
-polycall_core_error_t polycall_context_lock(
-    polycall_core_context_t* core_ctx,
-    polycall_context_ref_t* ctx_ref
-);
+polycall_core_error_t polycall_context_lock(polycall_core_context_t *core_ctx,
+                                            polycall_context_ref_t *ctx_ref);
 
 /**
  * @brief Unlock a context
@@ -265,10 +245,8 @@ polycall_core_error_t polycall_context_lock(
  * @param ctx_ref Context reference
  * @return Error code indicating success or failure
  */
-polycall_core_error_t polycall_context_unlock(
-    polycall_core_context_t* core_ctx,
-    polycall_context_ref_t* ctx_ref
-);
+polycall_core_error_t polycall_context_unlock(polycall_core_context_t *core_ctx,
+                                              polycall_context_ref_t *ctx_ref);
 
 /**
  * @brief Share a context with another component
@@ -278,11 +256,9 @@ polycall_core_error_t polycall_context_unlock(
  * @param component Component to share with
  * @return Error code indicating success or failure
  */
-polycall_core_error_t polycall_context_share(
-    polycall_core_context_t* core_ctx,
-    polycall_context_ref_t* ctx_ref,
-    const char* component
-);
+polycall_core_error_t polycall_context_share(polycall_core_context_t *core_ctx,
+                                             polycall_context_ref_t *ctx_ref,
+                                             const char *component);
 
 /**
  * @brief Unshare a context
@@ -291,10 +267,9 @@ polycall_core_error_t polycall_context_share(
  * @param ctx_ref Context reference
  * @return Error code indicating success or failure
  */
-polycall_core_error_t polycall_context_unshare(
-    polycall_core_context_t* core_ctx,
-    polycall_context_ref_t* ctx_ref
-);
+polycall_core_error_t
+polycall_context_unshare(polycall_core_context_t *core_ctx,
+                         polycall_context_ref_t *ctx_ref);
 
 /**
  * @brief Isolate a context
@@ -305,10 +280,9 @@ polycall_core_error_t polycall_context_unshare(
  * @param ctx_ref Context reference
  * @return Error code indicating success or failure
  */
-polycall_core_error_t polycall_context_isolate(
-    polycall_core_context_t* core_ctx,
-    polycall_context_ref_t* ctx_ref
-);
+polycall_core_error_t
+polycall_context_isolate(polycall_core_context_t *core_ctx,
+                         polycall_context_ref_t *ctx_ref);
 
 /**
  * @brief Register a context listener
@@ -320,11 +294,9 @@ polycall_core_error_t polycall_context_isolate(
  * @return Error code indicating success or failure
  */
 polycall_core_error_t polycall_context_register_listener(
-    polycall_core_context_t* core_ctx,
-    polycall_context_ref_t* ctx_ref,
-    void (*listener)(polycall_context_ref_t* ctx_ref, void* user_data),
-    void* user_data
-);
+    polycall_core_context_t *core_ctx, polycall_context_ref_t *ctx_ref,
+    void (*listener)(polycall_context_ref_t *ctx_ref, void *user_data),
+    void *user_data);
 
 /**
  * @brief Unregister a context listener
@@ -336,11 +308,9 @@ polycall_core_error_t polycall_context_register_listener(
  * @return Error code indicating success or failure
  */
 polycall_core_error_t polycall_context_unregister_listener(
-    polycall_core_context_t* core_ctx,
-    polycall_context_ref_t* ctx_ref,
-    void (*listener)(polycall_context_ref_t* ctx_ref, void* user_data),
-    void* user_data
-);
+    polycall_core_context_t *core_ctx, polycall_context_ref_t *ctx_ref,
+    void (*listener)(polycall_context_ref_t *ctx_ref, void *user_data),
+    void *user_data);
 
 #ifdef __cplusplus
 }

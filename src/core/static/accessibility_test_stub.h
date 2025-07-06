@@ -11,7 +11,7 @@
 
 /**
  * @brief Initialize accessibility test stubs
- * 
+ *
  * @return int 0 on success, non-zero on failure
  */
 int polycall_accessibility_init_test_stubs(void);

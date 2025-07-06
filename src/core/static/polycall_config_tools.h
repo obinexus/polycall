@@ -11,9 +11,9 @@
 #ifndef POLYCALL_CONFIG_TOOLS_H
 #define POLYCALL_CONFIG_TOOLS_H
 
-#include "polycall/core/polycall/polycall_repl.h"
-#include "polycall/core/polycall/polycall_core.h"
 #include "polycall/core/accessibility/accessibility_interface.h"
+#include "polycall/core/polycall/polycall_core.h"
+#include "polycall/core/polycall/polycall_repl.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -28,14 +28,15 @@ typedef struct polycall_config_tools_context polycall_config_tools_context_t;
  * @brief Configuration tools configuration
  */
 typedef struct {
-    polycall_repl_config_t repl_config;         /**< REPL configuration */
-    polycall_doctor_config_t doctor_config;     /**< DOCTOR configuration */
-    bool enable_accessibility;                  /**< Enable accessibility features */
-    polycall_accessibility_theme_t theme;       /**< Accessibility theme */
-    bool auto_doctor_on_exit;                   /**< Run DOCTOR automatically on exit */
-    bool confirm_dangerous_changes;             /**< Confirm changes that could break config */
-    const char* default_config_path;            /**< Default configuration path */
-    uint32_t flags;                            /**< Additional flags */
+  polycall_repl_config_t repl_config;     /**< REPL configuration */
+  polycall_doctor_config_t doctor_config; /**< DOCTOR configuration */
+  bool enable_accessibility;              /**< Enable accessibility features */
+  polycall_accessibility_theme_t theme;   /**< Accessibility theme */
+  bool auto_doctor_on_exit; /**< Run DOCTOR automatically on exit */
+  bool
+      confirm_dangerous_changes; /**< Confirm changes that could break config */
+  const char *default_config_path; /**< Default configuration path */
+  uint32_t flags;                  /**< Additional flags */
 } polycall_config_tools_config_t;
 
 /**
@@ -46,11 +47,10 @@ typedef struct {
  * @param config Configuration
  * @return Error code
  */
-polycall_core_error_t polycall_config_tools_init(
-    polycall_core_context_t* core_ctx,
-    polycall_config_tools_context_t** tools_ctx,
-    const polycall_config_tools_config_t* config
-);
+polycall_core_error_t
+polycall_config_tools_init(polycall_core_context_t *core_ctx,
+                           polycall_config_tools_context_t **tools_ctx,
+                           const polycall_config_tools_config_t *config);
 
 /**
  * @brief Clean up configuration tools
@@ -58,10 +58,8 @@ polycall_core_error_t polycall_config_tools_init(
  * @param core_ctx Core context
  * @param tools_ctx Tools context
  */
-void polycall_config_tools_cleanup(
-    polycall_core_context_t* core_ctx,
-    polycall_config_tools_context_t* tools_ctx
-);
+void polycall_config_tools_cleanup(polycall_core_context_t *core_ctx,
+                                   polycall_config_tools_context_t *tools_ctx);
 
 /**
  * @brief Run REPL
@@ -70,10 +68,9 @@ void polycall_config_tools_cleanup(
  * @param tools_ctx Tools context
  * @return Error code
  */
-polycall_core_error_t polycall_config_tools_run_repl(
-    polycall_core_context_t* core_ctx,
-    polycall_config_tools_context_t* tools_ctx
-);
+polycall_core_error_t
+polycall_config_tools_run_repl(polycall_core_context_t *core_ctx,
+                               polycall_config_tools_context_t *tools_ctx);
 
 /**
  * @brief Run DOCTOR
@@ -84,12 +81,10 @@ polycall_core_error_t polycall_config_tools_run_repl(
  * @param report_path Path to save report (NULL for no report)
  * @return Error code
  */
-polycall_core_error_t polycall_config_tools_run_doctor(
-    polycall_core_context_t* core_ctx,
-    polycall_config_tools_context_t* tools_ctx,
-    bool fix_issues,
-    const char* report_path
-);
+polycall_core_error_t
+polycall_config_tools_run_doctor(polycall_core_context_t *core_ctx,
+                                 polycall_config_tools_context_t *tools_ctx,
+                                 bool fix_issues, const char *report_path);
 
 /**
  * @brief Get REPL context
@@ -98,10 +93,9 @@ polycall_core_error_t polycall_config_tools_run_doctor(
  * @param tools_ctx Tools context
  * @return REPL context, or NULL on error
  */
-polycall_repl_context_t* polycall_config_tools_get_repl(
-    polycall_core_context_t* core_ctx,
-    polycall_config_tools_context_t* tools_ctx
-);
+polycall_repl_context_t *
+polycall_config_tools_get_repl(polycall_core_context_t *core_ctx,
+                               polycall_config_tools_context_t *tools_ctx);
 
 /**
  * @brief Get DOCTOR context
@@ -110,10 +104,9 @@ polycall_repl_context_t* polycall_config_tools_get_repl(
  * @param tools_ctx Tools context
  * @return DOCTOR context, or NULL on error
  */
-polycall_doctor_context_t* polycall_config_tools_get_doctor(
-    polycall_core_context_t* core_ctx,
-    polycall_config_tools_context_t* tools_ctx
-);
+polycall_doctor_context_t *
+polycall_config_tools_get_doctor(polycall_core_context_t *core_ctx,
+                                 polycall_config_tools_context_t *tools_ctx);
 
 /**
  * @brief Get config context
@@ -122,10 +115,9 @@ polycall_doctor_context_t* polycall_config_tools_get_doctor(
  * @param tools_ctx Tools context
  * @return Configuration context, or NULL on error
  */
-polycall_config_context_t* polycall_config_tools_get_config(
-    polycall_core_context_t* core_ctx,
-    polycall_config_tools_context_t* tools_ctx
-);
+polycall_config_context_t *
+polycall_config_tools_get_config(polycall_core_context_t *core_ctx,
+                                 polycall_config_tools_context_t *tools_ctx);
 
 /**
  * @brief Set config context
@@ -135,11 +127,10 @@ polycall_config_context_t* polycall_config_tools_get_config(
  * @param config_ctx Configuration context
  * @return Error code
  */
-polycall_core_error_t polycall_config_tools_set_config(
-    polycall_core_context_t* core_ctx,
-    polycall_config_tools_context_t* tools_ctx,
-    polycall_config_context_t* config_ctx
-);
+polycall_core_error_t
+polycall_config_tools_set_config(polycall_core_context_t *core_ctx,
+                                 polycall_config_tools_context_t *tools_ctx,
+                                 polycall_config_context_t *config_ctx);
 
 /**
  * @brief Create default configuration tools configuration
@@ -158,11 +149,9 @@ polycall_config_tools_config_t polycall_config_tools_default_config(void);
  * @return Error code
  */
 polycall_core_error_t polycall_config_tools_load_and_validate(
-    polycall_core_context_t* core_ctx,
-    polycall_config_tools_context_t* tools_ctx,
-    const char* file_path,
-    bool validate
-);
+    polycall_core_context_t *core_ctx,
+    polycall_config_tools_context_t *tools_ctx, const char *file_path,
+    bool validate);
 
 /**
  * @brief Save configuration to file
@@ -173,12 +162,10 @@ polycall_core_error_t polycall_config_tools_load_and_validate(
  * @param validate Whether to validate before saving
  * @return Error code
  */
-polycall_core_error_t polycall_config_tools_save(
-    polycall_core_context_t* core_ctx,
-    polycall_config_tools_context_t* tools_ctx,
-    const char* file_path,
-    bool validate
-);
+polycall_core_error_t
+polycall_config_tools_save(polycall_core_context_t *core_ctx,
+                           polycall_config_tools_context_t *tools_ctx,
+                           const char *file_path, bool validate);
 
 /**
  * @brief Import configuration from another format
@@ -189,12 +176,10 @@ polycall_core_error_t polycall_config_tools_save(
  * @param format Format (json, yaml, xml, ini)
  * @return Error code
  */
-polycall_core_error_t polycall_config_tools_import(
-    polycall_core_context_t* core_ctx,
-    polycall_config_tools_context_t* tools_ctx,
-    const char* file_path,
-    const char* format
-);
+polycall_core_error_t
+polycall_config_tools_import(polycall_core_context_t *core_ctx,
+                             polycall_config_tools_context_t *tools_ctx,
+                             const char *file_path, const char *format);
 
 /**
  * @brief Export configuration to another format
@@ -205,12 +190,10 @@ polycall_core_error_t polycall_config_tools_import(
  * @param format Format (json, yaml, xml, ini)
  * @return Error code
  */
-polycall_core_error_t polycall_config_tools_export(
-    polycall_core_context_t* core_ctx,
-    polycall_config_tools_context_t* tools_ctx,
-    const char* file_path,
-    const char* format
-);
+polycall_core_error_t
+polycall_config_tools_export(polycall_core_context_t *core_ctx,
+                             polycall_config_tools_context_t *tools_ctx,
+                             const char *file_path, const char *format);
 
 #ifdef __cplusplus
 }

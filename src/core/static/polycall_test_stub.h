@@ -11,7 +11,7 @@
 
 /**
  * @brief Initialize polycall test stubs
- * 
+ *
  * @return int 0 on success, non-zero on failure
  */
 int polycall_polycall_init_test_stubs(void);

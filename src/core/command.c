@@ -9,147 +9,122 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 // TODO: Implement polycall_command_init
 void polycall_command_init_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_command_cleanup
 void polycall_command_cleanup_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_command_register
 void polycall_command_register_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_command_unregister
 void polycall_command_unregister_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_command_find_by_id
 void polycall_command_find_by_id_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_command_find_by_name
 void polycall_command_find_by_name_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_command_create_message
 void polycall_command_create_message_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_command_destroy_message
 void polycall_command_destroy_message_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_command_add_parameter
 void polycall_command_add_parameter_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_command_get_parameter
 void polycall_command_get_parameter_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_command_destroy_response
 void polycall_command_destroy_response_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_command_process
 void polycall_command_process_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_command_validate
 void polycall_command_validate_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_command_serialize_message
 void polycall_command_serialize_message_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_command_deserialize_message
 void polycall_command_deserialize_message_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_command_serialize_response
 void polycall_command_serialize_response_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_command_deserialize_response
 void polycall_command_deserialize_response_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_command_set_permissions
 void polycall_command_set_permissions_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_command_get_permissions
 void polycall_command_get_permissions_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_command_exists
 void polycall_command_exists_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_command_get_count
 void polycall_command_get_count_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_command_generate_validator
 void polycall_command_generate_validator_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_command_set_flags
 void polycall_command_set_flags_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_command_get_flags
 void polycall_command_get_flags_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-

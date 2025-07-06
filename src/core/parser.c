@@ -9,9 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 // TODO: Implement polycall_parser_destroy
 void polycall_parser_destroy_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-

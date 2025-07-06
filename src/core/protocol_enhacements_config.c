@@ -9,27 +9,22 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 // TODO: Implement polycall_protocol_enhancements_init
 void polycall_protocol_enhancements_init_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_protocol_enhancements_cleanup
 void polycall_protocol_enhancements_cleanup_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_protocol_enhancements_default_config
 void polycall_protocol_enhancements_default_config_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_protocol_apply_enhancements
 void polycall_protocol_apply_enhancements_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-

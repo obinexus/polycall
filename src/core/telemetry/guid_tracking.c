@@ -1,13 +1,12 @@
 /* Standard library includes */
-#include <stdint.h>
-#include <stddef.h>
+#include <pthread.h>
 #include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <pthread.h>
-#include <unistd.h>
 #include <sys/types.h>
+#include <unistd.h>
 
 /* Core types */
 #include "polycall/core/types.h"
-

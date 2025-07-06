@@ -1,5 +1,5 @@
 # OBINexus PolyCall Root Makefile
-# Build Orchestration with Security and Edge Micro Features
+# Unified Command Interface with Subcommand Delegation
 # Copyright (c) 2025 OBINexus Computing
 
 # Version and Build Configuration
@@ -16,119 +16,224 @@ BUILD_MODE ?= release
 EDGE_MICRO ?= disabled
 SECURITY_LEVEL ?= standard
 
-# Compiler Configuration
-CC ?= gcc
-CXX ?= g++
-AR ?= ar
-RANLIB ?= ranlib
-
 # Base Directories
 ROOT_DIR := $(shell pwd)
 BUILD_DIR := build
 SRC_DIR := src
 INCLUDE_DIR := include
 TOOLS_DIR := tools
-CMAKE_DIR := cmake
-
-# Feature Flags
-FEATURES := \
-	-DPOLYCALL_VERSION=\"$(VERSION)\" \
-	-DPOLYCALL_BUILD_DATE=\"$(BUILD_DATE)\" \
-	-DPOLYCALL_BUILD_HASH=\"$(BUILD_HASH)\"
-
-# Security Flags
-ifeq ($(SECURITY_LEVEL),paranoid)
-	SECURITY_FLAGS := -fstack-protector-all -D_FORTIFY_SOURCE=2 -fPIE
-else ifeq ($(SECURITY_LEVEL),standard)
-	SECURITY_FLAGS := -fstack-protector-strong -D_FORTIFY_SOURCE=1
-else
-	SECURITY_FLAGS :=
-endif
-
-# Edge Micro Configuration
-ifeq ($(EDGE_MICRO),enabled)
-	FEATURES += -DPOLYCALL_EDGE_MICRO_ENABLED
-	EDGE_FLAGS := -Os -ffunction-sections -fdata-sections
-	EDGE_LDFLAGS := -Wl,--gc-sections
-else
-	EDGE_FLAGS :=
-	EDGE_LDFLAGS :=
-endif
-
-# Common Flags
-COMMON_FLAGS := \
-	-Wall -Wextra -Werror \
-	-I$(INCLUDE_DIR) \
-	$(FEATURES) \
-	$(SECURITY_FLAGS) \
-	$(EDGE_FLAGS)
-
-# Mode-specific Flags
-ifeq ($(BUILD_MODE),debug)
-	CFLAGS := $(COMMON_FLAGS) -g -O0 -DDEBUG
-	CXXFLAGS := $(COMMON_FLAGS) -g -O0 -DDEBUG
-else ifeq ($(BUILD_MODE),release)
-	CFLAGS := $(COMMON_FLAGS) -O2 -DNDEBUG
-	CXXFLAGS := $(COMMON_FLAGS) -O2 -DNDEBUG
-else ifeq ($(BUILD_MODE),profile)
-	CFLAGS := $(COMMON_FLAGS) -O2 -pg -DPROFILE
-	CXXFLAGS := $(COMMON_FLAGS) -O2 -pg -DPROFILE
-endif
 
 # Subcommand Makefiles
+MAKEFILE_BUILD := Makefile.build
 MAKEFILE_PURITY := Makefile.purity
 MAKEFILE_SPEC := Makefile.spec
-MAKEFILE_BUILD := Makefile.build
 MAKEFILE_VENDOR := Makefile.vendor
+MAKEFILE_PROJECTS := Makefile.projects
 
-# Primary Targets
-.PHONY: all clean test install uninstall help
+# Export common variables for sub-makefiles
+export VERSION BUILD_DATE BUILD_HASH
+export BUILD_MODE EDGE_MICRO SECURITY_LEVEL
+export ROOT_DIR BUILD_DIR SRC_DIR INCLUDE_DIR TOOLS_DIR
+export UNAME_S UNAME_M
 
-all: check-mutex build
+# ==============================================================================
+# PRIMARY TARGETS - These delegate to sub-makefiles
+# ==============================================================================
+.PHONY: all build test qa install uninstall clean help
 
-# Mutex Check for Command Exclusivity
+# Default target
+all: build
+
+# ==============================================================================
+# BUILD SUBSYSTEM (Makefile.build)
+# ==============================================================================
+.PHONY: build build-all static shared cli edge-build edge-deploy
+.PHONY: build-info deps directories
+
+build:
+	@$(MAKE) -f $(MAKEFILE_BUILD) build-all
+
+build-all:
+	@$(MAKE) -f $(MAKEFILE_BUILD) build-all
+
+static:
+	@$(MAKE) -f $(MAKEFILE_BUILD) static
+
+shared:
+	@$(MAKE) -f $(MAKEFILE_BUILD) shared
+
+cli:
+	@$(MAKE) -f $(MAKEFILE_BUILD) cli
+
+edge-build:
+	@$(MAKE) -f $(MAKEFILE_BUILD) edge-build
+
+edge-deploy:
+	@$(MAKE) -f $(MAKEFILE_BUILD) edge-deploy
+
+build-info:
+	@$(MAKE) -f $(MAKEFILE_BUILD) build-info
+
+deps:
+	@$(MAKE) -f $(MAKEFILE_BUILD) deps
+
+directories:
+	@$(MAKE) -f $(MAKEFILE_BUILD) directories
+
+install:
+	@$(MAKE) -f $(MAKEFILE_BUILD) install
+
+uninstall:
+	@$(MAKE) -f $(MAKEFILE_BUILD) uninstall
+
+# ==============================================================================
+# PURITY SUBSYSTEM (Makefile.purity)
+# ==============================================================================
+.PHONY: check-mutex check-commands acquire-lock release-lock
+.PHONY: security-scan security-audit edge-security-check
+.PHONY: check-memory-patterns check-concurrency-patterns
+.PHONY: validate-build-command validate-test-command validate-deploy-command
+.PHONY: cleanup-locks recover-from-crash
+
 check-mutex:
 	@$(MAKE) -f $(MAKEFILE_PURITY) check-commands
 
-# Build Targets
-build: check-mutex
-	@echo "Building PolyCall [$(BUILD_MODE)] [Security: $(SECURITY_LEVEL)] [Edge: $(EDGE_MICRO)]"
-	@$(MAKE) -f $(MAKEFILE_BUILD) build-all \
-		CC="$(CC)" \
-		CFLAGS="$(CFLAGS)" \
-		BUILD_DIR="$(BUILD_DIR)" \
-		EDGE_LDFLAGS="$(EDGE_LDFLAGS)"
+check-commands:
+	@$(MAKE) -f $(MAKEFILE_PURITY) check-commands
 
-# QA and Testing
-test: check-mutex
-	@$(MAKE) -f $(MAKEFILE_SPEC) run-tests \
-		BUILD_DIR="$(BUILD_DIR)"
+security-scan:
+	@$(MAKE) -f $(MAKEFILE_PURITY) security-scan
 
-qa: check-mutex
-	@$(MAKE) -f $(MAKEFILE_SPEC) qa-full \
-		SRC_DIR="$(SRC_DIR)" \
-		INCLUDE_DIR="$(INCLUDE_DIR)"
+security-audit:
+	@$(MAKE) -f $(MAKEFILE_PURITY) security-scan
 
-# Vendor/Browser Testing
-vendor-test: check-mutex
-	@$(MAKE) -f $(MAKEFILE_VENDOR) test-all-browsers
+edge-security-check:
+	@$(MAKE) -f $(MAKEFILE_PURITY) edge-security-check
 
-# Edge Micro Features
-edge-deploy: check-mutex
-	@if [ "$(EDGE_MICRO)" != "enabled" ]; then \
-		echo "Error: Edge micro features not enabled. Set EDGE_MICRO=enabled"; \
-		exit 1; \
+check-memory:
+	@$(MAKE) -f $(MAKEFILE_PURITY) check-memory-patterns
+
+check-concurrency:
+	@$(MAKE) -f $(MAKEFILE_PURITY) check-concurrency-patterns
+
+recover-crash:
+	@$(MAKE) -f $(MAKEFILE_PURITY) recover-from-crash
+
+# ==============================================================================
+# SPEC/QA SUBSYSTEM (Makefile.spec)
+# ==============================================================================
+.PHONY: test qa qa-full unit-tests integration-tests performance-test
+.PHONY: coverage-report lint lint-all format
+.PHONY: run-tests compile-unit-tests execute-unit-tests
+.PHONY: compile-integration-tests execute-integration-tests
+.PHONY: lint-source lint-headers lint-security
+.PHONY: check-header-compilation generate-qa-report clean-tests
+
+test:
+	@$(MAKE) -f $(MAKEFILE_SPEC) run-tests
+
+qa:
+	@$(MAKE) -f $(MAKEFILE_SPEC) qa-full
+
+qa-full:
+	@$(MAKE) -f $(MAKEFILE_SPEC) qa-full
+
+unit-tests:
+	@$(MAKE) -f $(MAKEFILE_SPEC) unit-tests
+
+integration-tests:
+	@$(MAKE) -f $(MAKEFILE_SPEC) integration-tests
+
+performance-test:
+	@$(MAKE) -f $(MAKEFILE_SPEC) performance-test
+
+security-test:
+	@$(MAKE) -f $(MAKEFILE_SPEC) security-test
+
+coverage-report:
+	@$(MAKE) -f $(MAKEFILE_SPEC) coverage-report
+
+lint:
+	@$(MAKE) -f $(MAKEFILE_SPEC) lint-all
+
+lint-all:
+	@$(MAKE) -f $(MAKEFILE_SPEC) lint-all
+
+format:
+	@echo "Formatting source code..."
+	@find $(SRC_DIR) $(INCLUDE_DIR) -name "*.c" -o -name "*.h" | \
+		xargs clang-format -i
+
+# ==============================================================================
+# VENDOR SUBSYSTEM (Makefile.vendor) - Create if doesn't exist
+# ==============================================================================
+.PHONY: vendor-test test-all-browsers test-chrome test-firefox
+.PHONY: test-safari test-edge wasm-build serve-demo
+
+vendor-test:
+	@if [ -f $(MAKEFILE_VENDOR) ]; then \
+		$(MAKE) -f $(MAKEFILE_VENDOR) test-all-browsers; \
+	else \
+		echo "Vendor testing not configured"; \
 	fi
-	@$(MAKE) -f $(MAKEFILE_BUILD) edge-deploy
 
-# Security Commands
-security-audit: check-mutex
-	@echo "Running security audit..."
-	@$(MAKE) -f $(MAKEFILE_PURITY) security-scan \
-		SRC_DIR="$(SRC_DIR)" \
-		SECURITY_LEVEL="$(SECURITY_LEVEL)"
+test-chrome:
+	@if [ -f $(MAKEFILE_VENDOR) ]; then \
+		$(MAKE) -f $(MAKEFILE_VENDOR) test-chrome; \
+	else \
+		echo "Chrome testing not configured"; \
+	fi
 
-# Clean Targets
+test-firefox:
+	@if [ -f $(MAKEFILE_VENDOR) ]; then \
+		$(MAKE) -f $(MAKEFILE_VENDOR) test-firefox; \
+	else \
+		echo "Firefox testing not configured"; \
+	fi
+
+wasm-build:
+	@if [ -f $(MAKEFILE_VENDOR) ]; then \
+		$(MAKE) -f $(MAKEFILE_VENDOR) wasm-build; \
+	else \
+		echo "WASM build not configured"; \
+	fi
+
+# ==============================================================================
+# PROJECT SUBSYSTEM (Makefile.projects)
+# ==============================================================================
+.PHONY: setup setup-fixtures setup-examples bootstrap demo
+.PHONY: help-all help-build help-purity help-spec help-vendor help-project
+.PHONY: status info version list-targets list-options
+
+setup:
+	@$(MAKE) -f $(MAKEFILE_PROJECTS) setup
+
+setup-fixtures:
+	@$(MAKE) -f $(MAKEFILE_PROJECTS) setup-fixtures
+
+setup-examples:
+	@$(MAKE) -f $(MAKEFILE_PROJECTS) setup-examples
+
+bootstrap:
+	@$(MAKE) -f $(MAKEFILE_PROJECTS) bootstrap
+
+demo:
+	@$(MAKE) -f $(MAKEFILE_PROJECTS) demo
+
+status:
+	@$(MAKE) -f $(MAKEFILE_PROJECTS) status
+
+info:
+	@$(MAKE) -f $(MAKEFILE_PROJECTS) info
+
+version:
+	@$(MAKE) -f $(MAKEFILE_PROJECTS) version
+
+# ==============================================================================
+# CLEAN TARGETS
+# ==============================================================================
+.PHONY: clean distclean clean-all clean-projects clean-reports
+
 clean:
 	@echo "Cleaning build artifacts..."
 	@rm -rf $(BUILD_DIR)
@@ -136,25 +241,26 @@ clean:
 	@find . -name "*.a" -delete
 	@find . -name "*.so" -delete
 	@find . -name "*.dylib" -delete
+	@$(MAKE) -f $(MAKEFILE_SPEC) clean-tests 2>/dev/null || true
 
 distclean: clean
 	@echo "Removing all generated files..."
 	@rm -rf .cache
 	@rm -rf compile_commands.json
 	@rm -rf .clangd
+	@$(MAKE) -f $(MAKEFILE_PURITY) cleanup-locks 2>/dev/null || true
 
-# Installation
-install: build
-	@echo "Installing PolyCall..."
-	@$(MAKE) -f $(MAKEFILE_BUILD) install \
-		PREFIX="$(PREFIX)"
+clean-all:
+	@$(MAKE) clean
+	@if [ -f $(MAKEFILE_PROJECTS) ]; then \
+		$(MAKE) -f $(MAKEFILE_PROJECTS) clean-projects clean-reports; \
+	fi
 
-uninstall:
-	@echo "Uninstalling PolyCall..."
-	@$(MAKE) -f $(MAKEFILE_BUILD) uninstall \
-		PREFIX="$(PREFIX)"
+# ==============================================================================
+# CMAKE INTEGRATION
+# ==============================================================================
+.PHONY: cmake-gen cmake-build cmake-test
 
-# CMake Integration
 cmake-gen:
 	@echo "Generating CMake configuration..."
 	@mkdir -p $(BUILD_DIR)/cmake
@@ -163,29 +269,44 @@ cmake-gen:
 		-DPOLYCALL_EDGE_MICRO=$(EDGE_MICRO) \
 		-DPOLYCALL_SECURITY_LEVEL=$(SECURITY_LEVEL)
 
-# Development Commands
-format:
-	@echo "Formatting source code..."
-	@find $(SRC_DIR) $(INCLUDE_DIR) -name "*.c" -o -name "*.h" | \
-		xargs clang-format -i
+cmake-build: cmake-gen
+	@cd $(BUILD_DIR)/cmake && cmake --build .
 
-lint:
-	@echo "Running linters..."
-	@$(MAKE) -f $(MAKEFILE_SPEC) lint-all
+cmake-test: cmake-build
+	@cd $(BUILD_DIR)/cmake && ctest
 
-# Documentation
+# ==============================================================================
+# DOCUMENTATION
+# ==============================================================================
+.PHONY: docs generate-docs
+
 docs:
 	@echo "Generating documentation..."
-	@doxygen docs/Doxyfile
+	@if command -v doxygen >/dev/null 2>&1; then \
+		doxygen docs/Doxyfile 2>/dev/null || echo "Doxyfile not found"; \
+	else \
+		echo "Doxygen not installed"; \
+	fi
 
-# Help
+generate-docs: docs
+
+# ==============================================================================
+# HELP SYSTEM
+# ==============================================================================
 help:
+	@if [ -f $(MAKEFILE_PROJECTS) ]; then \
+		$(MAKE) -f $(MAKEFILE_PROJECTS) help; \
+	else \
+		$(MAKE) help-basic; \
+	fi
+
+help-basic:
 	@echo "PolyCall Build System"
 	@echo "===================="
 	@echo ""
 	@echo "Usage: make [target] [options]"
 	@echo ""
-	@echo "Targets:"
+	@echo "Primary Targets:"
 	@echo "  all          - Build everything (default)"
 	@echo "  build        - Build the project"
 	@echo "  test         - Run tests"
@@ -194,22 +315,73 @@ help:
 	@echo "  install      - Install the library"
 	@echo "  docs         - Generate documentation"
 	@echo ""
+	@echo "Subsystems:"
+	@echo "  Build:       make build-all, static, shared, cli, edge-build"
+	@echo "  Security:    make security-scan, check-memory, check-concurrency"
+	@echo "  Testing:     make unit-tests, integration-tests, coverage-report"
+	@echo "  Quality:     make lint, format, qa-full"
+	@echo ""
 	@echo "Options:"
-	@echo "  BUILD_MODE={debug|release|profile}    (default: release)"
-	@echo "  EDGE_MICRO={enabled|disabled}         (default: disabled)"
+	@echo "  BUILD_MODE={debug|release|profile}      (default: release)"
+	@echo "  EDGE_MICRO={enabled|disabled}           (default: disabled)"
 	@echo "  SECURITY_LEVEL={none|standard|paranoid} (default: standard)"
-	@echo "  PREFIX=/path/to/install               (default: /usr/local)"
-	@echo ""
-	@echo "Edge Micro Commands:"
-	@echo "  edge-deploy  - Deploy edge micro features"
-	@echo ""
-	@echo "Security Commands:"
-	@echo "  security-audit - Run security audit"
-	@echo ""
-	@echo "Development:"
-	@echo "  format       - Format source code"
-	@echo "  lint         - Run linters"
-	@echo "  vendor-test  - Test browser compatibility"
+	@echo "  PREFIX=/path/to/install                 (default: /usr/local)"
 
-# Include dependency tracking
+help-all:
+	@$(MAKE) -f $(MAKEFILE_PROJECTS) help-all 2>/dev/null || $(MAKE) help-basic
+
+help-build:
+	@$(MAKE) -f $(MAKEFILE_PROJECTS) help-build 2>/dev/null || \
+		echo "Build help not available"
+
+help-purity:
+	@$(MAKE) -f $(MAKEFILE_PROJECTS) help-purity 2>/dev/null || \
+		echo "Purity help not available"
+
+help-spec:
+	@$(MAKE) -f $(MAKEFILE_PROJECTS) help-spec 2>/dev/null || \
+		echo "Spec help not available"
+
+help-vendor:
+	@$(MAKE) -f $(MAKEFILE_PROJECTS) help-vendor 2>/dev/null || \
+		echo "Vendor help not available"
+
+# ==============================================================================
+# UTILITY TARGETS
+# ==============================================================================
+.PHONY: list-targets list-options
+
+list-targets:
+	@$(MAKE) -qp | awk -F':' '/^[a-zA-Z0-9][^$$#\/\t=]*:([^=]|$$)/ {split($$1,A,/ /);for(i in A)print A[i]}' | sort -u | grep -v '^\.PHONY$$'
+
+list-options:
+	@echo "BUILD_MODE=debug"
+	@echo "BUILD_MODE=release"
+	@echo "BUILD_MODE=profile"
+	@echo "EDGE_MICRO=enabled"
+	@echo "EDGE_MICRO=disabled"
+	@echo "SECURITY_LEVEL=none"
+	@echo "SECURITY_LEVEL=standard"
+	@echo "SECURITY_LEVEL=paranoid"
+
+# ==============================================================================
+# DEVELOPMENT SHORTCUTS
+# ==============================================================================
+.PHONY: dev quick rebuild full
+
+# Quick development build
+dev:
+	@$(MAKE) BUILD_MODE=debug build
+
+# Quick build without full checks
+quick:
+	@$(MAKE) -f $(MAKEFILE_BUILD) static cli
+
+# Full rebuild
+rebuild: clean build
+
+# Full development cycle
+full: clean build test lint
+
+# Include dependency tracking if available
 -include $(BUILD_DIR)/*.d

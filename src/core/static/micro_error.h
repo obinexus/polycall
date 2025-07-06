@@ -14,11 +14,11 @@ extern "C" {
  * micro error codes
  */
 typedef enum micro_error {
-    MICRO_ERROR_SUCCESS = 0,
-    MICRO_ERROR_INVALID_PARAMETERS = 1,
-    MICRO_ERROR_OUT_OF_MEMORY = 2,
-    MICRO_ERROR_NOT_INITIALIZED = 3,
-    // Add component-specific error codes here
+  MICRO_ERROR_SUCCESS = 0,
+  MICRO_ERROR_INVALID_PARAMETERS = 1,
+  MICRO_ERROR_OUT_OF_MEMORY = 2,
+  MICRO_ERROR_NOT_INITIALIZED = 3,
+  // Add component-specific error codes here
 } micro_error_t;
 
 /**
@@ -27,7 +27,7 @@ typedef enum micro_error {
  * @param error Error code
  * @return const char* Error message
  */
-const char* micro_get_error_message(micro_error_t error);
+const char *micro_get_error_message(micro_error_t error);
 
 #ifdef __cplusplus
 }

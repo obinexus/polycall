@@ -9,33 +9,27 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 // TODO: Implement polycall_compute_router_init
 void polycall_compute_router_init_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_compute_router_route_task
 void polycall_compute_router_route_task_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_compute_router_handle_node_failure
 void polycall_compute_router_handle_node_failure_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_compute_router_get_stats
 void polycall_compute_router_get_stats_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_compute_router_cleanup
 void polycall_compute_router_cleanup_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-

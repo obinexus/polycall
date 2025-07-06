@@ -14,11 +14,11 @@ extern "C" {
  * config error codes
  */
 typedef enum config_error {
-    CONFIG_ERROR_SUCCESS = 0,
-    CONFIG_ERROR_INVALID_PARAMETERS = 1,
-    CONFIG_ERROR_OUT_OF_MEMORY = 2,
-    CONFIG_ERROR_NOT_INITIALIZED = 3,
-    // Add component-specific error codes here
+  CONFIG_ERROR_SUCCESS = 0,
+  CONFIG_ERROR_INVALID_PARAMETERS = 1,
+  CONFIG_ERROR_OUT_OF_MEMORY = 2,
+  CONFIG_ERROR_NOT_INITIALIZED = 3,
+  // Add component-specific error codes here
 } config_error_t;
 
 /**
@@ -27,7 +27,7 @@ typedef enum config_error {
  * @param error Error code
  * @return const char* Error message
  */
-const char* config_get_error_message(config_error_t error);
+const char *config_get_error_message(config_error_t error);
 
 #ifdef __cplusplus
 }

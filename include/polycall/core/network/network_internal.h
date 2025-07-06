@@ -10,7 +10,6 @@
 #ifndef POLYCALL_NETWORK_NETWORK_INTERNAL_H_H
 #define POLYCALL_NETWORK_NETWORK_INTERNAL_H_H
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -19,34 +18,34 @@ extern "C" {
  * @brief Configuration entry types
  */
 typedef enum {
-	CONFIG_TYPE_INT,
-	CONFIG_TYPE_UINT,
-	CONFIG_TYPE_BOOL,
-	CONFIG_TYPE_FLOAT,
-	CONFIG_TYPE_STRING
+  CONFIG_TYPE_INT,
+  CONFIG_TYPE_UINT,
+  CONFIG_TYPE_BOOL,
+  CONFIG_TYPE_FLOAT,
+  CONFIG_TYPE_STRING
 } config_entry_type_t;
 
 /**
  * @brief Configuration entry value union
  */
 typedef union {
-	int int_value;
-	unsigned int uint_value;
-	bool bool_value;
-	float float_value;
-	char* string_value;
+  int int_value;
+  unsigned int uint_value;
+  bool bool_value;
+  float float_value;
+  char *string_value;
 } config_value_t;
 
 /**
  * @brief Configuration entry structure
  */
 typedef struct config_entry {
-	char section[64];
-	char key[64];
-	config_entry_type_t type;
-	config_value_t value;
-	char* description;
-	struct config_entry* next;
+  char section[64];
+  char key[64];
+  config_entry_type_t type;
+  config_value_t value;
+  char *description;
+  struct config_entry *next;
 } config_entry_t;
 
 /**
@@ -56,10 +55,8 @@ typedef struct config_entry {
  * @param config Network configuration context
  * @return Error code
  */
-polycall_core_error_t apply_defaults(
-	polycall_core_context_t* ctx,
-	polycall_network_config_t* config
-);
+polycall_core_error_t apply_defaults(polycall_core_context_t *ctx,
+                                     polycall_network_config_t *config);
 
 /**
  * @brief Load configuration from file
@@ -68,10 +65,8 @@ polycall_core_error_t apply_defaults(
  * @param config Network configuration context
  * @return Error code
  */
-polycall_core_error_t load_config_from_file(
-	polycall_core_context_t* ctx,
-	polycall_network_config_t* config
-);
+polycall_core_error_t load_config_from_file(polycall_core_context_t *ctx,
+                                            polycall_network_config_t *config);
 
 /**
  * @brief Save configuration to file
@@ -80,10 +75,8 @@ polycall_core_error_t load_config_from_file(
  * @param config Network configuration context
  * @return Error code
  */
-polycall_core_error_t save_config_to_file(
-	polycall_core_context_t* ctx,
-	polycall_network_config_t* config
-);
+polycall_core_error_t save_config_to_file(polycall_core_context_t *ctx,
+                                          polycall_network_config_t *config);
 
 /**
  * @brief Add configuration entry
@@ -97,15 +90,12 @@ polycall_core_error_t save_config_to_file(
  * @param description Entry description
  * @return Error code
  */
-polycall_core_error_t add_config_entry(
-	polycall_core_context_t* ctx,
-	polycall_network_config_t* config,
-	const char* section,
-	const char* key,
-	config_entry_type_t type,
-	const void* value,
-	const char* description
-);
+polycall_core_error_t add_config_entry(polycall_core_context_t *ctx,
+                                       polycall_network_config_t *config,
+                                       const char *section, const char *key,
+                                       config_entry_type_t type,
+                                       const void *value,
+                                       const char *description);
 
 /**
  * @brief Find configuration entry
@@ -115,11 +105,8 @@ polycall_core_error_t add_config_entry(
  * @param key Configuration key
  * @return Found entry or NULL
  */
-config_entry_t* find_config_entry(
-	polycall_network_config_t* config,
-	const char* section,
-	const char* key
-);
+config_entry_t *find_config_entry(polycall_network_config_t *config,
+                                  const char *section, const char *key);
 
 /**
  * @brief Free configuration entries
@@ -127,10 +114,7 @@ config_entry_t* find_config_entry(
  * @param ctx Core context
  * @param entries Entry list to free
  */
-void free_config_entries(
-	polycall_core_context_t* ctx,
-	config_entry_t* entries
-);
+void free_config_entries(polycall_core_context_t *ctx, config_entry_t *entries);
 
 #ifdef __cplusplus
 }

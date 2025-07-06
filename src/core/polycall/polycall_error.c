@@ -6,114 +6,107 @@
  */
 
 #include "polycall/core/polycall/polycall_error.h"
-#include <string.h>
 #include <stdio.h>
+#include <string.h>
 
 /* Thread-local error context for detailed error reporting */
 static __thread struct {
-    polycall_error_t code;
-    char message[256];
-    const char* file;
-    int line;
-} g_last_error = { POLYCALL_OK, "", NULL, 0 };
+  polycall_error_t code;
+  char message[256];
+  const char *file;
+  int line;
+} g_last_error = {POLYCALL_OK, "", NULL, 0};
 
 /* Error string mapping table */
 static const struct {
-    polycall_error_t code;
-    const char* message;
+  polycall_error_t code;
+  const char *message;
 } error_strings[] = {
-    { POLYCALL_OK,                          "Success" },
-    { POLYCALL_ERROR_INVALID_PARAMETERS,    "Invalid parameters provided" },
-    { POLYCALL_ERROR_INITIALIZATION,        "Initialization failed" },
-    { POLYCALL_ERROR_OUT_OF_MEMORY,        "Memory allocation failed" },
-    { POLYCALL_ERROR_UNSUPPORTED,          "Operation not supported" },
-    { POLYCALL_ERROR_INVALID_STATE,        "Invalid state for operation" },
-    { POLYCALL_ERROR_INTERNAL,             "Internal error occurred" }
-};
+    {POLYCALL_OK, "Success"},
+    {POLYCALL_ERROR_INVALID_PARAMETERS, "Invalid parameters provided"},
+    {POLYCALL_ERROR_INITIALIZATION, "Initialization failed"},
+    {POLYCALL_ERROR_OUT_OF_MEMORY, "Memory allocation failed"},
+    {POLYCALL_ERROR_UNSUPPORTED, "Operation not supported"},
+    {POLYCALL_ERROR_INVALID_STATE, "Invalid state for operation"},
+    {POLYCALL_ERROR_INTERNAL, "Internal error occurred"}};
 
 /* Convert error code to human-readable string */
-const char* polycall_error_to_string(polycall_error_t error) {
-    const size_t count = sizeof(error_strings) / sizeof(error_strings[0]);
-    
-    for (size_t i = 0; i < count; i++) {
-        if (error_strings[i].code == error) {
-            return error_strings[i].message;
-        }
+const char *polycall_error_to_string(polycall_error_t error) {
+  const size_t count = sizeof(error_strings) / sizeof(error_strings[0]);
+
+  for (size_t i = 0; i < count; i++) {
+    if (error_strings[i].code == error) {
+      return error_strings[i].message;
     }
-    
-    return "Unknown error code";
+  }
+
+  return "Unknown error code";
 }
 
 /* Set last error with context information */
-void polycall_set_error(polycall_error_t error, const char* message, 
-                       const char* file, int line) {
-    g_last_error.code = error;
-    
-    if (message) {
-        strncpy(g_last_error.message, message, sizeof(g_last_error.message) - 1);
-        g_last_error.message[sizeof(g_last_error.message) - 1] = '\0';
-    } else {
-        g_last_error.message[0] = '\0';
-    }
-    
-    g_last_error.file = file;
-    g_last_error.line = line;
+void polycall_set_error(polycall_error_t error, const char *message,
+                        const char *file, int line) {
+  g_last_error.code = error;
+
+  if (message) {
+    strncpy(g_last_error.message, message, sizeof(g_last_error.message) - 1);
+    g_last_error.message[sizeof(g_last_error.message) - 1] = '\0';
+  } else {
+    g_last_error.message[0] = '\0';
+  }
+
+  g_last_error.file = file;
+  g_last_error.line = line;
 }
 
 /* Retrieve last error code */
-polycall_error_t polycall_get_last_error(void) {
-    return g_last_error.code;
-}
+polycall_error_t polycall_get_last_error(void) { return g_last_error.code; }
 
 /* Get detailed error message with context */
-const char* polycall_get_last_error_message(void) {
-    static __thread char buffer[512];
-    
-    if (g_last_error.code == POLYCALL_OK) {
-        return "No error";
-    }
-    
-    const char* base_msg = polycall_error_to_string(g_last_error.code);
-    
-    if (g_last_error.message[0] != '\0') {
-        if (g_last_error.file) {
-            snprintf(buffer, sizeof(buffer), "%s: %s [%s:%d]", 
-                    base_msg, g_last_error.message, 
-                    g_last_error.file, g_last_error.line);
-        } else {
-            snprintf(buffer, sizeof(buffer), "%s: %s", 
-                    base_msg, g_last_error.message);
-        }
+const char *polycall_get_last_error_message(void) {
+  static __thread char buffer[512];
+
+  if (g_last_error.code == POLYCALL_OK) {
+    return "No error";
+  }
+
+  const char *base_msg = polycall_error_to_string(g_last_error.code);
+
+  if (g_last_error.message[0] != '\0') {
+    if (g_last_error.file) {
+      snprintf(buffer, sizeof(buffer), "%s: %s [%s:%d]", base_msg,
+               g_last_error.message, g_last_error.file, g_last_error.line);
     } else {
-        if (g_last_error.file) {
-            snprintf(buffer, sizeof(buffer), "%s [%s:%d]", 
-                    base_msg, g_last_error.file, g_last_error.line);
-        } else {
-            return base_msg;
-        }
+      snprintf(buffer, sizeof(buffer), "%s: %s", base_msg,
+               g_last_error.message);
     }
-    
-    return buffer;
+  } else {
+    if (g_last_error.file) {
+      snprintf(buffer, sizeof(buffer), "%s [%s:%d]", base_msg,
+               g_last_error.file, g_last_error.line);
+    } else {
+      return base_msg;
+    }
+  }
+
+  return buffer;
 }
 
 /* Clear error state */
 void polycall_clear_error(void) {
-    g_last_error.code = POLYCALL_OK;
-    g_last_error.message[0] = '\0';
-    g_last_error.file = NULL;
-    g_last_error.line = 0;
+  g_last_error.code = POLYCALL_OK;
+  g_last_error.message[0] = '\0';
+  g_last_error.file = NULL;
+  g_last_error.line = 0;
 }
 
 /* Check if an error is set */
-int polycall_has_error(void) {
-    return g_last_error.code != POLYCALL_OK;
-}
+int polycall_has_error(void) { return g_last_error.code != POLYCALL_OK; }
 
 /* Convenience macro helpers for error setting */
 #ifdef POLYCALL_DEBUG
-    #define POLYCALL_SET_ERROR(code, msg) \
-        polycall_set_error(code, msg, __FILE__, __LINE__)
+#define POLYCALL_SET_ERROR(code, msg)                                          \
+  polycall_set_error(code, msg, __FILE__, __LINE__)
 #else
-    #define POLYCALL_SET_ERROR(code, msg) \
-        polycall_set_error(code, msg, NULL, 0)
+#define POLYCALL_SET_ERROR(code, msg) polycall_set_error(code, msg, NULL, 0)
 #endif

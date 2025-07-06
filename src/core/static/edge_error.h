@@ -14,11 +14,11 @@ extern "C" {
  * edge error codes
  */
 typedef enum edge_error {
-    EDGE_ERROR_SUCCESS = 0,
-    EDGE_ERROR_INVALID_PARAMETERS = 1,
-    EDGE_ERROR_OUT_OF_MEMORY = 2,
-    EDGE_ERROR_NOT_INITIALIZED = 3,
-    // Add component-specific error codes here
+  EDGE_ERROR_SUCCESS = 0,
+  EDGE_ERROR_INVALID_PARAMETERS = 1,
+  EDGE_ERROR_OUT_OF_MEMORY = 2,
+  EDGE_ERROR_NOT_INITIALIZED = 3,
+  // Add component-specific error codes here
 } edge_error_t;
 
 /**
@@ -27,7 +27,7 @@ typedef enum edge_error {
  * @param error Error code
  * @return const char* Error message
  */
-const char* edge_get_error_message(edge_error_t error);
+const char *edge_get_error_message(edge_error_t error);
 
 #ifdef __cplusplus
 }

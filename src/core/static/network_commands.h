@@ -18,7 +18,7 @@ extern "C" {
  * @param context Command context
  * @return int 0 on success, error code otherwise
  */
-int network_command_handler(int argc, char** argv, void* context);
+int network_command_handler(int argc, char **argv, void *context);
 
 /**
  * Register network commands

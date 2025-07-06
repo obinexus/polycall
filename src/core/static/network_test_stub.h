@@ -11,7 +11,7 @@
 
 /**
  * @brief Initialize network test stubs
- * 
+ *
  * @return int 0 on success, non-zero on failure
  */
 int polycall_network_init_test_stubs(void);

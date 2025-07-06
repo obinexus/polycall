@@ -9,195 +9,162 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 // TODO: Implement polycall_js_bridge_init
 void polycall_js_bridge_init_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_js_bridge_cleanup
 void polycall_js_bridge_cleanup_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_js_bridge_register_function
 void polycall_js_bridge_register_function_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_js_bridge_call_function
 void polycall_js_bridge_call_function_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_js_bridge_to_js_value
 void polycall_js_bridge_to_js_value_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_js_bridge_from_js_value
 void polycall_js_bridge_from_js_value_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_js_bridge_setup_promise
 void polycall_js_bridge_setup_promise_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_js_bridge_handle_exception
 void polycall_js_bridge_handle_exception_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_js_bridge_get_interface
 void polycall_js_bridge_get_interface_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_js_bridge_create_default_config
 void polycall_js_bridge_create_default_config_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement js_convert_to_native
 void js_convert_to_native_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement js_convert_from_native
 void js_convert_from_native_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement js_register_function
 void js_register_function_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement js_call_function
 void js_call_function_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement js_acquire_memory
 void js_acquire_memory_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement js_release_memory
 void js_release_memory_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement js_handle_exception
 void js_handle_exception_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement js_initialize
 void js_initialize_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement js_cleanup
 void js_cleanup_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement init_js_function_registry
 void init_js_function_registry_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement cleanup_js_function_registry
 void cleanup_js_function_registry_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement init_promise_registry
 void init_promise_registry_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement cleanup_promise_registry
 void cleanup_promise_registry_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement setup_runtime_adapter
 void setup_runtime_adapter_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement setup_node_adapter
 void setup_node_adapter_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement setup_v8_adapter
 void setup_v8_adapter_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement setup_webkit_adapter
 void setup_webkit_adapter_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement setup_spidermonkey_adapter
 void setup_spidermonkey_adapter_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement setup_quickjs_adapter
 void setup_quickjs_adapter_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement setup_custom_adapter
 void setup_custom_adapter_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement convert_js_to_ffi_value
 void convert_js_to_ffi_value_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement convert_ffi_to_js_value
 void convert_ffi_to_js_value_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-

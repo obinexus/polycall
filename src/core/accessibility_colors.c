@@ -9,39 +9,32 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 // TODO: Implement polycall_colors_init
 void polycall_colors_init_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_format_colored_text
 void polycall_format_colored_text_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_colors_supported
 void polycall_colors_supported_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_colors_enable
 void polycall_colors_enable_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_set_color_theme
 void polycall_set_color_theme_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_get_color_theme
 void polycall_get_color_theme_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-

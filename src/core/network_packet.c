@@ -9,105 +9,87 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 // TODO: Implement polycall_network_server_create
 void polycall_network_server_create_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_network_server_start
 void polycall_network_server_start_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_network_server_stop
 void polycall_network_server_stop_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_network_server_accept
 void polycall_network_server_accept_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_network_server_disconnect
 void polycall_network_server_disconnect_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_network_server_send
 void polycall_network_server_send_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_network_server_receive
 void polycall_network_server_receive_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_network_server_send_message
 void polycall_network_server_send_message_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_network_server_broadcast
 void polycall_network_server_broadcast_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_network_server_register_handler
 void polycall_network_server_register_handler_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_network_server_get_endpoints
 void polycall_network_server_get_endpoints_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_network_server_get_stats
 void polycall_network_server_get_stats_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_network_server_set_option
 void polycall_network_server_set_option_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_network_server_get_option
 void polycall_network_server_get_option_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_network_server_process_events
 void polycall_network_server_process_events_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_network_server_cleanup
 void polycall_network_server_cleanup_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_network_server_create_default_config
 void polycall_network_server_create_default_config_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-

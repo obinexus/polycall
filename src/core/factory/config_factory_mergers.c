@@ -9,15 +9,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 // TODO: Implement config_merge
 void config_merge_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement config_merge_default_options
 void config_merge_default_options_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-

@@ -14,11 +14,11 @@ extern "C" {
  * protocol error codes
  */
 typedef enum protocol_error {
-    PROTOCOL_ERROR_SUCCESS = 0,
-    PROTOCOL_ERROR_INVALID_PARAMETERS = 1,
-    PROTOCOL_ERROR_OUT_OF_MEMORY = 2,
-    PROTOCOL_ERROR_NOT_INITIALIZED = 3,
-    // Add component-specific error codes here
+  PROTOCOL_ERROR_SUCCESS = 0,
+  PROTOCOL_ERROR_INVALID_PARAMETERS = 1,
+  PROTOCOL_ERROR_OUT_OF_MEMORY = 2,
+  PROTOCOL_ERROR_NOT_INITIALIZED = 3,
+  // Add component-specific error codes here
 } protocol_error_t;
 
 /**
@@ -27,7 +27,7 @@ typedef enum protocol_error {
  * @param error Error code
  * @return const char* Error message
  */
-const char* protocol_get_error_message(protocol_error_t error);
+const char *protocol_get_error_message(protocol_error_t error);
 
 #ifdef __cplusplus
 }

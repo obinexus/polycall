@@ -16,9 +16,9 @@ extern "C" {
  * auth container structure
  */
 typedef struct auth_container {
-    polycall_core_context_t* core_ctx;
-    void* module_data;
-    // Add component-specific fields here
+  polycall_core_context_t *core_ctx;
+  void *module_data;
+  // Add component-specific fields here
 } auth_container_t;
 
 /**
@@ -28,7 +28,8 @@ typedef struct auth_container {
  * @param container Pointer to receive container
  * @return int 0 on success, error code otherwise
  */
-int auth_container_init(polycall_core_context_t* core_ctx, auth_container_t** container);
+int auth_container_init(polycall_core_context_t *core_ctx,
+                        auth_container_t **container);
 
 /**
  * Register auth services
@@ -36,14 +37,14 @@ int auth_container_init(polycall_core_context_t* core_ctx, auth_container_t** co
  * @param container auth container
  * @return int 0 on success, error code otherwise
  */
-int auth_register_services(auth_container_t* container);
+int auth_register_services(auth_container_t *container);
 
 /**
  * Cleanup auth container
  *
  * @param container auth container
  */
-void auth_container_cleanup(auth_container_t* container);
+void auth_container_cleanup(auth_container_t *container);
 
 #ifdef __cplusplus
 }

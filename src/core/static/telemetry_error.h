@@ -14,11 +14,11 @@ extern "C" {
  * telemetry error codes
  */
 typedef enum telemetry_error {
-    TELEMETRY_ERROR_SUCCESS = 0,
-    TELEMETRY_ERROR_INVALID_PARAMETERS = 1,
-    TELEMETRY_ERROR_OUT_OF_MEMORY = 2,
-    TELEMETRY_ERROR_NOT_INITIALIZED = 3,
-    // Add component-specific error codes here
+  TELEMETRY_ERROR_SUCCESS = 0,
+  TELEMETRY_ERROR_INVALID_PARAMETERS = 1,
+  TELEMETRY_ERROR_OUT_OF_MEMORY = 2,
+  TELEMETRY_ERROR_NOT_INITIALIZED = 3,
+  // Add component-specific error codes here
 } telemetry_error_t;
 
 /**
@@ -27,7 +27,7 @@ typedef enum telemetry_error {
  * @param error Error code
  * @return const char* Error message
  */
-const char* telemetry_get_error_message(telemetry_error_t error);
+const char *telemetry_get_error_message(telemetry_error_t error);
 
 #ifdef __cplusplus
 }

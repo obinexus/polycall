@@ -9,45 +9,37 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 // TODO: Implement polycall_cobol_bridge_init
 void polycall_cobol_bridge_init_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_cobol_bridge_cleanup
 void polycall_cobol_bridge_cleanup_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_cobol_bridge_register_program
 void polycall_cobol_bridge_register_program_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_cobol_bridge_call_program
 void polycall_cobol_bridge_call_program_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_cobol_bridge_parse_copybook
 void polycall_cobol_bridge_parse_copybook_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_cobol_bridge_get_interface
 void polycall_cobol_bridge_get_interface_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_cobol_bridge_create_default_config
 void polycall_cobol_bridge_create_default_config_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-

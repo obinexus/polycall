@@ -18,7 +18,7 @@ extern "C" {
  * @param context Command context
  * @return int 0 on success, error code otherwise
  */
-int protocol_command_handler(int argc, char** argv, void* context);
+int protocol_command_handler(int argc, char **argv, void *context);
 
 /**
  * Register protocol commands

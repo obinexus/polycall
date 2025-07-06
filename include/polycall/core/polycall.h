@@ -11,8 +11,8 @@
 #ifndef POLYCALL_POLYCALL_H
 #define POLYCALL_POLYCALL_H
 
-#include <stddef.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
 /* Version information */
@@ -22,14 +22,14 @@
 #define POLYCALL_VERSION_STRING "2.0.0"
 
 /* Core includes - order matters */
-#include "polycall/core/polycall/polycall_types.h"
-#include "polycall/core/polycall/polycall_error.h"
 #include "polycall/core/polycall/polycall_context.h"
 #include "polycall/core/polycall/polycall_core.h"
+#include "polycall/core/polycall/polycall_error.h"
+#include "polycall/core/polycall/polycall_types.h"
 
 /* FFI subsystem */
-#include "polycall/core/ffi/ffi_types.h"
 #include "polycall/core/ffi/ffi_core.h"
+#include "polycall/core/ffi/ffi_types.h"
 
 /* Forward declarations for types used in API */
 #ifdef __cplusplus
@@ -41,8 +41,8 @@ typedef struct polycall_signature_t polycall_signature_t;
 typedef struct polycall_value_t polycall_value_t;
 typedef struct polycall_stats_t polycall_stats_t;
 typedef struct polycall_security_policy_t polycall_security_policy_t;
-typedef void (*polycall_async_callback_t)(void*);
-typedef void (*polycall_error_handler_t)(void*);
+typedef void (*polycall_async_callback_t)(void *);
+typedef void (*polycall_error_handler_t)(void *);
 
 #ifdef __cplusplus
 }
@@ -77,7 +77,7 @@ void polycall_shutdown(void);
  *
  * @return Version string in format "major.minor.patch"
  */
-const char* polycall_get_version(void);
+const char *polycall_get_version(void);
 
 /**
  * @brief Check if LibPolyCall is initialized
@@ -96,17 +96,15 @@ bool polycall_is_initialized(void);
  * @param config Configuration options (can be NULL for defaults)
  * @return Error code
  */
-polycall_core_error_t polycall_create_context(
-    polycall_core_context_t** ctx,
-    const polycall_config_t* config
-);
+polycall_core_error_t polycall_create_context(polycall_core_context_t **ctx,
+                                              const polycall_config_t *config);
 
 /**
  * @brief Destroy an execution context
  *
  * @param ctx Context to destroy
  */
-void polycall_destroy_context(polycall_core_context_t* ctx);
+void polycall_destroy_context(polycall_core_context_t *ctx);
 
 /**
  * @brief Register a language binding
@@ -119,11 +117,9 @@ void polycall_destroy_context(polycall_core_context_t* ctx);
  * @param bridge Language bridge implementation
  * @return Error code
  */
-polycall_core_error_t polycall_register_language(
-    polycall_core_context_t* ctx,
-    const char* language,
-    const language_bridge_t* bridge
-);
+polycall_core_error_t
+polycall_register_language(polycall_core_context_t *ctx, const char *language,
+                           const language_bridge_t *bridge);
 
 /**
  * @brief Export a function for cross-language calls
@@ -137,13 +133,10 @@ polycall_core_error_t polycall_register_language(
  * @param language Source language
  * @return Error code
  */
-polycall_core_error_t polycall_export_function(
-    polycall_core_context_t* ctx,
-    const char* name,
-    void* func,
-    const polycall_signature_t* signature,
-    const char* language
-);
+polycall_core_error_t
+polycall_export_function(polycall_core_context_t *ctx, const char *name,
+                         void *func, const polycall_signature_t *signature,
+                         const char *language);
 
 /**
  * @brief Import a function from another language
@@ -157,13 +150,10 @@ polycall_core_error_t polycall_export_function(
  * @param wrapper Pointer to receive the wrapper function
  * @return Error code
  */
-polycall_core_error_t polycall_import_function(
-    polycall_core_context_t* ctx,
-    const char* name,
-    const polycall_signature_t* signature,
-    const char* source_language,
-    void** wrapper
-);
+polycall_core_error_t
+polycall_import_function(polycall_core_context_t *ctx, const char *name,
+                         const polycall_signature_t *signature,
+                         const char *source_language, void **wrapper);
 
 /**
  * @brief Call a polymorphic function
@@ -178,13 +168,10 @@ polycall_core_error_t polycall_import_function(
  * @param result Pointer to receive the result
  * @return Error code
  */
-polycall_core_error_t polycall_call(
-    polycall_core_context_t* ctx,
-    const char* name,
-    const polycall_value_t* args,
-    size_t arg_count,
-    polycall_value_t* result
-);
+polycall_core_error_t polycall_call(polycall_core_context_t *ctx,
+                                    const char *name,
+                                    const polycall_value_t *args,
+                                    size_t arg_count, polycall_value_t *result);
 
 /**
  * @brief Call a polymorphic function asynchronously
@@ -197,14 +184,10 @@ polycall_core_error_t polycall_call(
  * @param user_data User data for callback
  * @return Error code
  */
-polycall_core_error_t polycall_call_async(
-    polycall_core_context_t* ctx,
-    const char* name,
-    const polycall_value_t* args,
-    size_t arg_count,
-    polycall_async_callback_t callback,
-    void* user_data
-);
+polycall_core_error_t
+polycall_call_async(polycall_core_context_t *ctx, const char *name,
+                    const polycall_value_t *args, size_t arg_count,
+                    polycall_async_callback_t callback, void *user_data);
 
 /**
  * @brief Set error handler
@@ -217,11 +200,9 @@ polycall_core_error_t polycall_call_async(
  * @param user_data User data for handler
  * @return Error code
  */
-polycall_core_error_t polycall_set_error_handler(
-    polycall_core_context_t* ctx,
-    polycall_error_handler_t handler,
-    void* user_data
-);
+polycall_core_error_t
+polycall_set_error_handler(polycall_core_context_t *ctx,
+                           polycall_error_handler_t handler, void *user_data);
 
 /**
  * @brief Enable performance profiling
@@ -230,10 +211,8 @@ polycall_core_error_t polycall_set_error_handler(
  * @param enable true to enable, false to disable
  * @return Error code
  */
-polycall_core_error_t polycall_enable_profiling(
-    polycall_core_context_t* ctx,
-    bool enable
-);
+polycall_core_error_t polycall_enable_profiling(polycall_core_context_t *ctx,
+                                                bool enable);
 
 /**
  * @brief Get performance statistics
@@ -242,10 +221,8 @@ polycall_core_error_t polycall_enable_profiling(
  * @param stats Pointer to receive statistics
  * @return Error code
  */
-polycall_core_error_t polycall_get_stats(
-    polycall_core_context_t* ctx,
-    polycall_stats_t* stats
-);
+polycall_core_error_t polycall_get_stats(polycall_core_context_t *ctx,
+                                         polycall_stats_t *stats);
 
 /**
  * @brief Configure security policy
@@ -254,10 +231,9 @@ polycall_core_error_t polycall_get_stats(
  * @param policy Security policy configuration
  * @return Error code
  */
-polycall_core_error_t polycall_set_security_policy(
-    polycall_core_context_t* ctx,
-    const polycall_security_policy_t* policy
-);
+polycall_core_error_t
+polycall_set_security_policy(polycall_core_context_t *ctx,
+                             const polycall_security_policy_t *policy);
 
 /**
  * @brief Get last error message
@@ -265,14 +241,14 @@ polycall_core_error_t polycall_set_security_policy(
  * @param ctx Execution context
  * @return Error message string or NULL
  */
-const char* polycall_get_error_message(polycall_core_context_t* ctx);
+const char *polycall_get_error_message(polycall_core_context_t *ctx);
 
 /**
  * @brief Clear error state
  *
  * @param ctx Execution context
  */
-void polycall_clear_error(polycall_core_context_t* ctx);
+void polycall_clear_error(polycall_core_context_t *ctx);
 
 #ifdef __cplusplus
 }

@@ -10,13 +10,13 @@ extern "C" {
 typedef struct topology_manager topology_manager_t;
 
 enum {
-    TOPOLOGY_LAYER_PYTHON = 0,
-    TOPOLOGY_LAYER_GO,
-    TOPOLOGY_LAYER_NODEJS,
-    TOPOLOGY_LAYER_MAX
+  TOPOLOGY_LAYER_PYTHON = 0,
+  TOPOLOGY_LAYER_GO,
+  TOPOLOGY_LAYER_NODEJS,
+  TOPOLOGY_LAYER_MAX
 };
 
-int topology_manager_validate_transition(topology_manager_t* manager,
+int topology_manager_validate_transition(topology_manager_t *manager,
                                          uint32_t from_layer,
                                          uint32_t to_layer);
 

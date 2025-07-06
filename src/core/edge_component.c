@@ -9,117 +9,97 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 // TODO: Implement polycall_edge_component_create
 void polycall_edge_component_create_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_edge_component_start
 void polycall_edge_component_start_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_edge_component_stop
 void polycall_edge_component_stop_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_edge_component_get_status
 void polycall_edge_component_get_status_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_edge_component_register_processor
 void polycall_edge_component_register_processor_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_edge_component_register_event_callback
 void polycall_edge_component_register_event_callback_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_edge_component_process_task
 void polycall_edge_component_process_task_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_edge_component_process_task_async
 void polycall_edge_component_process_task_async_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_edge_component_add_node
 void polycall_edge_component_add_node_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_edge_component_remove_node
 void polycall_edge_component_remove_node_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_edge_component_start_discovery
 void polycall_edge_component_start_discovery_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_edge_component_stop_discovery
 void polycall_edge_component_stop_discovery_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_edge_component_get_metrics
 void polycall_edge_component_get_metrics_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_edge_component_get_nodes
 void polycall_edge_component_get_nodes_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_edge_component_get_node_metrics
 void polycall_edge_component_get_node_metrics_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_edge_component_update_config
 void polycall_edge_component_update_config_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_edge_component_get_config
 void polycall_edge_component_get_config_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_edge_component_default_config
 void polycall_edge_component_default_config_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_edge_component_destroy
 void polycall_edge_component_destroy_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-

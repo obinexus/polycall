@@ -16,9 +16,9 @@ extern "C" {
  * protocol container structure
  */
 typedef struct protocol_container {
-    polycall_core_context_t* core_ctx;
-    void* module_data;
-    // Add component-specific fields here
+  polycall_core_context_t *core_ctx;
+  void *module_data;
+  // Add component-specific fields here
 } protocol_container_t;
 
 /**
@@ -28,7 +28,8 @@ typedef struct protocol_container {
  * @param container Pointer to receive container
  * @return int 0 on success, error code otherwise
  */
-int protocol_container_init(polycall_core_context_t* core_ctx, protocol_container_t** container);
+int protocol_container_init(polycall_core_context_t *core_ctx,
+                            protocol_container_t **container);
 
 /**
  * Register protocol services
@@ -36,14 +37,14 @@ int protocol_container_init(polycall_core_context_t* core_ctx, protocol_containe
  * @param container protocol container
  * @return int 0 on success, error code otherwise
  */
-int protocol_register_services(protocol_container_t* container);
+int protocol_register_services(protocol_container_t *container);
 
 /**
  * Cleanup protocol container
  *
  * @param container protocol container
  */
-void protocol_container_cleanup(protocol_container_t* container);
+void protocol_container_cleanup(protocol_container_t *container);
 
 #ifdef __cplusplus
 }

@@ -10,7 +10,7 @@
 
 /**
  * Register all command modules
- * 
+ *
  * @return true if all commands registered successfully, false otherwise
  */
 bool register_all_commands(void);

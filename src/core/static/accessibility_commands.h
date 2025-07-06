@@ -18,7 +18,7 @@ extern "C" {
  * @param context Command context
  * @return int 0 on success, error code otherwise
  */
-int accessibility_command_handler(int argc, char** argv, void* context);
+int accessibility_command_handler(int argc, char **argv, void *context);
 
 /**
  * Register accessibility commands

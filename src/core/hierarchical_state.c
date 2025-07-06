@@ -9,87 +9,72 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 // TODO: Implement polycall_hierarchical_state_init
 void polycall_hierarchical_state_init_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_hierarchical_state_cleanup
 void polycall_hierarchical_state_cleanup_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_hierarchical_state_add
 void polycall_hierarchical_state_add_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_hierarchical_state_add_transition
 void polycall_hierarchical_state_add_transition_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_hierarchical_state_execute_transition
 void polycall_hierarchical_state_execute_transition_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_hierarchical_state_has_permission
 void polycall_hierarchical_state_has_permission_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_hierarchical_state_get_permissions
 void polycall_hierarchical_state_get_permissions_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_hierarchical_state_get_path
 void polycall_hierarchical_state_get_path_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_hierarchical_state_is_active
 void polycall_hierarchical_state_is_active_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_hierarchical_state_add_permission
 void polycall_hierarchical_state_add_permission_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_hierarchical_state_remove_permission
 void polycall_hierarchical_state_remove_permission_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_hierarchical_state_set_inheritance
 void polycall_hierarchical_state_set_inheritance_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_hierarchical_state_get_parent
 void polycall_hierarchical_state_get_parent_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_hierarchical_state_get_children
 void polycall_hierarchical_state_get_children_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-

@@ -11,8 +11,8 @@
 #ifndef POLYCALL_ACCESSIBILITY_AUDIO_H
 #define POLYCALL_ACCESSIBILITY_AUDIO_H
 
-#include <stdbool.h>
 #include "polycall/core/polycall/polycall_error.h"
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -22,14 +22,15 @@ extern "C" {
  * @brief Audio notification type enumeration
  */
 typedef enum {
-    POLYCALL_AUDIO_NOTIFICATION_NONE,       /**< No notification */
-    POLYCALL_AUDIO_NOTIFICATION_INFO,       /**< Informational notification */
-    POLYCALL_AUDIO_NOTIFICATION_SUCCESS,    /**< Success notification */
-    POLYCALL_AUDIO_NOTIFICATION_WARNING,    /**< Warning notification */
-    POLYCALL_AUDIO_NOTIFICATION_ERROR,      /**< Error notification */
-    POLYCALL_AUDIO_NOTIFICATION_PROMPT,     /**< Command prompt notification */
-    POLYCALL_AUDIO_NOTIFICATION_COMPLETION, /**< Command completion notification */
-    POLYCALL_AUDIO_NOTIFICATION_PROGRESS    /**< Progress update notification */
+  POLYCALL_AUDIO_NOTIFICATION_NONE,       /**< No notification */
+  POLYCALL_AUDIO_NOTIFICATION_INFO,       /**< Informational notification */
+  POLYCALL_AUDIO_NOTIFICATION_SUCCESS,    /**< Success notification */
+  POLYCALL_AUDIO_NOTIFICATION_WARNING,    /**< Warning notification */
+  POLYCALL_AUDIO_NOTIFICATION_ERROR,      /**< Error notification */
+  POLYCALL_AUDIO_NOTIFICATION_PROMPT,     /**< Command prompt notification */
+  POLYCALL_AUDIO_NOTIFICATION_COMPLETION, /**< Command completion notification
+                                           */
+  POLYCALL_AUDIO_NOTIFICATION_PROGRESS    /**< Progress update notification */
 } polycall_audio_notification_t;
 
 /**
@@ -38,7 +39,7 @@ typedef enum {
  * @param core_ctx Core context
  * @return polycall_core_error_t Error code
  */
-polycall_core_error_t polycall_audio_init(polycall_core_context_t* core_ctx);
+polycall_core_error_t polycall_audio_init(polycall_core_context_t *core_ctx);
 
 /**
  * @brief Play audio notification
@@ -48,9 +49,8 @@ polycall_core_error_t polycall_audio_init(polycall_core_context_t* core_ctx);
  * @return polycall_core_error_t Error code
  */
 polycall_core_error_t polycall_audio_play_notification(
-    polycall_core_context_t* core_ctx,
-    polycall_audio_notification_t notification_type
-);
+    polycall_core_context_t *core_ctx,
+    polycall_audio_notification_t notification_type);
 
 /**
  * @brief Enable or disable audio notifications
@@ -59,10 +59,8 @@ polycall_core_error_t polycall_audio_play_notification(
  * @param enable True to enable, false to disable
  * @return polycall_core_error_t Error code
  */
-polycall_core_error_t polycall_audio_enable(
-    polycall_core_context_t* core_ctx,
-    bool enable
-);
+polycall_core_error_t polycall_audio_enable(polycall_core_context_t *core_ctx,
+                                            bool enable);
 
 /**
  * @brief Check if audio notifications are enabled
@@ -71,10 +69,8 @@ polycall_core_error_t polycall_audio_enable(
  * @param enabled Pointer to receive enabled status
  * @return polycall_core_error_t Error code
  */
-polycall_core_error_t polycall_audio_is_enabled(
-    polycall_core_context_t* core_ctx,
-    bool* enabled
-);
+polycall_core_error_t
+polycall_audio_is_enabled(polycall_core_context_t *core_ctx, bool *enabled);
 
 /**
  * @brief Configure audio notification volume
@@ -83,17 +79,15 @@ polycall_core_error_t polycall_audio_is_enabled(
  * @param volume Volume level (0-100)
  * @return polycall_core_error_t Error code
  */
-polycall_core_error_t polycall_audio_set_volume(
-    polycall_core_context_t* core_ctx,
-    int volume
-);
+polycall_core_error_t
+polycall_audio_set_volume(polycall_core_context_t *core_ctx, int volume);
 
 /**
  * @brief Cleanup audio notification system
  *
  * @param core_ctx Core context
  */
-void polycall_audio_cleanup(polycall_core_context_t* core_ctx);
+void polycall_audio_cleanup(polycall_core_context_t *core_ctx);
 
 #ifdef __cplusplus
 }

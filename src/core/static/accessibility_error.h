@@ -14,11 +14,11 @@ extern "C" {
  * accessibility error codes
  */
 typedef enum accessibility_error {
-    ACCESSIBILITY_ERROR_SUCCESS = 0,
-    ACCESSIBILITY_ERROR_INVALID_PARAMETERS = 1,
-    ACCESSIBILITY_ERROR_OUT_OF_MEMORY = 2,
-    ACCESSIBILITY_ERROR_NOT_INITIALIZED = 3,
-    // Add component-specific error codes here
+  ACCESSIBILITY_ERROR_SUCCESS = 0,
+  ACCESSIBILITY_ERROR_INVALID_PARAMETERS = 1,
+  ACCESSIBILITY_ERROR_OUT_OF_MEMORY = 2,
+  ACCESSIBILITY_ERROR_NOT_INITIALIZED = 3,
+  // Add component-specific error codes here
 } accessibility_error_t;
 
 /**
@@ -27,7 +27,7 @@ typedef enum accessibility_error {
  * @param error Error code
  * @return const char* Error message
  */
-const char* accessibility_get_error_message(accessibility_error_t error);
+const char *accessibility_get_error_message(accessibility_error_t error);
 
 #ifdef __cplusplus
 }

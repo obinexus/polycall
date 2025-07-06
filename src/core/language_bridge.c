@@ -8,4 +8,3 @@
 #include "polycall/core/ffi/language_bridge.h"
 #include <stdlib.h>
 #include <string.h>
-

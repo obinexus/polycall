@@ -9,15 +9,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 // TODO: Implement polycall_network_event_init
 void polycall_network_event_init_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_network_event_cleanup
 void polycall_network_event_cleanup_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-

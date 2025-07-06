@@ -9,15 +9,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 // TODO: Implement polycall_config_destroy
 void polycall_config_destroy_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_config_parser_destroy
 void polycall_config_parser_destroy_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-

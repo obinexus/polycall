@@ -6,10 +6,10 @@ extern "C" {
 #endif
 
 typedef struct polycall_version {
-	int major;
-	int minor;
-	int patch;
-	const char* string;
+  int major;
+  int minor;
+  int patch;
+  const char *string;
 } polycall_version_t;
 
 polycall_version_t polycall_get_version(void);

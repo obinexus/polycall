@@ -9,51 +9,42 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 // TODO: Implement polycall_c_bridge_init
 void polycall_c_bridge_init_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_c_bridge_cleanup
 void polycall_c_bridge_cleanup_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_c_bridge_register_function
 void polycall_c_bridge_register_function_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_c_bridge_call_function
 void polycall_c_bridge_call_function_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_c_bridge_register_struct
 void polycall_c_bridge_register_struct_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_c_bridge_setup_callback
 void polycall_c_bridge_setup_callback_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_c_bridge_get_interface
 void polycall_c_bridge_get_interface_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_c_bridge_create_default_config
 void polycall_c_bridge_create_default_config_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-

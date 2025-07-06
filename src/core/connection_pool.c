@@ -9,63 +9,52 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 // TODO: Implement polycall_connection_pool_init
 void polycall_connection_pool_init_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_connection_pool_cleanup
 void polycall_connection_pool_cleanup_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_connection_pool_acquire
 void polycall_connection_pool_acquire_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_connection_pool_release
 void polycall_connection_pool_release_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_connection_pool_get_stats
 void polycall_connection_pool_get_stats_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_connection_pool_resize
 void polycall_connection_pool_resize_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_connection_pool_validate
 void polycall_connection_pool_validate_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_connection_pool_default_config
 void polycall_connection_pool_default_config_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_connection_pool_set_strategy
 void polycall_connection_pool_set_strategy_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_connection_pool_warm_up
 void polycall_connection_pool_warm_up_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-

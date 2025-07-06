@@ -21,15 +21,15 @@
 #ifndef POLYCALL_POLYCALL_POLYCALL_H_H
 #define POLYCALL_POLYCALL_POLYCALL_H_H
 
-#include <pthread.h>
-#include <stdbool.h>
 #include <arpa/inet.h>
+#include <errno.h>
+#include <pthread.h>
+#include <stdarg.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdarg.h>
 #include <unistd.h>
-#include <errno.h>
 
 // Forward declarations of opaque types
 typedef struct polycall_context polycall_context_t;
@@ -39,29 +39,27 @@ typedef struct polycall_core_context polycall_core_context_t;
 
 // Error type definition
 typedef enum polycall_error {
-	POLYCALL_OK = 0,
-	POLYCALL_ERROR_INVALID_PARAMETERS,
-	POLYCALL_ERROR_OUT_OF_MEMORY,
-	POLYCALL_ERROR_INITIALIZATION_FAILED,
-	POLYCALL_ERROR_CONNECTION_FAILED,
-	POLYCALL_ERROR_NOT_CONNECTED,
-	POLYCALL_ERROR_SEND_FAILED,
-	POLYCALL_ERROR_RECEIVE_FAILED
+  POLYCALL_OK = 0,
+  POLYCALL_ERROR_INVALID_PARAMETERS,
+  POLYCALL_ERROR_OUT_OF_MEMORY,
+  POLYCALL_ERROR_INITIALIZATION_FAILED,
+  POLYCALL_ERROR_CONNECTION_FAILED,
+  POLYCALL_ERROR_NOT_CONNECTED,
+  POLYCALL_ERROR_SEND_FAILED,
+  POLYCALL_ERROR_RECEIVE_FAILED
 } polycall_error_t;
 
 // Message type definition
 typedef enum polycall_message_type {
-	POLYCALL_MESSAGE_REQUEST,
-	POLYCALL_MESSAGE_RESPONSE,
-	POLYCALL_MESSAGE_NOTIFICATION
+  POLYCALL_MESSAGE_REQUEST,
+  POLYCALL_MESSAGE_RESPONSE,
+  POLYCALL_MESSAGE_NOTIFICATION
 } polycall_message_type_t;
 #include "polycall/core/polycall/polycall_config.h"
 #include "polycall/core/polycall/polycall_core.h"
 #include "polycall/core/polycall/polycall_error.h"
 #include "polycall/core/polycall/polycall_logger.h"
 #include "polycall/core/polycall/polycall_version.h"
-
-
 
 #ifdef __cplusplus
 extern "C" {
@@ -75,71 +73,68 @@ extern "C" {
 #define POLYCALL_POLYCALL_POLYCALL_H_H
 #define POLYCALL_POLYCALL_POLYCALL_H_H
 
- 
- // Internal context structure that extends the opaque public type
- struct polycall_context {
-	polycall_core_context_t* core_ctx;
-	polycall_error_t last_error;
-	char error_message[256];
-	void* user_data;
-	
-	// Extension for FFI integration
-	struct {
-		bool ffi_initialized;
-		void* ffi_context;
-	} ffi;
-	
-	// Extension for protocol integration
-	struct {
-		bool protocol_initialized;
-		void* protocol_context;
-	} protocol;
+// Internal context structure that extends the opaque public type
+struct polycall_context {
+  polycall_core_context_t *core_ctx;
+  polycall_error_t last_error;
+  char error_message[256];
+  void *user_data;
+
+  // Extension for FFI integration
+  struct {
+    bool ffi_initialized;
+    void *ffi_context;
+  } ffi;
+
+  // Extension for protocol integration
+  struct {
+    bool protocol_initialized;
+    void *protocol_context;
+  } protocol;
 };
 
 // Internal session structure
 struct polycall_session {
-	polycall_context_t* ctx;
-	void* connection;
-	char address[INET_ADDRSTRLEN];
-	uint16_t port;
-	bool connected;
-	bool authenticated;
-	uint32_t timeout_ms;
-	uint32_t sequence_number;
-	void* secure_context;
+  polycall_context_t *ctx;
+  void *connection;
+  char address[INET_ADDRSTRLEN];
+  uint16_t port;
+  bool connected;
+  bool authenticated;
+  uint32_t timeout_ms;
+  uint32_t sequence_number;
+  void *secure_context;
 };
 
 // Internal message structure
 struct polycall_message {
-	polycall_message_type_t type;
-	char path[256];
-	void* data;
-	size_t data_size;
-	void* json_data;
-	uint32_t flags;
-	uint32_t sequence;
-	void* secure_envelope;
+  polycall_message_type_t type;
+  char path[256];
+  void *data;
+  size_t data_size;
+  void *json_data;
+  uint32_t flags;
+  uint32_t sequence;
+  void *secure_envelope;
 };
 // Internal configuration structure
 
 /**
  * @brief Initialize the LibPolyCall library
- * 
+ *
  * @param ctx Pointer to receive context
  * @param config Configuration (NULL for defaults)
  * @return Error code
  */
-polycall_error_t polycall_init(
-	polycall_context_t** ctx,
-	const polycall_config_t* config
-);
+polycall_error_t polycall_init(polycall_context_t **ctx,
+                               const polycall_config_t *config);
 
 /**
  * @brief Clean up and release LibPolyCall resources
  *
  * @param ctx Context to clean up
  */
-void polycall_cleanup(polycall_context_t* ctx);
+void polycall_cleanup(polycall_context_t *ctx);
 
 /**
  * @brief Get the LibPolyCall version
@@ -154,7 +149,7 @@ polycall_version_t polycall_get_version(void);
  * @param ctx Context
  * @return Error message string
  */
-const char* polycall_get_error_message(polycall_context_t* ctx);
+const char *polycall_get_error_message(polycall_context_t *ctx);
 
 /**
  * @brief Get the last error code
@@ -162,7 +157,7 @@ const char* polycall_get_error_message(polycall_context_t* ctx);
  * @param ctx Context
  * @return Error code
  */
-polycall_error_t polycall_get_error_code(polycall_context_t* ctx);
+polycall_error_t polycall_get_error_code(polycall_context_t *ctx);
 
 /**
  * @brief Connect to a server
@@ -172,11 +167,9 @@ polycall_error_t polycall_get_error_code(polycall_context_t* ctx);
  * @param info Connection information
  * @return Error code
  */
-polycall_error_t polycall_connect(
-	polycall_context_t* ctx,
-	polycall_session_t** session,
-	const polycall_connection_info_t* info
-);
+polycall_error_t polycall_connect(polycall_context_t *ctx,
+                                  polycall_session_t **session,
+                                  const polycall_connection_info_t *info);
 
 /**
  * @brief Disconnect from a server
@@ -185,10 +178,8 @@ polycall_error_t polycall_connect(
  * @param session Session to disconnect
  * @return Error code
  */
-polycall_error_t polycall_disconnect(
-	polycall_context_t* ctx,
-	polycall_session_t* session
-);
+polycall_error_t polycall_disconnect(polycall_context_t *ctx,
+                                     polycall_session_t *session);
 
 /**
  * @brief Create a message
@@ -198,11 +189,9 @@ polycall_error_t polycall_disconnect(
  * @param type Message type
  * @return Error code
  */
-polycall_error_t polycall_create_message(
-	polycall_context_t* ctx,
-	polycall_message_t** message,
-	polycall_message_type_t type
-);
+polycall_error_t polycall_create_message(polycall_context_t *ctx,
+                                         polycall_message_t **message,
+                                         polycall_message_type_t type);
 
 /**
  * @brief Destroy a message
@@ -211,10 +200,8 @@ polycall_error_t polycall_create_message(
  * @param message Message to destroy
  * @return Error code
  */
-polycall_error_t polycall_destroy_message(
-	polycall_context_t* ctx,
-	polycall_message_t* message
-);
+polycall_error_t polycall_destroy_message(polycall_context_t *ctx,
+                                          polycall_message_t *message);
 
 /**
  * @brief Set message path
@@ -224,11 +211,9 @@ polycall_error_t polycall_destroy_message(
  * @param path Path to set
  * @return Error code
  */
-polycall_error_t polycall_message_set_path(
-	polycall_context_t* ctx,
-	polycall_message_t* message,
-	const char* path
-);
+polycall_error_t polycall_message_set_path(polycall_context_t *ctx,
+                                           polycall_message_t *message,
+                                           const char *path);
 
 /**
  * @brief Set message data
@@ -239,12 +224,9 @@ polycall_error_t polycall_message_set_path(
  * @param size Size of data
  * @return Error code
  */
-polycall_error_t polycall_message_set_data(
-	polycall_context_t* ctx,
-	polycall_message_t* message,
-	const void* data,
-	size_t size
-);
+polycall_error_t polycall_message_set_data(polycall_context_t *ctx,
+                                           polycall_message_t *message,
+                                           const void *data, size_t size);
 
 /**
  * @brief Set message string
@@ -254,11 +236,9 @@ polycall_error_t polycall_message_set_data(
  * @param string String to set
  * @return Error code
  */
-polycall_error_t polycall_message_set_string(
-	polycall_context_t* ctx,
-	polycall_message_t* message,
-	const char* string
-);
+polycall_error_t polycall_message_set_string(polycall_context_t *ctx,
+                                             polycall_message_t *message,
+                                             const char *string);
 
 /**
  * @brief Set message JSON
@@ -268,11 +248,9 @@ polycall_error_t polycall_message_set_string(
  * @param json JSON to set
  * @return Error code
  */
-polycall_error_t polycall_message_set_json(
-	polycall_context_t* ctx,
-	polycall_message_t* message,
-	const char* json
-);
+polycall_error_t polycall_message_set_json(polycall_context_t *ctx,
+                                           polycall_message_t *message,
+                                           const char *json);
 
 /**
  * @brief Send a message
@@ -283,12 +261,10 @@ polycall_error_t polycall_message_set_json(
  * @param response Pointer to receive response (NULL to ignore)
  * @return Error code
  */
-polycall_error_t polycall_send_message(
-	polycall_context_t* ctx,
-	polycall_session_t* session,
-	polycall_message_t* message,
-	polycall_message_t** response
-);
+polycall_error_t polycall_send_message(polycall_context_t *ctx,
+                                       polycall_session_t *session,
+                                       polycall_message_t *message,
+                                       polycall_message_t **response);
 
 /**
  * @brief Get message path
@@ -297,10 +273,8 @@ polycall_error_t polycall_send_message(
  * @param message Message
  * @return Path
  */
-const char* polycall_message_get_path(
-	polycall_context_t* ctx,
-	polycall_message_t* message
-);
+const char *polycall_message_get_path(polycall_context_t *ctx,
+                                      polycall_message_t *message);
 
 /**
  * @brief Get message data
@@ -310,11 +284,9 @@ const char* polycall_message_get_path(
  * @param size Pointer to receive size
  * @return Data
  */
-const void* polycall_message_get_data(
-	polycall_context_t* ctx,
-	polycall_message_t* message,
-	size_t* size
-);
+const void *polycall_message_get_data(polycall_context_t *ctx,
+                                      polycall_message_t *message,
+                                      size_t *size);
 
 /**
  * @brief Get message string
@@ -323,10 +295,8 @@ const void* polycall_message_get_data(
  * @param message Message
  * @return String
  */
-const char* polycall_message_get_string(
-	polycall_context_t* ctx,
-	polycall_message_t* message
-);
+const char *polycall_message_get_string(polycall_context_t *ctx,
+                                        polycall_message_t *message);
 
 /**
  * @brief Get message JSON
@@ -335,10 +305,8 @@ const char* polycall_message_get_string(
  * @param message Message
  * @return JSON
  */
-const char* polycall_message_get_json(
-	polycall_context_t* ctx,
-	polycall_message_t* message
-);
+const char *polycall_message_get_json(polycall_context_t *ctx,
+                                      polycall_message_t *message);
 
 /**
  * @brief Create default configuration
@@ -347,15 +315,13 @@ const char* polycall_message_get_json(
  */
 polycall_config_t polycall_create_default_config(void);
 
-
-
 /**
  * @brief Load configuration
  *
  * @param filename File to load
  * @return Configuration
  */
-polycall_config_t polycall_load_config(const char* filename);
+polycall_config_t polycall_load_config(const char *filename);
 
 /**
  * @brief Initialize FFI subsystem
@@ -364,10 +330,8 @@ polycall_config_t polycall_load_config(const char* filename);
  * @param ffi_config FFI configuration
  * @return Error code
  */
-polycall_error_t polycall_init_ffi(
-	polycall_context_t* ctx,
-	const void* ffi_config
-);
+polycall_error_t polycall_init_ffi(polycall_context_t *ctx,
+                                   const void *ffi_config);
 
 /**
  * @brief Initialize protocol subsystem
@@ -376,10 +340,8 @@ polycall_error_t polycall_init_ffi(
  * @param protocol_config Protocol configuration
  * @return Error code
  */
-polycall_error_t polycall_init_protocol(
-	polycall_context_t* ctx,
-	const void* protocol_config
-);
+polycall_error_t polycall_init_protocol(polycall_context_t *ctx,
+                                        const void *protocol_config);
 
 /**
  * @brief Set user data
@@ -388,10 +350,8 @@ polycall_error_t polycall_init_protocol(
  * @param user_data User data
  * @return Error code
  */
-polycall_error_t polycall_set_user_data(
-	polycall_context_t* ctx,
-	void* user_data
-);
+polycall_error_t polycall_set_user_data(polycall_context_t *ctx,
+                                        void *user_data);
 
 /**
  * @brief Get user data
@@ -399,7 +359,7 @@ polycall_error_t polycall_set_user_data(
  * @param ctx Context
  * @return User data
  */
-void* polycall_get_user_data(polycall_context_t* ctx);
+void *polycall_get_user_data(polycall_context_t *ctx);
 
 /**
  * @brief Register callback
@@ -409,12 +369,10 @@ void* polycall_get_user_data(polycall_context_t* ctx);
  * @param user_data User data
  * @return Error code
  */
-polycall_error_t polycall_register_callback(
-	polycall_context_t* ctx,
-	uint32_t event_type,
-	void (*callback)(polycall_context_t*, void*),
-	void* user_data
-);
+polycall_error_t
+polycall_register_callback(polycall_context_t *ctx, uint32_t event_type,
+                           void (*callback)(polycall_context_t *, void *),
+                           void *user_data);
 
 /**
  * @brief Unregister callback
@@ -424,11 +382,9 @@ polycall_error_t polycall_register_callback(
  * @param callback Callback function
  * @return Error code
  */
-polycall_error_t polycall_unregister_callback(
-	polycall_context_t* ctx,
-	uint32_t event_type,
-	void (*callback)(polycall_context_t*, void*)
-);
+polycall_error_t
+polycall_unregister_callback(polycall_context_t *ctx, uint32_t event_type,
+                             void (*callback)(polycall_context_t *, void *));
 
 /**
  * @brief Set log callback
@@ -438,11 +394,10 @@ polycall_error_t polycall_unregister_callback(
  * @param user_data User data
  * @return Error code
  */
-polycall_error_t polycall_set_log_callback(
-	polycall_context_t* ctx,
-	void (*callback)(int, const char*, void*),
-	void* user_data
-);
+polycall_error_t polycall_set_log_callback(polycall_context_t *ctx,
+                                           void (*callback)(int, const char *,
+                                                            void *),
+                                           void *user_data);
 
 /**
  * @brief Process messages
@@ -452,11 +407,9 @@ polycall_error_t polycall_set_log_callback(
  * @param timeout_ms Timeout in milliseconds
  * @return Error code
  */
-polycall_error_t polycall_process_messages(
-	polycall_context_t* ctx,
-	polycall_session_t* session,
-	uint32_t timeout_ms
-);
+polycall_error_t polycall_process_messages(polycall_context_t *ctx,
+                                           polycall_session_t *session,
+                                           uint32_t timeout_ms);
 
 /**
  * @brief Initialize all subsystems
@@ -465,10 +418,8 @@ polycall_error_t polycall_process_messages(
  * @param config Configuration
  * @return Error code
  */
-polycall_error_t polycall_init_all(
-	polycall_context_t** ctx,
-	const polycall_config_t* config
-);
+polycall_error_t polycall_init_all(polycall_context_t **ctx,
+                                   const polycall_config_t *config);
 
 #ifdef __cplusplus
 }

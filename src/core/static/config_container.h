@@ -16,9 +16,9 @@ extern "C" {
  * config container structure
  */
 typedef struct config_container {
-    polycall_core_context_t* core_ctx;
-    void* module_data;
-    // Add component-specific fields here
+  polycall_core_context_t *core_ctx;
+  void *module_data;
+  // Add component-specific fields here
 } config_container_t;
 
 /**
@@ -28,7 +28,8 @@ typedef struct config_container {
  * @param container Pointer to receive container
  * @return int 0 on success, error code otherwise
  */
-int config_container_init(polycall_core_context_t* core_ctx, config_container_t** container);
+int config_container_init(polycall_core_context_t *core_ctx,
+                          config_container_t **container);
 
 /**
  * Register config services
@@ -36,14 +37,14 @@ int config_container_init(polycall_core_context_t* core_ctx, config_container_t*
  * @param container config container
  * @return int 0 on success, error code otherwise
  */
-int config_register_services(config_container_t* container);
+int config_register_services(config_container_t *container);
 
 /**
  * Cleanup config container
  *
  * @param container config container
  */
-void config_container_cleanup(config_container_t* container);
+void config_container_cleanup(config_container_t *container);
 
 #ifdef __cplusplus
 }

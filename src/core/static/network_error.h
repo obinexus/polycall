@@ -14,11 +14,11 @@ extern "C" {
  * network error codes
  */
 typedef enum network_error {
-    NETWORK_ERROR_SUCCESS = 0,
-    NETWORK_ERROR_INVALID_PARAMETERS = 1,
-    NETWORK_ERROR_OUT_OF_MEMORY = 2,
-    NETWORK_ERROR_NOT_INITIALIZED = 3,
-    // Add component-specific error codes here
+  NETWORK_ERROR_SUCCESS = 0,
+  NETWORK_ERROR_INVALID_PARAMETERS = 1,
+  NETWORK_ERROR_OUT_OF_MEMORY = 2,
+  NETWORK_ERROR_NOT_INITIALIZED = 3,
+  // Add component-specific error codes here
 } network_error_t;
 
 /**
@@ -27,7 +27,7 @@ typedef enum network_error {
  * @param error Error code
  * @return const char* Error message
  */
-const char* network_get_error_message(network_error_t error);
+const char *network_get_error_message(network_error_t error);
 
 #ifdef __cplusplus
 }

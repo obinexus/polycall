@@ -9,81 +9,67 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 // TODO: Implement polycall_python_bridge_init
 void polycall_python_bridge_init_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_python_bridge_cleanup
 void polycall_python_bridge_cleanup_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_python_bridge_register_function
 void polycall_python_bridge_register_function_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_python_bridge_call_function
 void polycall_python_bridge_call_function_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_python_bridge_to_python_value
 void polycall_python_bridge_to_python_value_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_python_bridge_from_python_value
 void polycall_python_bridge_from_python_value_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_python_bridge_exec_code
 void polycall_python_bridge_exec_code_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_python_bridge_import_module
 void polycall_python_bridge_import_module_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_python_bridge_handle_exception
 void polycall_python_bridge_handle_exception_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_python_bridge_get_version
 void polycall_python_bridge_get_version_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_python_bridge_gil_control
 void polycall_python_bridge_gil_control_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_python_bridge_get_interface
 void polycall_python_bridge_get_interface_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_python_bridge_create_default_config
 void polycall_python_bridge_create_default_config_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-

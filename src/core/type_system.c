@@ -9,87 +9,72 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 // TODO: Implement polycall_type_init
 void polycall_type_init_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_type_cleanup
 void polycall_type_cleanup_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_type_register
 void polycall_type_register_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_type_find_by_name
 void polycall_type_find_by_name_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_type_register_conversion
 void polycall_type_register_conversion_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_type_convert
 void polycall_type_convert_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_type_validate
 void polycall_type_validate_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_type_serialize
 void polycall_type_serialize_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_type_deserialize
 void polycall_type_deserialize_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_type_create_struct
 void polycall_type_create_struct_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_type_create_array
 void polycall_type_create_array_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_type_get_canonical
 void polycall_type_get_canonical_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_type_get_language_specific
 void polycall_type_get_language_specific_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_type_create_default_config
 void polycall_type_create_default_config_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-

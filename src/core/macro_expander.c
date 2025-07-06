@@ -9,39 +9,32 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 // TODO: Implement polycall_macro_expander_destroy
 void polycall_macro_expander_destroy_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_macro_register
 void polycall_macro_register_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_macro_register_parameterized
 void polycall_macro_register_parameterized_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_macro_enter_scope
 void polycall_macro_enter_scope_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_macro_exit_scope
 void polycall_macro_exit_scope_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_macro_expand_ast
 void polycall_macro_expand_ast_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-

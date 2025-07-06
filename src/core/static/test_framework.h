@@ -7,12 +7,12 @@
 #ifndef POLYCALL_TEST_FRAMEWORK_H
 #define POLYCALL_TEST_FRAMEWORK_H
 
+#include <stdarg.h>
+#include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
-#include <stdint.h>
-#include <stdarg.h>
 #include <time.h>
 
 /*******************************************************************************
@@ -51,17 +51,26 @@
 /**
  * @brief Arrange test phase - setup the test environment
  */
-#define POLYCALL_ARRANGE_PHASE(description)     do {         polycall_test_log_info("ARRANGE: %s", description);     } while (0)
+#define POLYCALL_ARRANGE_PHASE(description)                                    \
+  do {                                                                         \
+    polycall_test_log_info("ARRANGE: %s", description);                        \
+  } while (0)
 
 /**
  * @brief Act test phase - perform the action being tested
  */
-#define POLYCALL_ACT_PHASE(description)     do {         polycall_test_log_info("ACT: %s", description);     } while (0)
+#define POLYCALL_ACT_PHASE(description)                                        \
+  do {                                                                         \
+    polycall_test_log_info("ACT: %s", description);                            \
+  } while (0)
 
 /**
  * @brief Assert test phase - verify the expected outcome
  */
-#define POLYCALL_ASSERT_PHASE(description)     do {         polycall_test_log_info("ASSERT: %s", description);     } while (0)
+#define POLYCALL_ASSERT_PHASE(description)                                     \
+  do {                                                                         \
+    polycall_test_log_info("ASSERT: %s", description);                         \
+  } while (0)
 
 /*******************************************************************************
  * Component Test Interface
@@ -79,12 +88,12 @@ typedef void (*polycall_component_cleanup_stub_fn)(void);
 
 /**
  * @brief Initialize all test stubs for a specific test
- * 
+ *
  * @param components Array of component names to initialize
  * @param count Number of components
  * @return int 0 on success, non-zero on failure
  */
-int polycall_test_init_component_stubs(const char** components, int count);
+int polycall_test_init_component_stubs(const char **components, int count);
 
 /**
  * @brief Clean up all test stubs
@@ -93,11 +102,11 @@ void polycall_test_cleanup_component_stubs(void);
 
 /**
  * @brief Log an informational message
- * 
+ *
  * @param format Format string
  * @param ... Format arguments
  */
-void polycall_test_log_info(const char* format, ...);
+void polycall_test_log_info(const char *format, ...);
 
 /*******************************************************************************
  * Include detailed framework definitions

@@ -9,21 +9,17 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 // TODO: Implement polycall_ast_node_destroy
 void polycall_ast_node_destroy_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_ast_node_add_child
 void polycall_ast_node_add_child_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_ast_destroy
 void polycall_ast_destroy_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-

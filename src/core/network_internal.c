@@ -9,33 +9,27 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 // TODO: Implement apply_defaults
 void apply_defaults_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement load_config_from_file
 void load_config_from_file_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement save_config_to_file
 void save_config_to_file_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement add_config_entry
 void add_config_entry_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement free_config_entries
 void free_config_entries_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-

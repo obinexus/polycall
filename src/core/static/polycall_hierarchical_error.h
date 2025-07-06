@@ -13,8 +13,8 @@
 #include "polycall/core/polycall/polycall_core.h"
 #include "polycall/core/polycall/polycall_error.h"
 #include <stdbool.h>
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -39,44 +39,44 @@ extern "C" {
  * @brief Error propagation mode
  */
 typedef enum {
-    /** Do not propagate errors */
-    POLYCALL_ERROR_PROPAGATE_NONE = 0x00,
-    /** Propagate errors to parent components */
-    POLYCALL_ERROR_PROPAGATE_UPWARD = 0x01,
-    /** Propagate errors to child components */
-    POLYCALL_ERROR_PROPAGATE_DOWNWARD = 0x02,
-    /** Propagate errors in both directions */
-    POLYCALL_ERROR_PROPAGATE_BIDIRECTIONAL = 0x03
+  /** Do not propagate errors */
+  POLYCALL_ERROR_PROPAGATE_NONE = 0x00,
+  /** Propagate errors to parent components */
+  POLYCALL_ERROR_PROPAGATE_UPWARD = 0x01,
+  /** Propagate errors to child components */
+  POLYCALL_ERROR_PROPAGATE_DOWNWARD = 0x02,
+  /** Propagate errors in both directions */
+  POLYCALL_ERROR_PROPAGATE_BIDIRECTIONAL = 0x03
 } polycall_error_propagation_mode_t;
 
 /**
  * @brief Hierarchical error context (opaque)
  */
-typedef struct polycall_hierarchical_error_context polycall_hierarchical_error_context_t;
+typedef struct polycall_hierarchical_error_context
+    polycall_hierarchical_error_context_t;
 
 /**
  * @brief Error handler function signature
  */
 typedef void (*polycall_hierarchical_error_handler_fn)(
-    polycall_core_context_t* ctx,
-    const char* component_name,
-    polycall_error_source_t source,
-    int32_t code,
-    polycall_error_severity_t severity,
-    const char* message,
-    void* user_data
-);
+    polycall_core_context_t *ctx, const char *component_name,
+    polycall_error_source_t source, int32_t code,
+    polycall_error_severity_t severity, const char *message, void *user_data);
 
 /**
  * @brief Component-specific error handler configuration
  */
 typedef struct {
-    char component_name[POLYCALL_MAX_COMPONENT_NAME_LENGTH];  /**< Component name */
-    polycall_error_source_t source;                          /**< Error source */
-    polycall_hierarchical_error_handler_fn handler;           /**< Error handler */
-    void* user_data;                                         /**< User data */
-    polycall_error_propagation_mode_t propagation_mode;       /**< Error propagation mode */
-    char parent_component[POLYCALL_MAX_COMPONENT_NAME_LENGTH];/**< Parent component name */
+  char
+      component_name[POLYCALL_MAX_COMPONENT_NAME_LENGTH]; /**< Component name */
+  polycall_error_source_t source;                         /**< Error source */
+  polycall_hierarchical_error_handler_fn handler;         /**< Error handler */
+  void *user_data;                                        /**< User data */
+  polycall_error_propagation_mode_t
+      propagation_mode; /**< Error propagation mode */
+  char
+      parent_component[POLYCALL_MAX_COMPONENT_NAME_LENGTH]; /**< Parent
+                                                               component name */
 } polycall_hierarchical_error_handler_config_t;
 
 /**
@@ -87,9 +87,8 @@ typedef struct {
  * @return Error code
  */
 polycall_core_error_t polycall_hierarchical_error_init(
-    polycall_core_context_t* core_ctx,
-    polycall_hierarchical_error_context_t** error_ctx
-);
+    polycall_core_context_t *core_ctx,
+    polycall_hierarchical_error_context_t **error_ctx);
 
 /**
  * @brief Clean up hierarchical error system
@@ -98,9 +97,8 @@ polycall_core_error_t polycall_hierarchical_error_init(
  * @param error_ctx Hierarchical error context
  */
 void polycall_hierarchical_error_cleanup(
-    polycall_core_context_t* core_ctx,
-    polycall_hierarchical_error_context_t* error_ctx
-);
+    polycall_core_context_t *core_ctx,
+    polycall_hierarchical_error_context_t *error_ctx);
 
 /**
  * @brief Register a component-specific error handler
@@ -111,10 +109,9 @@ void polycall_hierarchical_error_cleanup(
  * @return Error code
  */
 polycall_core_error_t polycall_hierarchical_error_register_handler(
-    polycall_core_context_t* core_ctx,
-    polycall_hierarchical_error_context_t* error_ctx,
-    const polycall_hierarchical_error_handler_config_t* config
-);
+    polycall_core_context_t *core_ctx,
+    polycall_hierarchical_error_context_t *error_ctx,
+    const polycall_hierarchical_error_handler_config_t *config);
 
 /**
  * @brief Unregister a component-specific error handler
@@ -125,10 +122,9 @@ polycall_core_error_t polycall_hierarchical_error_register_handler(
  * @return Error code
  */
 polycall_core_error_t polycall_hierarchical_error_unregister_handler(
-    polycall_core_context_t* core_ctx,
-    polycall_hierarchical_error_context_t* error_ctx,
-    const char* component_name
-);
+    polycall_core_context_t *core_ctx,
+    polycall_hierarchical_error_context_t *error_ctx,
+    const char *component_name);
 
 /**
  * @brief Set an error with propagation
@@ -146,17 +142,11 @@ polycall_core_error_t polycall_hierarchical_error_unregister_handler(
  * @return Error code
  */
 polycall_core_error_t polycall_hierarchical_error_set(
-    polycall_core_context_t* core_ctx,
-    polycall_hierarchical_error_context_t* error_ctx,
-    const char* component_name,
-    polycall_error_source_t source,
-    int32_t code,
-    polycall_error_severity_t severity,
-    const char* file,
-    int line,
-    const char* message,
-    ...
-);
+    polycall_core_context_t *core_ctx,
+    polycall_hierarchical_error_context_t *error_ctx,
+    const char *component_name, polycall_error_source_t source, int32_t code,
+    polycall_error_severity_t severity, const char *file, int line,
+    const char *message, ...);
 
 /**
  * @brief Get the parent component
@@ -169,12 +159,9 @@ polycall_core_error_t polycall_hierarchical_error_set(
  * @return Error code
  */
 polycall_core_error_t polycall_hierarchical_error_get_parent(
-    polycall_core_context_t* core_ctx,
-    polycall_hierarchical_error_context_t* error_ctx,
-    const char* component_name,
-    char* parent_buffer,
-    size_t buffer_size
-);
+    polycall_core_context_t *core_ctx,
+    polycall_hierarchical_error_context_t *error_ctx,
+    const char *component_name, char *parent_buffer, size_t buffer_size);
 
 /**
  * @brief Get child components
@@ -188,13 +175,11 @@ polycall_core_error_t polycall_hierarchical_error_get_parent(
  * @return Error code
  */
 polycall_core_error_t polycall_hierarchical_error_get_children(
-    polycall_core_context_t* core_ctx,
-    polycall_hierarchical_error_context_t* error_ctx,
-    const char* component_name,
-    char children[][POLYCALL_MAX_COMPONENT_NAME_LENGTH],
-    uint32_t max_children,
-    uint32_t* child_count
-);
+    polycall_core_context_t *core_ctx,
+    polycall_hierarchical_error_context_t *error_ctx,
+    const char *component_name,
+    char children[][POLYCALL_MAX_COMPONENT_NAME_LENGTH], uint32_t max_children,
+    uint32_t *child_count);
 
 /**
  * @brief Set error propagation mode
@@ -206,11 +191,9 @@ polycall_core_error_t polycall_hierarchical_error_get_children(
  * @return Error code
  */
 polycall_core_error_t polycall_hierarchical_error_set_propagation(
-    polycall_core_context_t* core_ctx,
-    polycall_hierarchical_error_context_t* error_ctx,
-    const char* component_name,
-    polycall_error_propagation_mode_t mode
-);
+    polycall_core_context_t *core_ctx,
+    polycall_hierarchical_error_context_t *error_ctx,
+    const char *component_name, polycall_error_propagation_mode_t mode);
 
 /**
  * @brief Check if component has error handling
@@ -221,10 +204,9 @@ polycall_core_error_t polycall_hierarchical_error_set_propagation(
  * @return true if component has a handler, false otherwise
  */
 bool polycall_hierarchical_error_has_handler(
-    polycall_core_context_t* core_ctx,
-    polycall_hierarchical_error_context_t* error_ctx,
-    const char* component_name
-);
+    polycall_core_context_t *core_ctx,
+    polycall_hierarchical_error_context_t *error_ctx,
+    const char *component_name);
 
 /**
  * @brief Get last error for a component
@@ -236,11 +218,9 @@ bool polycall_hierarchical_error_has_handler(
  * @return true if error record was retrieved, false otherwise
  */
 bool polycall_hierarchical_error_get_last(
-    polycall_core_context_t* core_ctx,
-    polycall_hierarchical_error_context_t* error_ctx,
-    const char* component_name,
-    polycall_error_record_t* record
-);
+    polycall_core_context_t *core_ctx,
+    polycall_hierarchical_error_context_t *error_ctx,
+    const char *component_name, polycall_error_record_t *record);
 
 /**
  * @brief Clear last error for a component
@@ -251,16 +231,19 @@ bool polycall_hierarchical_error_get_last(
  * @return Error code
  */
 polycall_core_error_t polycall_hierarchical_error_clear(
-    polycall_core_context_t* core_ctx,
-    polycall_hierarchical_error_context_t* error_ctx,
-    const char* component_name
-);
+    polycall_core_context_t *core_ctx,
+    polycall_hierarchical_error_context_t *error_ctx,
+    const char *component_name);
 
 /**
- * @brief Convenience macro for setting a hierarchical error with file and line info
+ * @brief Convenience macro for setting a hierarchical error with file and line
+ * info
  */
-#define POLYCALL_HIERARCHICAL_ERROR_SET(ctx, error_ctx, component, source, code, severity, message, ...) \
-    polycall_hierarchical_error_set(ctx, error_ctx, component, source, code, severity, __FILE__, __LINE__, message, ##__VA_ARGS__)
+#define POLYCALL_HIERARCHICAL_ERROR_SET(ctx, error_ctx, component, source,     \
+                                        code, severity, message, ...)          \
+  polycall_hierarchical_error_set(ctx, error_ctx, component, source, code,     \
+                                  severity, __FILE__, __LINE__, message,       \
+                                  ##__VA_ARGS__)
 
 #ifdef __cplusplus
 }

@@ -12,42 +12,43 @@
  * Service entry in the registry
  */
 typedef struct edge_service {
-    char* name;
-    void* service;
+  char *name;
+  void *service;
 } edge_service_t;
 
 /**
  * Registry for edge services
  */
 typedef struct edge_registry {
-    edge_service_t* services;
-    int count;
-    int capacity;
+  edge_service_t *services;
+  int count;
+  int capacity;
 } edge_registry_t;
 
 /**
  * Create a new registry
  */
-edge_registry_t* edge_registry_create();
+edge_registry_t *edge_registry_create();
 
 /**
  * Destroy a registry
  */
-void edge_registry_destroy(edge_registry_t* registry);
+void edge_registry_destroy(edge_registry_t *registry);
 
 /**
  * Register a service with the registry
  */
-int edge_registry_register(edge_registry_t* registry, const char* name, void* service);
+int edge_registry_register(edge_registry_t *registry, const char *name,
+                           void *service);
 
 /**
  * Get a service from the registry
  */
-void* edge_registry_get(edge_registry_t* registry, const char* name);
+void *edge_registry_get(edge_registry_t *registry, const char *name);
 
 /**
  * Register default services
  */
-int edge_registry_register_defaults(edge_registry_t* registry);
+int edge_registry_register_defaults(edge_registry_t *registry);
 
 #endif /* POLYCALL_EDGE_REGISTRY_H */

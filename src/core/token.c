@@ -9,9 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 // TODO: Implement polycall_token_destroy
 void polycall_token_destroy_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-

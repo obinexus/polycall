@@ -9,45 +9,37 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 // TODO: Implement polycall_subscription_init
 void polycall_subscription_init_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_subscription_cleanup
 void polycall_subscription_cleanup_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_subscription_handle_subscribe
 void polycall_subscription_handle_subscribe_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_subscription_handle_unsubscribe
 void polycall_subscription_handle_unsubscribe_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_subscription_handle_publish
 void polycall_subscription_handle_publish_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_subscription_publish
 void polycall_subscription_publish_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_subscription_unsubscribe
 void polycall_subscription_unsubscribe_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-

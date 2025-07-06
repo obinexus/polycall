@@ -16,9 +16,9 @@ extern "C" {
  * network container structure
  */
 typedef struct network_container {
-    polycall_core_context_t* core_ctx;
-    void* module_data;
-    // Add component-specific fields here
+  polycall_core_context_t *core_ctx;
+  void *module_data;
+  // Add component-specific fields here
 } network_container_t;
 
 /**
@@ -28,7 +28,8 @@ typedef struct network_container {
  * @param container Pointer to receive container
  * @return int 0 on success, error code otherwise
  */
-int network_container_init(polycall_core_context_t* core_ctx, network_container_t** container);
+int network_container_init(polycall_core_context_t *core_ctx,
+                           network_container_t **container);
 
 /**
  * Register network services
@@ -36,14 +37,14 @@ int network_container_init(polycall_core_context_t* core_ctx, network_container_
  * @param container network container
  * @return int 0 on success, error code otherwise
  */
-int network_register_services(network_container_t* container);
+int network_register_services(network_container_t *container);
 
 /**
  * Cleanup network container
  *
  * @param container network container
  */
-void network_container_cleanup(network_container_t* container);
+void network_container_cleanup(network_container_t *container);
 
 #ifdef __cplusplus
 }

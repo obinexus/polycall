@@ -9,105 +9,87 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 // TODO: Implement polycall_comm_create_stream
 void polycall_comm_create_stream_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_comm_destroy_stream
 void polycall_comm_destroy_stream_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_comm_open_stream
 void polycall_comm_open_stream_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_comm_close_stream
 void polycall_comm_close_stream_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_comm_send
 void polycall_comm_send_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_comm_receive
 void polycall_comm_receive_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_comm_poll
 void polycall_comm_poll_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_comm_create_observer
 void polycall_comm_create_observer_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_comm_destroy_observer
 void polycall_comm_destroy_observer_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_comm_pause_stream
 void polycall_comm_pause_stream_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_comm_resume_stream
 void polycall_comm_resume_stream_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_comm_get_stats
 void polycall_comm_get_stats_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_comm_get_state
 void polycall_comm_get_state_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_comm_set_buffer_threshold
 void polycall_comm_set_buffer_threshold_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_comm_flush
 void polycall_comm_flush_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_comm_register_with_protocol
 void polycall_comm_register_with_protocol_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-
 
 // TODO: Implement polycall_comm_create_default_config
 void polycall_comm_create_default_config_stub(void) {
-    // Implementation pending
+  // Implementation pending
 }
-

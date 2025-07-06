@@ -25,7 +25,7 @@ extern "C" {
 #endif
 
 // Protocol command constants
-#define POLYCALL_COMMAND_MAGIC 0x434D44   /* "CMD" in ASCII */
+#define POLYCALL_COMMAND_MAGIC 0x434D44 /* "CMD" in ASCII */
 #define POLYCALL_COMMAND_VERSION 1
 #define POLYCALL_MAX_COMMAND_NAME 64
 #define POLYCALL_MAX_ERROR_LENGTH 256
@@ -34,29 +34,29 @@ extern "C" {
 
 // Command registry structure
 typedef struct {
-	polycall_command_entry_t* commands;
-	uint32_t command_count;
-	uint32_t capacity;
-	uint32_t flags;
-	polycall_memory_pool_t* memory_pool;
-	void* user_data;
+  polycall_command_entry_t *commands;
+  uint32_t command_count;
+  uint32_t capacity;
+  uint32_t flags;
+  polycall_memory_pool_t *memory_pool;
+  void *user_data;
 } command_registry_t;
 
 // Command parameter value data structure
 typedef struct {
-	union {
-		int32_t int_value;
-		int64_t int64_value;
-		float float_value;
-		double double_value;
-		bool bool_value;
-		struct {
-			void* data;
-			uint32_t size;
-		} binary;
-		char* string_value;
-	} data;
-	polycall_parameter_type_t type;
+  union {
+    int32_t int_value;
+    int64_t int64_value;
+    float float_value;
+    double double_value;
+    bool bool_value;
+    struct {
+      void *data;
+      uint32_t size;
+    } binary;
+    char *string_value;
+  } data;
+  polycall_parameter_type_t type;
 } command_param_value_t;
 
 /**
@@ -66,10 +66,8 @@ typedef struct {
  * @param command_id Command ID to find
  * @return Command entry if found, NULL otherwise
  */
-polycall_command_entry_t* polycall_command_find_by_id(
-	command_registry_t* registry,
-	uint32_t command_id
-);
+polycall_command_entry_t *
+polycall_command_find_by_id(command_registry_t *registry, uint32_t command_id);
 
 /**
  * @brief Find command by name
@@ -78,10 +76,8 @@ polycall_command_entry_t* polycall_command_find_by_id(
  * @param name Command name to find
  * @return Command entry if found, NULL otherwise
  */
-polycall_command_entry_t* polycall_command_find_by_name(
-	command_registry_t* registry,
-	const char* name
-);
+polycall_command_entry_t *
+polycall_command_find_by_name(command_registry_t *registry, const char *name);
 
 /**
  * @brief Validate command state
@@ -91,11 +87,10 @@ polycall_command_entry_t* polycall_command_find_by_name(
  * @param command Command entry
  * @return Error code
  */
-polycall_core_error_t polycall_command_validate_state(
-	polycall_core_context_t* ctx,
-	polycall_protocol_context_t* proto_ctx,
-	const polycall_command_entry_t* command
-);
+polycall_core_error_t
+polycall_command_validate_state(polycall_core_context_t *ctx,
+                                polycall_protocol_context_t *proto_ctx,
+                                const polycall_command_entry_t *command);
 
 /**
  * @brief Validate command permissions
@@ -105,11 +100,10 @@ polycall_core_error_t polycall_command_validate_state(
  * @param command Command entry
  * @return Error code
  */
-polycall_core_error_t polycall_command_validate_permissions(
-	polycall_core_context_t* ctx,
-	polycall_protocol_context_t* proto_ctx,
-	const polycall_command_entry_t* command
-);
+polycall_core_error_t
+polycall_command_validate_permissions(polycall_core_context_t *ctx,
+                                      polycall_protocol_context_t *proto_ctx,
+                                      const polycall_command_entry_t *command);
 
 /**
  * @brief Serialize command parameter
@@ -122,12 +116,8 @@ polycall_core_error_t polycall_command_validate_permissions(
  * @return Error code
  */
 polycall_core_error_t polycall_command_serialize_parameter(
-	polycall_core_context_t* ctx,
-	const polycall_command_parameter_t* param,
-	void* buffer,
-	size_t buffer_size,
-	size_t* bytes_written
-);
+    polycall_core_context_t *ctx, const polycall_command_parameter_t *param,
+    void *buffer, size_t buffer_size, size_t *bytes_written);
 
 /**
  * @brief Deserialize command parameter
@@ -140,12 +130,8 @@ polycall_core_error_t polycall_command_serialize_parameter(
  * @return Error code
  */
 polycall_core_error_t polycall_command_deserialize_parameter(
-	polycall_core_context_t* ctx,
-	polycall_command_parameter_t* param,
-	const void* buffer,
-	size_t buffer_size,
-	size_t* bytes_read
-);
+    polycall_core_context_t *ctx, polycall_command_parameter_t *param,
+    const void *buffer, size_t buffer_size, size_t *bytes_read);
 
 /**
  * @brief Free parameter data
@@ -153,10 +139,8 @@ polycall_core_error_t polycall_command_deserialize_parameter(
  * @param ctx Core context
  * @param param Parameter whose data should be freed
  */
-void polycall_command_free_parameter_data(
-	polycall_core_context_t* ctx,
-	polycall_command_parameter_t* param
-);
+void polycall_command_free_parameter_data(polycall_core_context_t *ctx,
+                                          polycall_command_parameter_t *param);
 
 /**
  * @brief Create command response
@@ -171,14 +155,9 @@ void polycall_command_free_parameter_data(
  * @return Error code
  */
 polycall_core_error_t polycall_command_create_response(
-	polycall_core_context_t* ctx,
-	polycall_command_status_t status,
-	const void* data,
-	uint32_t data_size,
-	uint32_t error_code,
-	const char* error_message,
-	polycall_command_response_t** response
-);
+    polycall_core_context_t *ctx, polycall_command_status_t status,
+    const void *data, uint32_t data_size, uint32_t error_code,
+    const char *error_message, polycall_command_response_t **response);
 
 #ifdef __cplusplus
 }
