@@ -1,48 +1,206 @@
-# PolyCall Build Configuration
-CC = gcc
-CFLAGS = -Wall -Wextra -std=c11 -D_GNU_SOURCE \
-		 -Iinclude -Iinclude/polycall/core \
-		 -DPOLYCALL_BUILD_VERSION=\"1.0.0\" \
-		 -DPOLYCALL_CORE_ERROR_ENUM_DEFINED \
-		 -DPOLYCALL_ERROR_ENUM_DEFINED \
-		 -DPOLYCALL_CONTEXT_TYPE_EDGE \
-		 -DPOLYCALL_CONTEXT_TYPE_MICRO
-LDFLAGS = -pthread
+# Makefile.build - Core Build Operations
+# Handles compilation, linking, and deployment
+# Copyright (c) 2025 OBINexus Computing
 
-# Directories
-SRC_DIR = src
-OBJ_DIR = build/obj
-BIN_DIR = build/bin
+# Build Configuration
+BUILD_DIR ?= build
+OBJ_DIR := $(BUILD_DIR)/obj
+LIB_DIR := $(BUILD_DIR)/lib
+BIN_DIR := $(BUILD_DIR)/bin
+EDGE_DIR := $(BUILD_DIR)/edge
 
-# Create directories
-$(shell mkdir -p $(OBJ_DIR)/core/common $(OBJ_DIR)/core/micro $(OBJ_DIR)/core)
-$(shell mkdir -p $(BIN_DIR))
+# Installation Paths
+PREFIX ?= /usr/local
+LIBDIR := $(PREFIX)/lib
+INCLUDEDIR := $(PREFIX)/include
+BINDIR := $(PREFIX)/bin
 
-# Source files
-CORE_SOURCES = $(wildcard $(SRC_DIR)/core/*.c)
-COMMON_SOURCES = $(wildcard $(SRC_DIR)/core/common/*.c)
-MICRO_SOURCES = $(wildcard $(SRC_DIR)/core/micro/*.c)
+# Source Files Discovery
+C_SOURCES := $(shell find $(SRC_DIR) -name "*.c" -not -path "*/test/*" -not -path "*/edge/*")
+CXX_SOURCES := $(shell find $(SRC_DIR) -name "*.cpp" -not -path "*/test/*" -not -path "*/edge/*")
+EDGE_SOURCES := $(shell find $(SRC_DIR)/edge -name "*.c" 2>/dev/null || true)
 
-# Object files
-CORE_OBJECTS = $(CORE_SOURCES:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
-COMMON_OBJECTS = $(COMMON_SOURCES:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
-MICRO_OBJECTS = $(MICRO_SOURCES:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
+# Object Files
+C_OBJECTS := $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(C_SOURCES))
+CXX_OBJECTS := $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(CXX_SOURCES))
+EDGE_OBJECTS := $(patsubst $(SRC_DIR)/%.c,$(EDGE_DIR)/%.o,$(EDGE_SOURCES))
 
-ALL_OBJECTS = $(CORE_OBJECTS) $(COMMON_OBJECTS) $(MICRO_OBJECTS)
+# All Objects
+ALL_OBJECTS := $(C_OBJECTS) $(CXX_OBJECTS)
 
-# Build rules
+# Libraries and Binaries
+STATIC_LIB := $(LIB_DIR)/libpolycall.a
+SHARED_LIB := $(LIB_DIR)/libpolycall.so
+POLYCALL_CLI := $(BIN_DIR)/polycall
+
+# Edge Micro Targets
+EDGE_STATIC_LIB := $(EDGE_DIR)/libpolycall-edge.a
+EDGE_BINARY := $(EDGE_DIR)/polycall-edge
+
+# Build Flags
+LDFLAGS += -L$(LIB_DIR) $(EDGE_LDFLAGS)
+LIBS := -lpthread -lm
+
+# Platform-specific settings
+ifeq ($(UNAME_S),Darwin)
+	SHARED_LIB := $(LIB_DIR)/libpolycall.dylib
+	SHARED_FLAGS := -dynamiclib -install_name @rpath/libpolycall.dylib
+else
+	SHARED_FLAGS := -shared -Wl,-soname,libpolycall.so.1
+endif
+
+# Primary Build Target
+.PHONY: build-all static shared cli edge-build edge-deploy install uninstall
+
+build-all: directories static shared cli
+	@echo "Build complete: $(BUILD_MODE) mode"
+	@echo "  Static library: $(STATIC_LIB)"
+	@echo "  Shared library: $(SHARED_LIB)"
+	@echo "  CLI binary: $(POLYCALL_CLI)"
+
+# Directory Structure
+directories:
+	@mkdir -p $(OBJ_DIR)
+	@mkdir -p $(LIB_DIR)
+	@mkdir -p $(BIN_DIR)
+	@mkdir -p $(EDGE_DIR)
+	@# Create subdirectories for objects
+	@cd $(SRC_DIR) && find . -type d -not -path "./test*" -not -path "./edge*" | \
+		xargs -I {} mkdir -p $(OBJ_DIR)/{}
+	@if [ -d "$(SRC_DIR)/edge" ]; then \
+		cd $(SRC_DIR)/edge && find . -type d | xargs -I {} mkdir -p $(EDGE_DIR)/{}; \
+	fi
+
+# Compilation Rules
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
-	@echo "Compiling: $<"
+	@echo "CC  $<"
+	@$(CC) $(CFLAGS) -fPIC -c $< -o $@ -MMD -MP
+
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
+	@echo "CXX $<"
+	@$(CXX) $(CXXFLAGS) -fPIC -c $< -o $@ -MMD -MP
+
+# Edge Micro Compilation (optimized for size)
+$(EDGE_DIR)/%.o: $(SRC_DIR)/%.c
+	@echo "CC  [EDGE] $<"
+	@$(CC) $(CFLAGS) -Os -ffunction-sections -fdata-sections -c $< -o $@ -MMD -MP
+
+# Static Library
+static: $(STATIC_LIB)
+
+$(STATIC_LIB): $(ALL_OBJECTS)
+	@echo "AR  $@"
+	@$(AR) rcs $@ $^
+	@$(RANLIB) $@
+
+# Shared Library
+shared: $(SHARED_LIB)
+
+$(SHARED_LIB): $(ALL_OBJECTS)
+	@echo "LD  $@"
+	@$(CC) $(SHARED_FLAGS) -o $@ $^ $(LDFLAGS) $(LIBS)
+
+# CLI Binary
+cli: $(POLYCALL_CLI)
+
+$(POLYCALL_CLI): $(BIN_DIR)/main.o $(STATIC_LIB)
+	@echo "LD  $@"
+	@$(CC) -o $@ $< -L$(LIB_DIR) -lpolycall $(LDFLAGS) $(LIBS)
+
+$(BIN_DIR)/main.o: $(SRC_DIR)/cli/main.c
+	@mkdir -p $(BIN_DIR)
+	@echo "CC  $<"
 	@$(CC) $(CFLAGS) -c $< -o $@
 
-# Test compilation target
-test-build: $(ALL_OBJECTS)
-	@echo ""
-	@echo "✅ Compilation successful!"
-	@echo "Objects created: $(words $(ALL_OBJECTS))"
+# Edge Micro Build
+edge-build: $(EDGE_STATIC_LIB) $(EDGE_BINARY)
 
-# Clean target
-clean:
-	rm -rf build
+$(EDGE_STATIC_LIB): $(EDGE_OBJECTS)
+	@echo "AR  [EDGE] $@"
+	@$(AR) rcs $@ $^
+	@$(RANLIB) $@
+	@# Report size
+	@echo "Edge library size: $$(du -h $@ | cut -f1)"
 
-.PHONY: test-build clean
+$(EDGE_BINARY): $(EDGE_DIR)/main.o $(EDGE_STATIC_LIB)
+	@echo "LD  [EDGE] $@"
+	@$(CC) -o $@ $< -L$(EDGE_DIR) -lpolycall-edge $(LDFLAGS) -Wl,--gc-sections
+	@# Strip and report size
+	@strip --strip-all $@
+	@echo "Edge binary size: $$(du -h $@ | cut -f1)"
+
+# Edge Deployment
+edge-deploy: edge-build
+	@echo "Deploying edge micro components..."
+	@# Verify size constraints
+	@SIZE=$$(stat -f%z $(EDGE_BINARY) 2>/dev/null || stat -c%s $(EDGE_BINARY)); \
+	if [ $$SIZE -gt 65536 ]; then \
+		echo "Error: Edge binary too large ($$SIZE bytes > 64KB limit)"; \
+		exit 1; \
+	fi
+	@# Generate deployment package
+	@mkdir -p $(EDGE_DIR)/deploy
+	@cp $(EDGE_BINARY) $(EDGE_DIR)/deploy/
+	@cp $(EDGE_STATIC_LIB) $(EDGE_DIR)/deploy/
+	@# Create manifest
+	@echo "PolyCall Edge Micro Deployment" > $(EDGE_DIR)/deploy/manifest.txt
+	@echo "Version: $(VERSION)" >> $(EDGE_DIR)/deploy/manifest.txt
+	@echo "Build: $(BUILD_HASH)" >> $(EDGE_DIR)/deploy/manifest.txt
+	@echo "Date: $(BUILD_DATE)" >> $(EDGE_DIR)/deploy/manifest.txt
+	@echo "Size: $$SIZE bytes" >> $(EDGE_DIR)/deploy/manifest.txt
+	@# Create checksum
+	@shasum -a 256 $(EDGE_DIR)/deploy/* > $(EDGE_DIR)/deploy/checksums.sha256
+	@echo "Edge deployment ready in $(EDGE_DIR)/deploy/"
+
+# Installation
+install: build-all install-headers install-libs install-cli
+
+install-headers:
+	@echo "Installing headers..."
+	@mkdir -p $(INCLUDEDIR)/polycall
+	@cp -R $(INCLUDE_DIR)/polycall/* $(INCLUDEDIR)/polycall/
+
+install-libs:
+	@echo "Installing libraries..."
+	@mkdir -p $(LIBDIR)
+	@install -m 644 $(STATIC_LIB) $(LIBDIR)/
+	@install -m 755 $(SHARED_LIB) $(LIBDIR)/
+	@# Create symlinks for shared library
+	@if [ "$(UNAME_S)" != "Darwin" ]; then \
+		ln -sf libpolycall.so $(LIBDIR)/libpolycall.so.1; \
+		ln -sf libpolycall.so.1 $(LIBDIR)/libpolycall.so.1.0; \
+	fi
+
+install-cli:
+	@echo "Installing CLI binary..."
+	@mkdir -p $(BINDIR)
+	@install -m 755 $(POLYCALL_CLI) $(BINDIR)/
+
+# Uninstallation
+uninstall:
+	@echo "Uninstalling PolyCall..."
+	@rm -rf $(INCLUDEDIR)/polycall
+	@rm -f $(LIBDIR)/libpolycall.*
+	@rm -f $(BINDIR)/polycall
+
+# Build Information
+build-info:
+	@echo "Build Configuration:"
+	@echo "  Mode: $(BUILD_MODE)"
+	@echo "  CC: $(CC)"
+	@echo "  CFLAGS: $(CFLAGS)"
+	@echo "  Sources: $(words $(C_SOURCES)) C files, $(words $(CXX_SOURCES)) C++ files"
+	@echo "  Edge: $(words $(EDGE_SOURCES)) files"
+	@echo "  Objects: $(words $(ALL_OBJECTS)) total"
+
+# Dependency Management
+deps:
+	@echo "Generating dependency graph..."
+	@find $(OBJ_DIR) -name "*.d" -exec cat {} \; | \
+		sed 's/.*://' | tr ' ' '\n' | sort | uniq | \
+		grep -v '^\s*$$' > $(BUILD_DIR)/dependencies.txt
+	@echo "Dependencies written to $(BUILD_DIR)/dependencies.txt"
+
+# Include dependency files
+-include $(ALL_OBJECTS:.o=.d)
+-include $(EDGE_OBJECTS:.o=.d)
