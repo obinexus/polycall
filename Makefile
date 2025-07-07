@@ -1,387 +1,340 @@
 # OBINexus PolyCall Root Makefile
-# Unified Command Interface with Subcommand Delegation
-# Copyright (c) 2025 OBINexus Computing
+# Fixed non-recursive delegation orchestrator
 
-# Version and Build Configuration
-VERSION := 0.1.0-dev
-BUILD_DATE := $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
-BUILD_HASH := $(shell git rev-parse --short HEAD 2>/dev/null || echo "no-git")
+# Recursion guard
+ifndef POLYCALL_MAKEFILE_INCLUDED
+POLYCALL_MAKEFILE_INCLUDED := 1
 
-# Detect OS and Architecture
-UNAME_S := $(shell uname -s)
-UNAME_M := $(shell uname -m)
+# Version and metadata
+VERSION := 0.7.0
+BUILD_DATE := $(shell date +%Y%m%d)
+BUILD_HASH := $(shell git rev-parse --short HEAD 2>/dev/null || echo "nogit")
 
-# Build Mode Control
+# Build configuration
 BUILD_MODE ?= release
-EDGE_MICRO ?= disabled
-SECURITY_LEVEL ?= standard
+EDGE_MICRO ?= enabled
+SECURITY_LEVEL ?= paranoid
 
-# Base Directories
+# Directory structure
 ROOT_DIR := $(shell pwd)
-BUILD_DIR := build
-SRC_DIR := src
-INCLUDE_DIR := include
-TOOLS_DIR := tools
+BUILD_DIR := $(ROOT_DIR)/build
+SRC_DIR := $(ROOT_DIR)/src
+INCLUDE_DIR := $(ROOT_DIR)/include
+TOOLS_DIR := $(ROOT_DIR)/tools
 
-# Subcommand Makefiles
-MAKEFILE_BUILD := Makefile.build
-MAKEFILE_PURITY := Makefile.purity
-MAKEFILE_SPEC := Makefile.spec
-MAKEFILE_VENDOR := Makefile.vendor
-MAKEFILE_PROJECTS := Makefile.projects
-
-# Export common variables for sub-makefiles
+# Export common variables
 export VERSION BUILD_DATE BUILD_HASH
 export BUILD_MODE EDGE_MICRO SECURITY_LEVEL
 export ROOT_DIR BUILD_DIR SRC_DIR INCLUDE_DIR TOOLS_DIR
-export UNAME_S UNAME_M
-
-# ==============================================================================
-# PRIMARY TARGETS - These delegate to sub-makefiles
-# ==============================================================================
-.PHONY: all build test qa install uninstall clean help
+export POLYCALL_MAKEFILE_INCLUDED
 
 # Default target
-all: build
+.DEFAULT_GOAL := all
 
-# ==============================================================================
-# BUILD SUBSYSTEM (Makefile.build)
-# ==============================================================================
-.PHONY: build build-all static shared cli edge-build edge-deploy
-.PHONY: build-info deps directories
+# Non-recursive make invocation
+SUBMAKE = $(MAKE) --no-print-directory -f
+
+#################
+# Main Targets  #
+#################
+
+.PHONY: all
+all:
+	@$(SUBMAKE) Makefile.build all
+
+.PHONY: help
+help:
+	@echo "OBINexus PolyCall Build System v$(VERSION)"
+	@echo "========================================"
+	@echo ""
+	@echo "Main targets:"
+	@echo "  all          - Build everything (default)"
+	@echo "  build        - Build core components"
+	@echo "  test         - Run test suite"
+	@echo "  qa           - Run QA checks"
+	@echo "  clean        - Clean build artifacts"
+	@echo "  install      - Install polycall"
+	@echo ""
+	@echo "Subsystem targets:"
+	@echo "  Build:       build-* targets (see 'make help-build')"
+	@echo "  Purity:      check-*, verify-* targets (see 'make help-purity')"
+	@echo "  Testing:     test-*, qa-* targets (see 'make help-spec')"
+	@echo "  Vendor:      vendor-*, browser-* targets (see 'make help-vendor')"
+	@echo "  Projects:    setup-*, config-* targets (see 'make help-projects')"
+
+#################
+# Build Targets #
+#################
+
+.PHONY: build build-all build-core build-cli build-edge build-micro
+.PHONY: edge-deploy micro-deploy release install clean
 
 build:
-	@$(MAKE) -f $(MAKEFILE_BUILD) build-all
+	@$(SUBMAKE) Makefile.build build
 
 build-all:
-	@$(MAKE) -f $(MAKEFILE_BUILD) build-all
+	@$(SUBMAKE) Makefile.build build-all
 
-static:
-	@$(MAKE) -f $(MAKEFILE_BUILD) static
+build-core:
+	@$(SUBMAKE) Makefile.build build-core
 
-shared:
-	@$(MAKE) -f $(MAKEFILE_BUILD) shared
+build-cli:
+	@$(SUBMAKE) Makefile.build build-cli
 
-cli:
-	@$(MAKE) -f $(MAKEFILE_BUILD) cli
+build-edge:
+	@$(SUBMAKE) Makefile.build build-edge
 
-edge-build:
-	@$(MAKE) -f $(MAKEFILE_BUILD) edge-build
+build-micro:
+	@$(SUBMAKE) Makefile.build build-micro
 
 edge-deploy:
-	@$(MAKE) -f $(MAKEFILE_BUILD) edge-deploy
+	@$(SUBMAKE) Makefile.build edge-deploy
 
-build-info:
-	@$(MAKE) -f $(MAKEFILE_BUILD) build-info
+micro-deploy:
+	@$(SUBMAKE) Makefile.build micro-deploy
 
-deps:
-	@$(MAKE) -f $(MAKEFILE_BUILD) deps
-
-directories:
-	@$(MAKE) -f $(MAKEFILE_BUILD) directories
+release:
+	@$(SUBMAKE) Makefile.build release
 
 install:
-	@$(MAKE) -f $(MAKEFILE_BUILD) install
-
-uninstall:
-	@$(MAKE) -f $(MAKEFILE_BUILD) uninstall
-
-# ==============================================================================
-# PURITY SUBSYSTEM (Makefile.purity)
-# ==============================================================================
-.PHONY: check-mutex check-commands acquire-lock release-lock
-.PHONY: security-scan security-audit edge-security-check
-.PHONY: check-memory-patterns check-concurrency-patterns
-.PHONY: validate-build-command validate-test-command validate-deploy-command
-.PHONY: cleanup-locks recover-from-crash
-
-check-mutex:
-	@$(MAKE) -f $(MAKEFILE_PURITY) check-commands
-
-check-commands:
-	@$(MAKE) -f $(MAKEFILE_PURITY) check-commands
-
-security-scan:
-	@$(MAKE) -f $(MAKEFILE_PURITY) security-scan
-
-security-audit:
-	@$(MAKE) -f $(MAKEFILE_PURITY) security-scan
-
-edge-security-check:
-	@$(MAKE) -f $(MAKEFILE_PURITY) edge-security-check
-
-check-memory:
-	@$(MAKE) -f $(MAKEFILE_PURITY) check-memory-patterns
-
-check-concurrency:
-	@$(MAKE) -f $(MAKEFILE_PURITY) check-concurrency-patterns
-
-recover-crash:
-	@$(MAKE) -f $(MAKEFILE_PURITY) recover-from-crash
-
-# ==============================================================================
-# SPEC/QA SUBSYSTEM (Makefile.spec)
-# ==============================================================================
-.PHONY: test qa qa-full unit-tests integration-tests performance-test
-.PHONY: coverage-report lint lint-all format
-.PHONY: run-tests compile-unit-tests execute-unit-tests
-.PHONY: compile-integration-tests execute-integration-tests
-.PHONY: lint-source lint-headers lint-security
-.PHONY: check-header-compilation generate-qa-report clean-tests
-
-test:
-	@$(MAKE) -f $(MAKEFILE_SPEC) run-tests
-
-qa:
-	@$(MAKE) -f $(MAKEFILE_SPEC) qa-full
-
-qa-full:
-	@$(MAKE) -f $(MAKEFILE_SPEC) qa-full
-
-unit-tests:
-	@$(MAKE) -f $(MAKEFILE_SPEC) unit-tests
-
-integration-tests:
-	@$(MAKE) -f $(MAKEFILE_SPEC) integration-tests
-
-performance-test:
-	@$(MAKE) -f $(MAKEFILE_SPEC) performance-test
-
-security-test:
-	@$(MAKE) -f $(MAKEFILE_SPEC) security-test
-
-coverage-report:
-	@$(MAKE) -f $(MAKEFILE_SPEC) coverage-report
-
-lint:
-	@$(MAKE) -f $(MAKEFILE_SPEC) lint-all
-
-lint-all:
-	@$(MAKE) -f $(MAKEFILE_SPEC) lint-all
-
-format:
-	@echo "Formatting source code..."
-	@find $(SRC_DIR) $(INCLUDE_DIR) -name "*.c" -o -name "*.h" | \
-		xargs clang-format -i
-
-# ==============================================================================
-# VENDOR SUBSYSTEM (Makefile.vendor) - Create if doesn't exist
-# ==============================================================================
-.PHONY: vendor-test test-all-browsers test-chrome test-firefox
-.PHONY: test-safari test-edge wasm-build serve-demo
-
-vendor-test:
-	@if [ -f $(MAKEFILE_VENDOR) ]; then \
-		$(MAKE) -f $(MAKEFILE_VENDOR) test-all-browsers; \
-	else \
-		echo "Vendor testing not configured"; \
-	fi
-
-test-chrome:
-	@if [ -f $(MAKEFILE_VENDOR) ]; then \
-		$(MAKE) -f $(MAKEFILE_VENDOR) test-chrome; \
-	else \
-		echo "Chrome testing not configured"; \
-	fi
-
-test-firefox:
-	@if [ -f $(MAKEFILE_VENDOR) ]; then \
-		$(MAKE) -f $(MAKEFILE_VENDOR) test-firefox; \
-	else \
-		echo "Firefox testing not configured"; \
-	fi
-
-wasm-build:
-	@if [ -f $(MAKEFILE_VENDOR) ]; then \
-		$(MAKE) -f $(MAKEFILE_VENDOR) wasm-build; \
-	else \
-		echo "WASM build not configured"; \
-	fi
-
-# ==============================================================================
-# PROJECT SUBSYSTEM (Makefile.projects)
-# ==============================================================================
-.PHONY: setup setup-fixtures setup-examples bootstrap demo
-.PHONY: help-all help-build help-purity help-spec help-vendor help-project
-.PHONY: status info version list-targets list-options
-
-setup:
-	@$(MAKE) -f $(MAKEFILE_PROJECTS) setup
-
-setup-fixtures:
-	@$(MAKE) -f $(MAKEFILE_PROJECTS) setup-fixtures
-
-setup-examples:
-	@$(MAKE) -f $(MAKEFILE_PROJECTS) setup-examples
-
-bootstrap:
-	@$(MAKE) -f $(MAKEFILE_PROJECTS) bootstrap
-
-demo:
-	@$(MAKE) -f $(MAKEFILE_PROJECTS) demo
-
-status:
-	@$(MAKE) -f $(MAKEFILE_PROJECTS) status
-
-info:
-	@$(MAKE) -f $(MAKEFILE_PROJECTS) info
-
-version:
-	@$(MAKE) -f $(MAKEFILE_PROJECTS) version
-
-# ==============================================================================
-# CLEAN TARGETS
-# ==============================================================================
-.PHONY: clean distclean clean-all clean-projects clean-reports
+	@$(SUBMAKE) Makefile.build install
 
 clean:
-	@echo "Cleaning build artifacts..."
-	@rm -rf $(BUILD_DIR)
-	@find . -name "*.o" -delete
-	@find . -name "*.a" -delete
-	@find . -name "*.so" -delete
-	@find . -name "*.dylib" -delete
-	@$(MAKE) -f $(MAKEFILE_SPEC) clean-tests 2>/dev/null || true
+	@$(SUBMAKE) Makefile.build clean
 
-distclean: clean
-	@echo "Removing all generated files..."
-	@rm -rf .cache
-	@rm -rf compile_commands.json
-	@rm -rf .clangd
-	@$(MAKE) -f $(MAKEFILE_PURITY) cleanup-locks 2>/dev/null || true
+##################
+# Purity Targets #
+##################
 
-clean-all:
-	@$(MAKE) clean
-	@if [ -f $(MAKEFILE_PROJECTS) ]; then \
-		$(MAKE) -f $(MAKEFILE_PROJECTS) clean-projects clean-reports; \
-	fi
+.PHONY: check-commands check-memory check-security check-compliance
+.PHONY: verify-auth verify-network verify-protocol
+.PHONY: audit-code audit-deps security-scan purity-report clean-audit
 
-# ==============================================================================
-# CMAKE INTEGRATION
-# ==============================================================================
-.PHONY: cmake-gen cmake-build cmake-test
+check-commands:
+	@$(SUBMAKE) Makefile.purity check-commands
 
-cmake-gen:
-	@echo "Generating CMake configuration..."
-	@mkdir -p $(BUILD_DIR)/cmake
-	@cd $(BUILD_DIR)/cmake && cmake ../.. \
-		-DCMAKE_BUILD_TYPE=$(BUILD_MODE) \
-		-DPOLYCALL_EDGE_MICRO=$(EDGE_MICRO) \
-		-DPOLYCALL_SECURITY_LEVEL=$(SECURITY_LEVEL)
+check-memory:
+	@$(SUBMAKE) Makefile.purity check-memory
 
-cmake-build: cmake-gen
-	@cd $(BUILD_DIR)/cmake && cmake --build .
+check-security:
+	@$(SUBMAKE) Makefile.purity check-security
 
-cmake-test: cmake-build
-	@cd $(BUILD_DIR)/cmake && ctest
+check-compliance:
+	@$(SUBMAKE) Makefile.purity check-compliance
 
-# ==============================================================================
-# DOCUMENTATION
-# ==============================================================================
-.PHONY: docs generate-docs
+verify-auth:
+	@$(SUBMAKE) Makefile.purity verify-auth
 
-docs:
-	@echo "Generating documentation..."
-	@if command -v doxygen >/dev/null 2>&1; then \
-		doxygen docs/Doxyfile 2>/dev/null || echo "Doxyfile not found"; \
-	else \
-		echo "Doxygen not installed"; \
-	fi
+verify-network:
+	@$(SUBMAKE) Makefile.purity verify-network
 
-generate-docs: docs
+verify-protocol:
+	@$(SUBMAKE) Makefile.purity verify-protocol
 
-# ==============================================================================
-# HELP SYSTEM
-# ==============================================================================
-help:
-	@if [ -f $(MAKEFILE_PROJECTS) ]; then \
-		$(MAKE) -f $(MAKEFILE_PROJECTS) help; \
-	else \
-		$(MAKE) help-basic; \
-	fi
+audit-code:
+	@$(SUBMAKE) Makefile.purity audit-code
 
-help-basic:
-	@echo "PolyCall Build System"
-	@echo "===================="
-	@echo ""
-	@echo "Usage: make [target] [options]"
-	@echo ""
-	@echo "Primary Targets:"
-	@echo "  all          - Build everything (default)"
-	@echo "  build        - Build the project"
-	@echo "  test         - Run tests"
-	@echo "  qa           - Run full QA suite"
-	@echo "  clean        - Clean build artifacts"
-	@echo "  install      - Install the library"
-	@echo "  docs         - Generate documentation"
-	@echo ""
-	@echo "Subsystems:"
-	@echo "  Build:       make build-all, static, shared, cli, edge-build"
-	@echo "  Security:    make security-scan, check-memory, check-concurrency"
-	@echo "  Testing:     make unit-tests, integration-tests, coverage-report"
-	@echo "  Quality:     make lint, format, qa-full"
-	@echo ""
-	@echo "Options:"
-	@echo "  BUILD_MODE={debug|release|profile}      (default: release)"
-	@echo "  EDGE_MICRO={enabled|disabled}           (default: disabled)"
-	@echo "  SECURITY_LEVEL={none|standard|paranoid} (default: standard)"
-	@echo "  PREFIX=/path/to/install                 (default: /usr/local)"
+audit-deps:
+	@$(SUBMAKE) Makefile.purity audit-deps
 
-help-all:
-	@$(MAKE) -f $(MAKEFILE_PROJECTS) help-all 2>/dev/null || $(MAKE) help-basic
+security-scan:
+	@$(SUBMAKE) Makefile.purity security-scan
+
+purity-report:
+	@$(SUBMAKE) Makefile.purity purity-report
+
+clean-audit:
+	@$(SUBMAKE) Makefile.purity clean-audit
+
+#################
+# Spec Targets  #
+#################
+
+.PHONY: test qa qa-full qa-quick qa-integration qa-unit
+.PHONY: test-all test-unit test-integration test-edge test-micro
+.PHONY: test-network test-protocol test-auth test-accessibility
+.PHONY: coverage coverage-report benchmark stress-test
+.PHONY: validate-api validate-schema clean-test
+
+test:
+	@$(SUBMAKE) Makefile.spec test
+
+qa:
+	@$(SUBMAKE) Makefile.spec qa
+
+qa-full:
+	@$(SUBMAKE) Makefile.spec qa-full
+
+qa-quick:
+	@$(SUBMAKE) Makefile.spec qa-quick
+
+qa-integration:
+	@$(SUBMAKE) Makefile.spec qa-integration
+
+qa-unit:
+	@$(SUBMAKE) Makefile.spec qa-unit
+
+test-all:
+	@$(SUBMAKE) Makefile.spec test-all
+
+test-unit:
+	@$(SUBMAKE) Makefile.spec test-unit
+
+test-integration:
+	@$(SUBMAKE) Makefile.spec test-integration
+
+test-edge:
+	@$(SUBMAKE) Makefile.spec test-edge
+
+test-micro:
+	@$(SUBMAKE) Makefile.spec test-micro
+
+test-network:
+	@$(SUBMAKE) Makefile.spec test-network
+
+test-protocol:
+	@$(SUBMAKE) Makefile.spec test-protocol
+
+test-auth:
+	@$(SUBMAKE) Makefile.spec test-auth
+
+test-accessibility:
+	@$(SUBMAKE) Makefile.spec test-accessibility
+
+coverage:
+	@$(SUBMAKE) Makefile.spec coverage
+
+coverage-report:
+	@$(SUBMAKE) Makefile.spec coverage-report
+
+benchmark:
+	@$(SUBMAKE) Makefile.spec benchmark
+
+stress-test:
+	@$(SUBMAKE) Makefile.spec stress-test
+
+validate-api:
+	@$(SUBMAKE) Makefile.spec validate-api
+
+validate-schema:
+	@$(SUBMAKE) Makefile.spec validate-schema
+
+clean-test:
+	@$(SUBMAKE) Makefile.spec clean-test
+
+##################
+# Vendor Targets #
+##################
+
+.PHONY: vendor-test test-all-browsers test-chrome test-firefox test-safari test-edge
+.PHONY: browser-matrix wasm-build serve-demo clean-vendor
+
+vendor-test:
+	@$(SUBMAKE) Makefile.vendor vendor-test
+
+test-all-browsers:
+	@$(SUBMAKE) Makefile.vendor test-all-browsers
+
+test-chrome:
+	@$(SUBMAKE) Makefile.vendor test-chrome
+
+test-firefox:
+	@$(SUBMAKE) Makefile.vendor test-firefox
+
+test-safari:
+	@$(SUBMAKE) Makefile.vendor test-safari
+
+test-edge:
+	@$(SUBMAKE) Makefile.vendor test-edge
+
+browser-matrix:
+	@$(SUBMAKE) Makefile.vendor browser-matrix
+
+wasm-build:
+	@$(SUBMAKE) Makefile.vendor wasm-build
+
+serve-demo:
+	@$(SUBMAKE) Makefile.vendor serve-demo
+
+clean-vendor:
+	@$(SUBMAKE) Makefile.vendor clean-vendor
+
+####################
+# Project Targets  #
+####################
+
+.PHONY: setup setup-dev setup-prod config-edge config-micro
+.PHONY: generate-docs update-schemas validate-config init-workspace
+.PHONY: clean-config help-projects
+
+setup:
+	@$(SUBMAKE) Makefile.projects setup
+
+setup-dev:
+	@$(SUBMAKE) Makefile.projects setup-dev
+
+setup-prod:
+	@$(SUBMAKE) Makefile.projects setup-prod
+
+config-edge:
+	@$(SUBMAKE) Makefile.projects config-edge
+
+config-micro:
+	@$(SUBMAKE) Makefile.projects config-micro
+
+generate-docs:
+	@$(SUBMAKE) Makefile.projects generate-docs
+
+update-schemas:
+	@$(SUBMAKE) Makefile.projects update-schemas
+
+validate-config:
+	@$(SUBMAKE) Makefile.projects validate-config
+
+init-workspace:
+	@$(SUBMAKE) Makefile.projects init-workspace
+
+clean-config:
+	@$(SUBMAKE) Makefile.projects clean-config
+
+help-projects:
+	@$(SUBMAKE) Makefile.projects help
+
+###################
+# Help Subsystems #
+###################
+
+.PHONY: help-build help-purity help-spec help-vendor
 
 help-build:
-	@$(MAKE) -f $(MAKEFILE_PROJECTS) help-build 2>/dev/null || \
-		echo "Build help not available"
+	@$(SUBMAKE) Makefile.build help
 
 help-purity:
-	@$(MAKE) -f $(MAKEFILE_PROJECTS) help-purity 2>/dev/null || \
-		echo "Purity help not available"
+	@$(SUBMAKE) Makefile.purity help
 
 help-spec:
-	@$(MAKE) -f $(MAKEFILE_PROJECTS) help-spec 2>/dev/null || \
-		echo "Spec help not available"
+	@$(SUBMAKE) Makefile.spec help
 
 help-vendor:
-	@$(MAKE) -f $(MAKEFILE_PROJECTS) help-vendor 2>/dev/null || \
-		echo "Vendor help not available"
+	@$(SUBMAKE) Makefile.vendor help
 
-# ==============================================================================
-# UTILITY TARGETS
-# ==============================================================================
-.PHONY: list-targets list-options
+########################
+# Compound Operations  #
+########################
 
-list-targets:
-	@$(MAKE) -qp | awk -F':' '/^[a-zA-Z0-9][^$$#\/\t=]*:([^=]|$$)/ {split($$1,A,/ /);for(i in A)print A[i]}' | sort -u | grep -v '^\.PHONY$$'
+.PHONY: full-build full-test full-clean verify-all
 
-list-options:
-	@echo "BUILD_MODE=debug"
-	@echo "BUILD_MODE=release"
-	@echo "BUILD_MODE=profile"
-	@echo "EDGE_MICRO=enabled"
-	@echo "EDGE_MICRO=disabled"
-	@echo "SECURITY_LEVEL=none"
-	@echo "SECURITY_LEVEL=standard"
-	@echo "SECURITY_LEVEL=paranoid"
+full-build: clean build test qa
+	@echo "Full build completed successfully"
 
-# ==============================================================================
-# DEVELOPMENT SHORTCUTS
-# ==============================================================================
-.PHONY: dev quick rebuild full
+full-test: test-all qa-full coverage-report
+	@echo "Full test suite completed"
 
-# Quick development build
-dev:
-	@$(MAKE) BUILD_MODE=debug build
+full-clean: clean clean-test clean-audit clean-vendor clean-config
+	@echo "Full cleanup completed"
 
-# Quick build without full checks
-quick:
-	@$(MAKE) -f $(MAKEFILE_BUILD) static cli
+verify-all: check-commands security-scan validate-api validate-schema
+	@echo "All verifications passed"
 
-# Full rebuild
-rebuild: clean build
-
-# Full development cycle
-full: clean build test lint
-
-# Include dependency tracking if available
--include $(BUILD_DIR)/*.d
+# End recursion guard
+endif
