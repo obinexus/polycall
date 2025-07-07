@@ -242,41 +242,6 @@ test-firefox:
 	@$(SUBMAKE) Makefile.vendor test-firefox
 
 test-safari:
-	@$(SUBMAKE) Makefile.vendor test-safari
-
-test-edge:
-	@$(SUBMAKE) Makefile.vendor test-edge
-
-browser-matrix:
-	@$(SUBMAKE) Makefile.vendor browser-matrix
-
-wasm-build:
-	@$(SUBMAKE) Makefile.vendor wasm-build
-
-serve-demo:
-	@$(SUBMAKE) Makefile.vendor serve-demo
-
-clean-vendor:
-	@$(SUBMAKE) Makefile.vendor clean-vendor
-
-####################
-# Project Targets  #
-####################
-
-.PHONY: setup setup-dev setup-prod config-edge config-micro
-.PHONY: generate-docs update-schemas validate-config init-workspace
-.PHONY: clean-config help-projects
-
-setup:
-	@$(SUBMAKE) Makefile.projects setup
-
-setup-dev:
-	@$(SUBMAKE) Makefile.projects setup-dev
-
-setup-prod:
-	@$(SUBMAKE) Makefile.projects setup-prod
-
-config-edge:
 	@$(SUBMAKE) Makefile.projects config-edge
 
 config-micro:

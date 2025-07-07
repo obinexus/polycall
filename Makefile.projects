@@ -1,3 +1,7 @@
+# Recursion guard
+ifndef MAKEFILE_PROJECTS_INCLUDED
+MAKEFILE_PROJECTS_INCLUDED := 1
+
 # Makefile.projects - OBINexus PolyCall Project Orchestrator
 # Unified subcommand interface with complete help system
 # Copyright (c) 2025 OBINexus Computing
@@ -319,4 +323,4 @@ list-options:
 	@echo "EDGE_MICRO=disabled"
 	@echo "SECURITY_LEVEL=none"
 	@echo "SECURITY_LEVEL=standard"
-	@echo "SECURITY_LEVEL=paranoid"
+	@echo "SECURITY_LEVEL=paranoid"endif # MAKEFILE_PROJECTS_INCLUDED

@@ -1,3 +1,7 @@
+# Recursion guard
+ifndef MAKEFILE_PURITY_INCLUDED
+MAKEFILE_PURITY_INCLUDED := 1
+
 # Makefile.purity - Mutually Exclusive Command Control
 # Ensures atomic command execution and prevents race conditions
 # Copyright (c) 2025 OBINexus Computing
@@ -190,4 +194,4 @@ recover-from-crash:
 	@# Remove stale locks older than timeout
 	@find $(LOCK_DIR) -name "*.lock" -mmin +$(LOCK_TIMEOUT) -delete 2>/dev/null || true
 	@# Log recovery
-	@echo "Recovery performed at $$(date -u)" >> $(LOCK_DIR)/recovery.log
+	@echo "Recovery performed at $$(date -u)" >> $(LOCK_DIR)/recovery.logendif # MAKEFILE_PURITY_INCLUDED

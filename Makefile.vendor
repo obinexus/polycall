@@ -1,3 +1,7 @@
+# Recursion guard
+ifndef MAKEFILE_VENDOR_INCLUDED
+MAKEFILE_VENDOR_INCLUDED := 1
+
 # Makefile.vendor - Browser and Vendor Testing Subsystem
 # Cross-platform compatibility testing and WebAssembly builds
 # Copyright (c) 2025 OBINexus Computing
@@ -464,4 +468,4 @@ help:
 	@echo ""
 	@echo "Utilities:"
 	@echo "  vendor-setup     - Setup test environment"
-	@echo "  clean-vendor     - Clean all vendor artifacts"
+	@echo "  clean-vendor     - Clean all vendor artifacts"endif # MAKEFILE_VENDOR_INCLUDED
