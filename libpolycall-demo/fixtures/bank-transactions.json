@@ -1,0 +1,4 @@
+[
+  {"from": "ACC001", "to": "ACC002", "amount": 100, "status": "COMPLETED"},
+  {"from": "ACC002", "to": "ACC001", "amount": 50, "status": "COMPLETED"}
+]

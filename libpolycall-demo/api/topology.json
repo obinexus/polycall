@@ -1,0 +1,9 @@
+{
+  "topology": "demo",
+  "nodes": [
+    {"id": "auth-001", "type": "auth"},
+    {"id": "trans-001", "type": "transaction"},
+    {"id": "edge-us-west", "type": "edge"},
+    {"id": "edge-us-east", "type": "edge"}
+  ]
+}

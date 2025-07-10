@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>LibPolyCall v3.3 Demo - Zero Trust Protocol</title>
+    <link rel="stylesheet" href="css/demo.css">
+</head>
+<body>
+    <header>
+        <h1>LibPolyCall Command Demo</h1>
+        <div id="topology-status">Topology: INITIALIZING</div>
+    </header>
+    
+    <section id="command-interface">
+        <h2>Command Terminal</h2>
+        <div id="terminal">
+            <input type="text" id="command-input" placeholder="polycall --help">
+            <button onclick="executeCommand()">Execute</button>
+        </div>
+        <pre id="command-output"></pre>
+    </section>
+    
+    <section id="use-cases">
+        <div class="use-case" id="microbank">
+            <h3>MicroBank Demo</h3>
+            <button onclick="runBankingDemo()">Initialize Banking Topology</button>
+            <div id="bank-topology"></div>
+            <div id="bank-transactions"></div>
+        </div>
+        
+        <div class="use-case" id="edge-compute">
+            <h3>Edge Computing CDN Cache</h3>
+            <button onclick="runEdgeDemo()">Deploy Edge Nodes</button>
+            <div id="edge-topology"></div>
+            <div id="cache-status"></div>
+        </div>
+    </section>
+    
+    <script src="js/libpolycall-mock.js"></script>
+    <script src="js/microbank-demo.js"></script>
+    <script src="js/edge-compute-demo.js"></script>
+</body>
+</html>
