@@ -1,0 +1,2 @@
+# Add to crontab
+0 2 * * * cd /path/to/polycall && ./enexus-search.sh >> logs/nightly-health.log 2>&1

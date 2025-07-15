@@ -1,79 +1,58 @@
-# Windows metadata files
-*:Zone.Identifier
-*.Identifier
-desktop.ini
-Thumbs.db
-
-# MacOS metadata
-.DS_Store
-._*
-
-# Build directories
-/build/
-/out/
-/bin/
-/lib/
-/install/
-/cmake-build*/
-
-# Backup files
-/backup*/
-!backup_20250424_211311/
-!backup_20250424_215614/
-
-# CMake files
-CMakeCache.txt
-CMakeFiles/
-CMakeScripts/
-cmake_install.cmake
-compile_commands.json
-CTestTestfile.cmake
-_deps/
-*.cmake
-!CMakeLists.txt
-
-# Logs
-/logs/
-*.log
-
-# Object files and libraries
+# Build artifacts
+build/
 *.o
-*.ko
-*.obj
-*.elf
 *.so
-*.so.*
-*.dylib
 *.dll
+*.dylib
 *.a
-*.la
-*.lo
 *.lib
-
-# Executables
 *.exe
 *.out
-*.app
-*.i*86
-*.x86_64
-*.hex
+*.bin
 
-# Debug files
-*.dSYM/
-*.su
-*.idb
-*.pdb
+# Cache directories
+polycache/
+.polycache/
+.cache/
+logs/
+archive/
+tmp/
+temp/
+.tmp/
 
-# Editor files
+# Editor/IDE files
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
+.#*
+
+# System files
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
 Thumbs.db
+desktop.ini
+
+# Debug files
+*.pdb
+*.exp
+*.ilk
+core.*
+*.core
+
+# Generated files
+*.generated.c
+*.generated.h
+compile_commands.json
+.ninja_deps
+.ninja_log
+
+# Platform-specific
+.fuse_hidden*
+.nfs*
+
+# Polycall-specific
+*.polybak
+.polycall.lock
+protocol_cache/
+ffi_cache/
