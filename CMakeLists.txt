@@ -1,78 +1,66 @@
-# CMakeLists.txt (root)
-cmake_minimum_required(VERSION 3.13)
-project(OBINexusPolyCall 
+# OBINexus Polycall Project Build Configuration
+cmake_minimum_required(VERSION 3.16)
+
+project(polycall
     VERSION 0.7.0
-    DESCRIPTION "OBINexus PolyCall - Unified Runtime Abstraction"
+    DESCRIPTION "OBINexus Polymorphic Call System"
     LANGUAGES C CXX
 )
 
-# CMake module path
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+# Build configuration
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Include enhanced modules
-include(PolycallConfig)
-include(PolycallDocs)
-include(PolycallTests)
+# Project options
+option(BUILD_SHARED_LIBS "Build shared libraries" ON)
+option(BUILD_TESTING "Build test suite" ON)
+option(ENABLE_NLINK "Enable nlink integration" ON)
+option(POLYCALL_SECURITY_LEVEL "Security level configuration" "standard")
 
-if(POLYCALL_ENABLE_NLINK)
-    include(PolycallNLink)
+# Include custom cmake modules
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
+# Find required packages
+find_package(Threads REQUIRED)
+
+# Set up include directories
+include_directories(
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+
+# Configure build type
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type" FORCE)
 endif()
 
-# Create build directories
-file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib)
-file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
+# Compiler flags
+set(CMAKE_C_FLAGS_DEBUG "-g -O0 -DDEBUG")
+set(CMAKE_C_FLAGS_RELEASE "-O3 -DNDEBUG")
 
-# Process source directories
-add_subdirectory(src)
+# Add subdirectories
+add_subdirectory(src/core)
+add_subdirectory(src/cli)
 
-# Documentation
-if(POLYCALL_BUILD_DOCS)
-    add_subdirectory(docs)
-endif()
-
-# Tests
-if(POLYCALL_BUILD_TESTS)
+# Testing
+if(BUILD_TESTING)
     enable_testing()
-    add_subdirectory(test)
-endif()
-
-# Examples
-if(POLYCALL_BUILD_EXAMPLES)
-    add_subdirectory(examples)
+    add_subdirectory(tests)
 endif()
 
 # Installation
-include(PolycallPackaging)
-
-# Generate configuration files
-configure_package_config_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/PolycallConfig.cmake.in
-    ${CMAKE_CURRENT_BINARY_DIR}/PolycallConfig.cmake
-    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Polycall
+install(TARGETS polycall_core polycall_cli
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+    RUNTIME DESTINATION bin
 )
 
-# Install CMake modules
-install(
-    FILES ${CMAKE_CURRENT_BINARY_DIR}/PolycallConfig.cmake
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Polycall
-)
-
-# Summary
-message(STATUS "") 
-message(STATUS "OBINexus 
-PolyCall Configuration 
-Summary:") message(STATUS " 
-Version: ${POLYCALL_VERSION}") 
-message(STATUS " Build Type: 
-${CMAKE_BUILD_TYPE}") 
-message(STATUS " Security 
-Level: 
-${POLYCALL_SECURITY_LEVEL}") 
-message(STATUS " 
-Documentation: 
-${POLYCALL_BUILD_DOCS}") 
-message(STATUS " Tests: 
-${POLYCALL_BUILD_TESTS}") 
-message(STATUS " NLink: 
-${POLYCALL_ENABLE_NLINK}") 
-message(STATUS "")
+# Configuration summary
+message(STATUS "Polycall Configuration Summary:")
+message(STATUS "  Version: ${PROJECT_VERSION}")
+message(STATUS "  Build type: ${CMAKE_BUILD_TYPE}")
+message(STATUS "  Shared libs: ${BUILD_SHARED_LIBS}")
+message(STATUS "  Testing: ${BUILD_TESTING}")
+message(STATUS "  Security level: ${POLYCALL_SECURITY_LEVEL}")
