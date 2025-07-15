@@ -1,0 +1,15 @@
+{
+  "project": "libpolycall",
+  "codename": "aegis",
+  "version": {
+    "major": 2,
+    "minor": 0,
+    "patch": 0,
+    "prerelease": null,
+    "build": "e0378d2"
+  },
+  "release_date": null,
+  "status": "development",
+  "branch": "dev-main",
+  "last_updated": "2025-07-15T23:20:22Z"
+}
