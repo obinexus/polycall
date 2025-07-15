@@ -1,0 +1,137 @@
+docs/
+├── api
+│   └── core
+│       ├── accessibility.md
+│       ├── auth.md
+│       ├── config.md
+│       ├── network.md
+│       ├── protocol.md
+│       └── telemetry.md
+├── architecture
+│   ├── ARCHITECTURE.md
+│   └── README.md
+├── ARCHITECTURE.md
+├── assets
+│   └── images
+│       ├── favicon.png
+│       ├── faviconv1.png
+│       ├── founder.png
+│       ├── graph.png
+│       ├── libpolycall.png
+│       └── nnamdi.png
+├── cli
+│   └── ws2s_integration.md
+├── cmake_master_plan.md
+├── code_ai_4agent_framework.md
+├── code_ai_4agent_task_framework.md
+├── computing
+│   └── hotwiring-architecture
+│       ├── overview.md
+│       └── README.md
+├── data-isolation-blog.md
+├── dop-archiecture
+│   ├── adapter
+│   │   └── DOPAdapter.js
+│   ├── components
+│   │   └── ButtonLogic.js
+│   ├── Cryptographic_Standard_V1_0.pdf
+│   ├── Isomorphic_Reduction__Not_a_Bug__But_a_Feature.pdf
+│   ├── main.js
+│   ├── Mathematical_Framework_for_Zero_Overhead_Data_Marshalling.pdf
+│   ├── package.json
+│   ├── README.md
+│   ├── render
+│   │   ├── renderFunc.js
+│   │   └── renderOOP.js
+│   └── syntax
+│       ├── domain_sepcific.tsx
+│       └── example.tsx
+├── dop_implementation_roadmap.md
+├── dynamic-static-cost-function.md
+├── faviconv1.png
+├── Formal_Mathemitical_Reasoning_System.pdf
+├── graph.png
+├── guides
+│   └── getting-started
+│       └── obinexus-makefile-fixes-guide.md
+├── hotwiring-architecture
+│   ├── backward_compatibility.md
+│   ├── hotwiring_adapter_integration.md
+│   ├── hotwiring_adapter_integration_spec.md
+│   ├── hotwiring_architecture.md
+│   ├── hotwiring_overview.md
+│   ├── implementation_strategy.md
+│   ├── README.md
+│   └── repo_structure.md
+├── internal
+│   └── policies
+│       └── documentation-qa.md
+├── language-binding-blog.md
+├── legal
+│   ├── articles
+│   │   ├── inclusive-responsive-web-design-article.md
+│   │   └── use-it-respect-it.md
+│   ├── charters
+│   │   └── obiaxis_division_charter.md
+│   ├── legal-index.md
+│   ├── LICENSE
+│   ├── OBINexus Constitutional Ecosystem README.pdf
+│   ├── policies
+│   │   ├── hacc-human-advocacy-compliance-cycle.md
+│   │   └── right_to_act_clause.md
+│   ├── README.md
+│   ├── references
+│   │   ├── Dark Psychology Mitigation & Disability Rights Enforcement Specification.pdf
+│   │   ├── OBIAxis Division Charter - Epistemological Alignment Authority.pdf
+│   │   ├── OBINexus Constitutional Clause_ Department-to-Division Transition Protocol.pdf
+│   │   ├── OBINexus Constitutional Legal Framework_ Machine-Verifiable Governance Code.pdf
+│   │   ├── OBINexus Constitutional Legal Framework.pdf
+│   │   ├── OBINexus UI_UX Infrastructure Specification.pdf
+│   │   ├── Right to Act Human Rights Clause - Constitutional Implementation.pdf
+│   │   ├── The Truth Project.pdf
+│   │   └── Universal Pension Allocation for Human Rights Enforcement - OBINexus Constitutional Clause.pdf
+│   └── specifications
+│       ├── dark-psychology-mitigation.md
+│       ├── dark-psychology-mitigation-spec.md
+│       ├── department_division_clause.md
+│       ├── human-rights-enforcement-clause.md
+│       ├── obinexus-constitutional-framework.md
+│       ├── obinexus-constitutional-legal-code.md
+│       ├── obinexus-constructive-use-constitutional-protection.md
+│       └── obinexus-uiux-infrastructure-specification.md
+├── LFS-LIBPOLYCALL.md
+├── libpolycall.plantuml
+├── LibPolyCall v2 Binding Layer Development Plan.pdf
+├── mapping.yaml
+├── micro_dop_integration.md
+├── new-features-blog.md
+├── nnamdi.png
+├── obinexus-makefile-fixes-guide.md
+├── pdf
+│   ├── Data Isolation Through Micro Command_ Technical Implementation.pdf
+│   ├── docs
+│   │   ├── FEATURES.md
+│   │   ├── PLAN.md
+│   │   └── USAGE.md
+│   ├── Language-Specific Binding in LibPolyCall_ Implementation Guide.pdf
+│   ├── New Features in LibPolyCall_ Technical Overview.pdf
+│   └── Zero Trust Authentication in LibPolyCall.pdf
+├── PLAN.md
+├── PLAN.pdf
+├── polkov_v2_task_schema.md
+├── QUALITY_ASSURANCE.md
+├── README.md
+├── README.pdf
+├── safety-critical-topology
+│   ├── Cryptographic_Standard_V1_0.pdf
+│   ├── Mathematical_Framework_for_Zero_Overhead_Data_Marshalling.pdf
+│   └── Thread Safety Implementation in Gosilang - A Formal Analysis (1).pdf
+├── sinphase_documentation.pdf
+├── SINPHASE_RECOVERY_REPORT.md
+├── task_schema_phase1.md
+├── welcome.md
+├── zero-trust-blog.md
+├── zero_trust_qa_framework_for_polycall.md
+└── ZT_Protocol_v3.3.md
+
+28 directories, 107 files
