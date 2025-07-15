@@ -38,6 +38,19 @@ SUBMAKE = $(MAKE) --no-print-directory -f
 # Main Targets  #
 #################
 
+.PHONY: health-check cleanup pre-build
+
+health-check:
+	@./enexus-search.sh
+
+cleanup:
+	@./cleanup.sh
+
+pre-build: health-check
+	@./claude-observer.sh block-refactor
+
+build: pre-build
+	@echo "Building polycall..."
 .PHONY: all
 all:
 	@$(SUBMAKE) Makefile.build all
