@@ -1,0 +1,133 @@
+include/
+└── polycall
+    ├── auth
+    │   └── advanced_security.h
+    ├── cli
+    │   ├── command.h
+    │   └── repl.h
+    ├── core
+    │   ├── accessibility
+    │   │   ├── accessibility_colors.h
+    │   │   ├── accessibility_config.h
+    │   │   └── accessibility_interface.h
+    │   ├── auth
+    │   │   ├── advanced_security.h
+    │   │   ├── polycall_auth_audit.h
+    │   │   ├── polycall_auth_config.h
+    │   │   ├── polycall_auth_context.h
+    │   │   ├── polycall_auth_identity.h
+    │   │   ├── polycall_auth_integration.h
+    │   │   ├── polycall_auth_policy.h
+    │   │   └── polycall_auth_token.h
+    │   ├── bind
+    │   │   ├── binding_config.h
+    │   │   └── zerotrust
+    │   │       ├── bind_authenticator.h
+    │   │       ├── bind_policy.h
+    │   │       └── bind_validator.h
+    │   ├── comadnorehicon
+    │   │   └── secure_core.h
+    │   ├── config
+    │   │   ├── path_utils.h
+    │   │   └── polycall_config_tools.h
+    │   ├── edge
+    │   │   ├── compute_router.h
+    │   │   ├── edge_component.h
+    │   │   ├── edge_config.h
+    │   │   ├── edge.h
+    │   │   ├── edge_runtime.h
+    │   │   ├── fallback.h
+    │   │   ├── node_selector.h
+    │   │   ├── polycall_edge.h
+    │   │   └── security.h
+    │   ├── ffi
+    │   │   ├── c_bridge.h
+    │   │   ├── cobol_bridge.h
+    │   │   ├── dop_adapter.h
+    │   │   ├── ffi_config.h
+    │   │   ├── ffi_core.h
+    │   │   ├── ffi_types.h
+    │   │   ├── js_bridge.h
+    │   │   ├── jvm_bridge.h
+    │   │   ├── language_bridge.h
+    │   │   ├── memory_bridge.h
+    │   │   ├── performance.h
+    │   │   ├── protocol_bridge.h
+    │   │   ├── python_bridge.h
+    │   │   ├── security.h
+    │   │   └── type_system.h
+    │   ├── ignore
+    │   │   └── polycall_ignore.h
+    │   ├── micro
+    │   │   ├── polycall_micro_component.h
+    │   │   ├── polycall_micro_config.h
+    │   │   ├── polycall_micro_context.h
+    │   │   ├── polycall_micro_resource.h
+    │   │   └── polycall_micro_security.h
+    │   ├── network
+    │   │   ├── connection_pool.h
+    │   │   ├── network_client.h
+    │   │   ├── network_config.h
+    │   │   ├── network_endpoint.h
+    │   │   ├── network_event.h
+    │   │   ├── network.h
+    │   │   ├── network_internal.h
+    │   │   ├── network_packet.h
+    │   │   ├── network_server.h
+    │   │   └── subscription.h
+    │   ├── parser
+    │   │   └── config_parser.h
+    │   ├── polycall
+    │   │   ├── hierarchical_state.h
+    │   │   ├── polycall_config.h
+    │   │   ├── polycall_context.h
+    │   │   ├── polycall_core.h
+    │   │   ├── polycall_error.h
+    │   │   ├── polycall_event.h
+    │   │   ├── polycall.h
+    │   │   ├── polycall_logger.h
+    │   │   ├── polycall_memory.h
+    │   │   ├── polycall_permission.h
+    │   │   ├── polycall_program.h
+    │   │   ├── polycall_public.h
+    │   │   ├── polycall_shared_core.h
+    │   │   ├── polycall_state_machine.h
+    │   │   ├── polycall_types.h
+    │   │   └── polycall_version.h
+    │   ├── polycallfile
+    │   │   ├── ast.h
+    │   │   ├── expression_evaluator.h
+    │   │   ├── global_config.h
+    │   │   ├── ignore
+    │   │   │   └── polycallfile_ignore.h
+    │   │   ├── macro_expander.h
+    │   │   ├── parser.h
+    │   │   ├── polycall.h
+    │   │   ├── token.h
+    │   │   └── tokenizer.h
+    │   ├── polycall.h
+    │   ├── polycallrc
+    │   │   ├── binding_config.h
+    │   │   └── ignore
+    │   │       └── polycallrc_ignore.h
+    │   ├── protocol
+    │   │   ├── command.h
+    │   │   ├── communication.h
+    │   │   ├── message.h
+    │   │   ├── message_optimization.h
+    │   │   ├── polycall_protocol_context.h
+    │   │   ├── protocol_config.h
+    │   │   └── protocol_enhacements_config.h
+    │   ├── repl
+    │   │   └── polycall_repl.h
+    │   ├── schema
+    │   │   └── config_schema.h
+    │   └── telemetry
+    │       ├── polycall_telemetry.h
+    │       ├── polycall_telemetry_reporting.h
+    │       ├── polycall_telemetry_security.h
+    │       └── telemetry_config.h
+    ├── polycall.h.in
+    └── polycall_version.h.in
+
+26 directories, 105 files
