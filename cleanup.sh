@@ -48,6 +48,12 @@ run_script() {
     fi
 }
 
+# Add to cleanup.sh
+update_cleanup_timestamp() {
+    date +%s > ".last_cleanup"
+    rm -f ".cleanup_required"
+    log "Cleanup timestamp updated"
+}
 main() {
     log "Starting Polycall cleanup phase (${#CLEANUP_SCRIPTS[@]} scripts)"
     log "Mode: $([ "$DRY_RUN" == "true" ] && echo "DRY-RUN" || echo "EXECUTE")"
