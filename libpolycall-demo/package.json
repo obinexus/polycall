@@ -1,0 +1,15 @@
+{
+  "name": "libpolycall-demo",
+  "version": "3.3.0",
+  "description": "LibPolyCall Zero-Trust Protocol Local Demo",
+  "main": "index.html",
+  "scripts": {
+    "start": "python -m http.server -b 127.0.0.1 8000",
+    "test": "echo 'No tests - demo only'"
+  },
+  "keywords": ["libpolycall", "zero-trust", "demo"],
+  "author": "OBINexus",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {}
+}
