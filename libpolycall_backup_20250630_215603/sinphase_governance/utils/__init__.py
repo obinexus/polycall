@@ -1,1 +1,0 @@
-"""Sinphasé utils module."""

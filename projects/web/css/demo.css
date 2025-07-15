@@ -1,0 +1,78 @@
+.demo-section {
+    background: var(--obinexus-secondary);
+    padding: 2rem;
+    border-radius: 8px;
+    margin: 3rem 0;
+}
+
+.code-demo {
+    background: var(--obinexus-primary);
+    padding: 1.5rem;
+    border-radius: 4px;
+    overflow-x: auto;
+    margin: 1rem 0;
+}
+
+.interactive-demo {
+    display: flex;
+    gap: 2rem;
+    margin: 2rem 0;
+}
+
+.demo-input, .demo-output {
+    flex: 1;
+}
+
+textarea {
+    width: 100%;
+    min-height: 150px;
+    background: var(--obinexus-primary);
+    color: var(--text-primary);
+    border: 1px solid var(--obinexus-accent);
+    border-radius: 4px;
+    padding: 1rem;
+    font-family: inherit;
+    resize: vertical;
+}
+
+button {
+    background: var(--obinexus-highlight);
+    color: var(--text-primary);
+    border: none;
+    padding: 0.8rem 2rem;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+button:hover {
+    background: #d63950;
+}
+
+.telemetry-panel {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--obinexus-secondary);
+    border: 1px solid var(--obinexus-accent);
+    border-radius: 8px;
+    padding: 1rem;
+    min-width: 250px;
+}
+
+.telemetry-panel h4 {
+    color: var(--obinexus-highlight);
+    margin-bottom: 0.5rem;
+}
+
+.metric {
+    display: flex;
+    justify-content: space-between;
+    margin: 0.3rem 0;
+    font-size: 0.9rem;
+}
+
+.metric-value {
+    color: var(--obinexus-highlight);
+}

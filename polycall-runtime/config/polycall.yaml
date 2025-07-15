@@ -1,0 +1,37 @@
+# PolyCall Configuration
+# Generated: 2025-07-06T14:38:09Z
+# Version: 1.0
+
+version: 1.0
+
+runtime:
+  mode: interactive
+  home: /home/obinexus/projects/pkg/polycall/polycall-runtime
+  telemetry: enabled
+  log_level: info
+  
+security:
+  level: standard
+  zero_trust: true
+  crypto_seed: "[0;34m[INFO][0m Generating cryptographic seed...
+wRzxEFIRrwMRJ8UzJAP4SAjfJtySoFpQHbKwo/tG/1c="
+  session_timeout: 3600
+  
+edge:
+  enabled: false
+  memory_limit: 256KB
+  static_allocation: true
+  
+telemetry:
+  enabled: true
+  endpoint: file:///home/obinexus/projects/pkg/polycall/polycall-runtime/logs/telemetry
+  sample_rate: 100
+  metrics:
+    - latency
+    - memory
+    - crypto_ops
+    
+accessibility:
+  voice_control: false
+  haptic_feedback: false
+  screen_reader_support: true

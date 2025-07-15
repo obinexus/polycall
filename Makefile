@@ -1,113 +1,305 @@
-# OBINexus LibPolyCall - Hybrid Build System Makefile
-# Combines Python packaging with CMake C/C++ builds
-# Maintains Sinphasé governance enforcement
+# OBINexus PolyCall Root Makefile
+# Fixed non-recursive delegation orchestrator
 
-.PHONY: all install build clean test check report refactor help
+# Recursion guard
+ifndef POLYCALL_MAKEFILE_INCLUDED
+POLYCALL_MAKEFILE_INCLUDED := 1
+
+# Version and metadata
+VERSION := 0.7.0
+BUILD_DATE := $(shell date +%Y%m%d)
+BUILD_HASH := $(shell git rev-parse --short HEAD 2>/dev/null || echo "nogit")
+
+# Build configuration
+BUILD_MODE ?= release
+EDGE_MICRO ?= enabled
+SECURITY_LEVEL ?= paranoid
+
+# Directory structure
+ROOT_DIR := $(shell pwd)
+BUILD_DIR := $(ROOT_DIR)/build
+SRC_DIR := $(ROOT_DIR)/src
+INCLUDE_DIR := $(ROOT_DIR)/include
+TOOLS_DIR := $(ROOT_DIR)/tools
+
+# Export common variables
+export VERSION BUILD_DATE BUILD_HASH
+export BUILD_MODE EDGE_MICRO SECURITY_LEVEL
+export ROOT_DIR BUILD_DIR SRC_DIR INCLUDE_DIR TOOLS_DIR
+export POLYCALL_MAKEFILE_INCLUDED
 
 # Default target
-all: help
+.DEFAULT_GOAL := all
 
-# Help message
+# Non-recursive make invocation
+SUBMAKE = $(MAKE) --no-print-directory -f
+
+#################
+# Main Targets  #
+#################
+
+.PHONY: all
+all:
+	@$(SUBMAKE) Makefile.build all
+
+.PHONY: help
 help:
-	@echo "LibPolyCall Build System Commands:"
-	@echo "  install    - Install Python package in editable mode"
-	@echo "  build      - Build C/C++ components via CMake"
-	@echo "  clean      - Remove build artifacts and caches"
-	@echo "  test       - Run Python test suite"
-	@echo "  check      - Run Sinphasé governance check"
-	@echo "  report     - Generate governance report"
-	@echo "  refactor   - Run refactoring (dry-run)"
-	@echo "  full       - Run full build pipeline (clean, build, install, test)"
+	@echo "OBINexus PolyCall Build System v$(VERSION)"
+	@echo "========================================"
+	@echo ""
+	@echo "Main targets:"
+	@echo "  all          - Build everything (default)"
+	@echo "  build        - Build core components"
+	@echo "  test         - Run test suite"
+	@echo "  qa           - Run QA checks"
+	@echo "  clean        - Clean build artifacts"
+	@echo "  install      - Install polycall"
+	@echo ""
+	@echo "Subsystem targets:"
+	@echo "  Build:       build-* targets (see 'make help-build')"
+	@echo "  Purity:      check-*, verify-* targets (see 'make help-purity')"
+	@echo "  Testing:     test-*, qa-* targets (see 'make help-spec')"
+	@echo "  Vendor:      vendor-*, browser-* targets (see 'make help-vendor')"
+	@echo "  Projects:    setup-*, config-* targets (see 'make help-projects')"
 
-# Python package installation
-install:
-	@echo "Installing LibPolyCall Python package..."
-	@pip install -e .
-	@echo "Installation complete."
+#################
+# Build Targets #
+#################
 
-# CMake build for C/C++ components
+.PHONY: build build-all build-core build-cli build-edge build-micro
+.PHONY: edge-deploy micro-deploy release install clean
+
 build:
-	@echo "Building C/C++ components..."
-	@cmake -B build/ -S . -DCMAKE_BUILD_TYPE=Release
-	@cmake --build build/ --parallel
-	@echo "Build complete."
+	@$(SUBMAKE) Makefile.build build
 
-# Clean all build artifacts
+build-all:
+	@$(SUBMAKE) Makefile.build build-all
+
+build-core:
+	@$(SUBMAKE) Makefile.build build-core
+
+build-cli:
+	@$(SUBMAKE) Makefile.build build-cli
+
+build-edge:
+	@$(SUBMAKE) Makefile.build build-edge
+
+build-micro:
+	@$(SUBMAKE) Makefile.build build-micro
+
+edge-deploy:
+	@$(SUBMAKE) Makefile.build edge-deploy
+
+micro-deploy:
+	@$(SUBMAKE) Makefile.build micro-deploy
+
+release:
+	@$(SUBMAKE) Makefile.build release
+
+install:
+	@$(SUBMAKE) Makefile.build install
+
 clean:
-	@echo "Cleaning build artifacts..."
-	@rm -rf build/ dist/ *.egg-info
-	@rm -rf __pycache__ .pytest_cache
-	@rm -rf sinphase_governance.egg-info
-	@find . -type d -name "__pycache__" -exec rm -rf {} +
-	@find . -type f -name "*.pyc" -delete
-	@find . -type f -name "*.pyo" -delete
-	@find . -type f -name "*.so" -delete
-	@find . -type f -name "*.dylib" -delete
-	@echo "Clean complete."
+	@$(SUBMAKE) Makefile.build clean
 
-# Run test suite
+##################
+# Purity Targets #
+##################
+
+.PHONY: check-commands check-memory check-security check-compliance
+.PHONY: verify-auth verify-network verify-protocol
+.PHONY: audit-code audit-deps security-scan purity-report clean-audit
+
+check-commands:
+	@$(SUBMAKE) Makefile.purity check-commands
+
+check-memory:
+	@$(SUBMAKE) Makefile.purity check-memory
+
+check-security:
+	@$(SUBMAKE) Makefile.purity check-security
+
+check-compliance:
+	@$(SUBMAKE) Makefile.purity check-compliance
+
+verify-auth:
+	@$(SUBMAKE) Makefile.purity verify-auth
+
+verify-network:
+	@$(SUBMAKE) Makefile.purity verify-network
+
+verify-protocol:
+	@$(SUBMAKE) Makefile.purity verify-protocol
+
+audit-code:
+	@$(SUBMAKE) Makefile.purity audit-code
+
+audit-deps:
+	@$(SUBMAKE) Makefile.purity audit-deps
+
+security-scan:
+	@$(SUBMAKE) Makefile.purity security-scan
+
+purity-report:
+	@$(SUBMAKE) Makefile.purity purity-report
+
+clean-audit:
+	@$(SUBMAKE) Makefile.purity clean-audit
+
+#################
+# Spec Targets  #
+#################
+
+.PHONY: test qa qa-full qa-quick qa-integration qa-unit
+.PHONY: test-all test-unit test-integration test-edge test-micro
+.PHONY: test-network test-protocol test-auth test-accessibility
+.PHONY: coverage coverage-report benchmark stress-test
+.PHONY: validate-api validate-schema clean-test
+
 test:
-	@echo "Running test suite..."
-	@pytest tests/ -v
+	@$(SUBMAKE) Makefile.spec test
 
-# Sinphasé governance check
-check:
-	@echo "Running Sinphasé governance check..."
-	@python -m sinphase_governance check
+qa:
+	@$(SUBMAKE) Makefile.spec qa
 
-# Generate governance report
-report:
-	@echo "Generating governance report..."
-	@python -m sinphase_governance report
+qa-full:
+	@$(SUBMAKE) Makefile.spec qa-full
 
-# Run refactoring
-refactor:
-	@echo "Running refactoring (dry-run)..."
-	@bash refactor.sh --dry-run
+qa-quick:
+	@$(SUBMAKE) Makefile.spec qa-quick
 
-# Full build pipeline
-full: clean build install test
-	@echo "Full build pipeline complete."
+qa-integration:
+	@$(SUBMAKE) Makefile.spec qa-integration
 
-# Development setup
-dev-setup:
-	@echo "Setting up development environment..."
-	@pip install -e ".[dev]"
-	@pre-commit install
-	@echo "Development setup complete."
+qa-unit:
+	@$(SUBMAKE) Makefile.spec qa-unit
 
-# Build Python wheel
-wheel:
-	@echo "Building Python wheel..."
-	@pip install --upgrade build
-	@python -m build
-	@echo "Wheel build complete."
+test-all:
+	@$(SUBMAKE) Makefile.spec test-all
 
-# Build documentation
-docs:
-	@echo "Building documentation..."
-	@cd docs && make html
-	@echo "Documentation build complete."
+test-unit:
+	@$(SUBMAKE) Makefile.spec test-unit
 
-# CMake specific targets
-cmake-debug:
-	@cmake -B build-debug/ -S . -DCMAKE_BUILD_TYPE=Debug
-	@cmake --build build-debug/ --parallel
+test-integration:
+	@$(SUBMAKE) Makefile.spec test-integration
 
-cmake-test:
-	@cd build && ctest --output-on-failure
+test-edge:
+	@$(SUBMAKE) Makefile.spec test-edge
 
-# Platform-specific builds
-build-linux:
-	@cmake -B build-linux/ -S . -DCMAKE_BUILD_TYPE=Release -DCMAKE_SYSTEM_NAME=Linux
-	@cmake --build build-linux/ --parallel
+test-micro:
+	@$(SUBMAKE) Makefile.spec test-micro
 
-build-windows:
-	@cmake -B build-windows/ -S . -DCMAKE_BUILD_TYPE=Release -G "MinGW Makefiles"
-	@cmake --build build-windows/ --parallel
+test-network:
+	@$(SUBMAKE) Makefile.spec test-network
 
-# Isolated FFI/Protocol builds (Sinphasé enforcement)
-build-ffi:
-	@echo "Building isolated FFI components..."
-	@cmake --build build/ --target root-dynamic-c
-	@echo "FFI build complete."
+test-protocol:
+	@$(SUBMAKE) Makefile.spec test-protocol
+
+test-auth:
+	@$(SUBMAKE) Makefile.spec test-auth
+
+test-accessibility:
+	@$(SUBMAKE) Makefile.spec test-accessibility
+
+coverage:
+	@$(SUBMAKE) Makefile.spec coverage
+
+coverage-report:
+	@$(SUBMAKE) Makefile.spec coverage-report
+
+benchmark:
+	@$(SUBMAKE) Makefile.spec benchmark
+
+stress-test:
+	@$(SUBMAKE) Makefile.spec stress-test
+
+validate-api:
+	@$(SUBMAKE) Makefile.spec validate-api
+
+validate-schema:
+	@$(SUBMAKE) Makefile.spec validate-schema
+
+clean-test:
+	@$(SUBMAKE) Makefile.spec clean-test
+
+##################
+# Vendor Targets #
+##################
+
+.PHONY: vendor-test test-all-browsers test-chrome test-firefox test-safari test-edge
+.PHONY: browser-matrix wasm-build serve-demo clean-vendor
+
+vendor-test:
+	@$(SUBMAKE) Makefile.vendor vendor-test
+
+test-all-browsers:
+	@$(SUBMAKE) Makefile.vendor test-all-browsers
+
+test-chrome:
+	@$(SUBMAKE) Makefile.vendor test-chrome
+
+test-firefox:
+	@$(SUBMAKE) Makefile.vendor test-firefox
+
+test-safari:
+	@$(SUBMAKE) Makefile.projects config-edge
+
+config-micro:
+	@$(SUBMAKE) Makefile.projects config-micro
+
+generate-docs:
+	@$(SUBMAKE) Makefile.projects generate-docs
+
+update-schemas:
+	@$(SUBMAKE) Makefile.projects update-schemas
+
+validate-config:
+	@$(SUBMAKE) Makefile.projects validate-config
+
+init-workspace:
+	@$(SUBMAKE) Makefile.projects init-workspace
+
+clean-config:
+	@$(SUBMAKE) Makefile.projects clean-config
+
+help-projects:
+	@$(SUBMAKE) Makefile.projects help
+
+###################
+# Help Subsystems #
+###################
+
+.PHONY: help-build help-purity help-spec help-vendor
+
+help-build:
+	@$(SUBMAKE) Makefile.build help
+
+help-purity:
+	@$(SUBMAKE) Makefile.purity help
+
+help-spec:
+	@$(SUBMAKE) Makefile.spec help
+
+help-vendor:
+	@$(SUBMAKE) Makefile.vendor help
+
+########################
+# Compound Operations  #
+########################
+
+.PHONY: full-build full-test full-clean verify-all
+
+full-build: clean build test qa
+	@echo "Full build completed successfully"
+
+full-test: test-all qa-full coverage-report
+	@echo "Full test suite completed"
+
+full-clean: clean clean-test clean-audit clean-vendor clean-config
+	@echo "Full cleanup completed"
+
+verify-all: check-commands security-scan validate-api validate-schema
+	@echo "All verifications passed"
+
+# End recursion guard
+endif

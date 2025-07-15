@@ -1,0 +1,1 @@
+"""Sinphasé config module."""

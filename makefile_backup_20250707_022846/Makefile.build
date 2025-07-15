@@ -1,0 +1,197 @@
+# OBINexus PolyCall Build Subsystem
+# Handles core build operations with recursion protection
+
+# Recursion guard
+ifndef POLYCALL_BUILD_INCLUDED
+POLYCALL_BUILD_INCLUDED := 1
+
+# Inherit from root or set defaults
+VERSION ?= 0.7.0
+BUILD_MODE ?= release
+ROOT_DIR ?= $(shell pwd)
+BUILD_DIR ?= $(ROOT_DIR)/build
+SRC_DIR ?= $(ROOT_DIR)/src
+
+# Compiler settings
+CC := gcc
+CXX := g++
+AR := ar
+CFLAGS := -Wall -Wextra -std=c11 -I$(INCLUDE_DIR) -fPIC
+CXXFLAGS := -Wall -Wextra -std=c++17 -I$(INCLUDE_DIR) -fPIC
+LDFLAGS := -L$(BUILD_DIR)/lib -lpthread -ldl
+
+# Build mode configurations
+ifeq ($(BUILD_MODE),debug)
+    CFLAGS += -g -O0 -DDEBUG
+    CXXFLAGS += -g -O0 -DDEBUG
+else ifeq ($(BUILD_MODE),release)
+    CFLAGS += -O3 -DNDEBUG
+    CXXFLAGS += -O3 -DNDEBUG
+else ifeq ($(BUILD_MODE),profile)
+    CFLAGS += -g -O2 -pg
+    CXXFLAGS += -g -O2 -pg
+    LDFLAGS += -pg
+endif
+
+# Security hardening
+ifeq ($(SECURITY_LEVEL),paranoid)
+    CFLAGS += -D_FORTIFY_SOURCE=2 -fstack-protector-strong -fPIE
+    LDFLAGS += -pie -Wl,-z,relro -Wl,-z,now
+endif
+
+# Components
+COMPONENTS := core cli network protocol auth telemetry
+EDGE_COMPONENTS := edge micro accessibility
+FFI_COMPONENTS := ffi bridges adapters
+
+# Default target
+.DEFAULT_GOAL := all
+
+###################
+# Build Targets   #
+###################
+
+.PHONY: all
+all: build-all
+
+.PHONY: build
+build: build-core build-cli
+
+.PHONY: build-all
+build-all: directories build-core build-cli build-edge build-micro build-ffi
+	@echo "[BUILD] All components built successfully"
+
+.PHONY: build-core
+build-core: directories
+	@echo "[BUILD] Building core components..."
+	@for comp in $(COMPONENTS); do \
+		echo "[CC] Building $$comp..."; \
+		$(MAKE) -C $(SRC_DIR)/core/$$comp --no-print-directory || exit 1; \
+	done
+	@echo "[BUILD] Core components complete"
+
+.PHONY: build-cli
+build-cli: build-core
+	@echo "[BUILD] Building CLI..."
+	@$(MAKE) -C $(SRC_DIR)/cli --no-print-directory
+	@echo "[BUILD] CLI complete"
+
+.PHONY: build-edge
+build-edge: build-core
+	@echo "[BUILD] Building edge components..."
+	@$(MAKE) -C $(SRC_DIR)/core/edge --no-print-directory
+	@echo "[BUILD] Edge components complete"
+
+.PHONY: build-micro
+build-micro: build-core
+	@echo "[BUILD] Building micro components..."
+	@$(MAKE) -C $(SRC_DIR)/core/micro --no-print-directory
+	@echo "[BUILD] Micro components complete"
+
+.PHONY: build-ffi
+build-ffi: build-core
+	@echo "[BUILD] Building FFI bridges..."
+	@$(MAKE) -C $(SRC_DIR)/core/ffi --no-print-directory
+	@echo "[BUILD] FFI bridges complete"
+
+###################
+# Deploy Targets  #
+###################
+
+.PHONY: edge-deploy
+edge-deploy: build-edge
+	@echo "[DEPLOY] Deploying edge components..."
+	@mkdir -p $(BUILD_DIR)/deploy/edge
+	@cp $(BUILD_DIR)/bin/polycall-edge $(BUILD_DIR)/deploy/edge/
+	@cp $(BUILD_DIR)/lib/libpolycall-edge.so $(BUILD_DIR)/deploy/edge/
+	@echo "[DEPLOY] Edge deployment complete"
+
+.PHONY: micro-deploy
+micro-deploy: build-micro
+	@echo "[DEPLOY] Deploying micro services..."
+	@mkdir -p $(BUILD_DIR)/deploy/micro
+	@cp $(BUILD_DIR)/bin/polycall-micro $(BUILD_DIR)/deploy/micro/
+	@cp $(BUILD_DIR)/lib/libpolycall-micro.so $(BUILD_DIR)/deploy/micro/
+	@echo "[DEPLOY] Micro deployment complete"
+
+###################
+# Release Target  #
+###################
+
+.PHONY: release
+release: clean build-all test-minimal
+	@echo "[RELEASE] Creating release package..."
+	@mkdir -p $(BUILD_DIR)/release-$(VERSION)
+	@cp -r $(BUILD_DIR)/bin $(BUILD_DIR)/release-$(VERSION)/
+	@cp -r $(BUILD_DIR)/lib $(BUILD_DIR)/release-$(VERSION)/
+	@cp -r $(INCLUDE_DIR) $(BUILD_DIR)/release-$(VERSION)/
+	@tar czf $(BUILD_DIR)/polycall-$(VERSION).tar.gz -C $(BUILD_DIR) release-$(VERSION)
+	@echo "[RELEASE] Package created: $(BUILD_DIR)/polycall-$(VERSION).tar.gz"
+
+###################
+# Install Target  #
+###################
+
+.PHONY: install
+install: build-all
+	@echo "[INSTALL] Installing PolyCall..."
+	@mkdir -p $(DESTDIR)/usr/local/bin
+	@mkdir -p $(DESTDIR)/usr/local/lib
+	@mkdir -p $(DESTDIR)/usr/local/include/polycall
+	@cp $(BUILD_DIR)/bin/polycall $(DESTDIR)/usr/local/bin/
+	@cp $(BUILD_DIR)/lib/*.so $(DESTDIR)/usr/local/lib/
+	@cp -r $(INCLUDE_DIR)/polycall/* $(DESTDIR)/usr/local/include/polycall/
+	@ldconfig || true
+	@echo "[INSTALL] Installation complete"
+
+###################
+# Utility Targets #
+###################
+
+.PHONY: directories
+directories:
+	@mkdir -p $(BUILD_DIR)/{bin,lib,obj,deploy,release-$(VERSION)}
+	@mkdir -p $(BUILD_DIR)/obj/{core,cli,edge,micro,ffi}
+
+.PHONY: test-minimal
+test-minimal:
+	@echo "[TEST] Running minimal smoke tests..."
+	@$(BUILD_DIR)/bin/polycall --version || exit 1
+	@echo "[TEST] Smoke tests passed"
+
+.PHONY: clean
+clean:
+	@echo "[CLEAN] Removing build artifacts..."
+	@rm -rf $(BUILD_DIR)
+	@echo "[CLEAN] Build directory cleaned"
+
+.PHONY: help
+help:
+	@echo "PolyCall Build Subsystem"
+	@echo "======================="
+	@echo ""
+	@echo "Build targets:"
+	@echo "  all          - Build all components (default)"
+	@echo "  build        - Build core and CLI only"
+	@echo "  build-core   - Build core libraries"
+	@echo "  build-cli    - Build command-line interface"
+	@echo "  build-edge   - Build edge components"
+	@echo "  build-micro  - Build micro services"
+	@echo "  build-ffi    - Build FFI bridges"
+	@echo ""
+	@echo "Deployment targets:"
+	@echo "  edge-deploy  - Deploy edge components"
+	@echo "  micro-deploy - Deploy micro services"
+	@echo ""
+	@echo "Other targets:"
+	@echo "  release      - Create release package"
+	@echo "  install      - Install to system"
+	@echo "  clean        - Remove build artifacts"
+	@echo ""
+	@echo "Build modes:"
+	@echo "  BUILD_MODE=debug    - Debug build with symbols"
+	@echo "  BUILD_MODE=release  - Optimized release build"
+	@echo "  BUILD_MODE=profile  - Build with profiling"
+
+# End recursion guard
+endif

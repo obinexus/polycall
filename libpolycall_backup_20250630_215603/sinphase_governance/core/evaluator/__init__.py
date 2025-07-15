@@ -1,1 +1,0 @@
-"""Sinphasé evaluator module."""

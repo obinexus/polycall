@@ -1,0 +1,2 @@
+add_executable(polic_advanced_example advanced_example.c)
+target_link_libraries(polic_advanced_example PRIVATE polic)

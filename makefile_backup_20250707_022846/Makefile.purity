@@ -1,0 +1,193 @@
+# Makefile.purity - Mutually Exclusive Command Control
+# Ensures atomic command execution and prevents race conditions
+# Copyright (c) 2025 OBINexus Computing
+
+# Lock Directory Configuration
+LOCK_DIR := .polycall-locks
+LOCK_TIMEOUT := 30
+
+# Command Categories (mutually exclusive groups)
+BUILD_COMMANDS := build compile link archive
+TEST_COMMANDS := test unit-test integration-test qa
+DEPLOY_COMMANDS := install uninstall deploy edge-deploy
+CLEAN_COMMANDS := clean distclean purge
+
+# Security Scanner Configuration
+SECURITY_TOOLS := \
+	clang-analyzer \
+	cppcheck \
+	flawfinder \
+	rats
+
+# Lock Files
+BUILD_LOCK := $(LOCK_DIR)/build.lock
+TEST_LOCK := $(LOCK_DIR)/test.lock
+DEPLOY_LOCK := $(LOCK_DIR)/deploy.lock
+MASTER_LOCK := $(LOCK_DIR)/master.lock
+
+# Ensure lock directory exists
+$(shell mkdir -p $(LOCK_DIR))
+
+# Primary target
+.PHONY: check-commands acquire-lock release-lock security-scan
+
+# Check for conflicting commands
+check-commands:
+	@echo "Checking command mutex state..."
+	@$(MAKE) -s validate-no-conflicts
+
+# Validate no conflicting operations
+validate-no-conflicts:
+	@# Check if any locks are stale
+	@find $(LOCK_DIR) -name "*.lock" -mmin +$(LOCK_TIMEOUT) -delete 2>/dev/null || true
+	@# Validate mutex state
+	@if [ -f $(MASTER_LOCK) ]; then \
+		echo "Error: Another PolyCall operation is in progress"; \
+		echo "Lock info: $$(cat $(MASTER_LOCK))"; \
+		exit 1; \
+	fi
+	@# Create master lock
+	@echo "PID=$$$$ USER=$$(whoami) TIME=$$(date -u +%s) CMD=$(MAKECMDGOALS)" > $(MASTER_LOCK)
+	@# Register cleanup trap
+	@trap 'rm -f $(MASTER_LOCK)' EXIT
+
+# Acquire specific lock for command category
+acquire-lock:
+	@if [ -z "$(LOCK_TYPE)" ]; then \
+		echo "Error: LOCK_TYPE not specified"; \
+		exit 1; \
+	fi
+	@LOCK_FILE=$(LOCK_DIR)/$(LOCK_TYPE).lock; \
+	if [ -f $$LOCK_FILE ]; then \
+		echo "Error: $(LOCK_TYPE) lock already held"; \
+		echo "Lock info: $$(cat $$LOCK_FILE)"; \
+		exit 1; \
+	fi; \
+	echo "PID=$$$$ USER=$$(whoami) TIME=$$(date -u +%s)" > $$LOCK_FILE
+
+# Release specific lock
+release-lock:
+	@if [ -z "$(LOCK_TYPE)" ]; then \
+		echo "Error: LOCK_TYPE not specified"; \
+		exit 1; \
+	fi
+	@rm -f $(LOCK_DIR)/$(LOCK_TYPE).lock
+
+# Security Scanning
+security-scan: check-commands
+	@echo "Running security scans..."
+	@$(MAKE) -s run-security-tools
+
+run-security-tools:
+	@echo "=== Static Analysis Security Scan ==="
+	@# Check for dangerous functions
+	@echo "Checking for dangerous functions..."
+	@grep -r -n -E "(strcpy|strcat|gets|sprintf|vsprintf|scanf|sscanf|fscanf|vfscanf|vscanf|vsscanf|streadd|strecpy|strtrns|realpath|syslog|getopt|getpass|getchar|fgetc|getc|read|bcopy|fgets|fgetss|getwd|getcwd|strlen|strcmp|strncmp|strcasecmp|strncasecmp|memcmp|memcpy|memset|memmove|memchr|strchr|strrchr|strstr|strcasestr|strtok|strtok_r|strdup|strndup|strncpy|strncat|strlcpy|strlcat)" \
+		$(SRC_DIR) $(INCLUDE_DIR) 2>/dev/null | \
+		grep -v "// SAFE:" | \
+		grep -v "/* SAFE:" || echo "No unsafe functions found"
+	
+	@# Check for hardcoded credentials
+	@echo "Checking for hardcoded credentials..."
+	@grep -r -n -E "(password|passwd|pwd|secret|api_key|apikey|token|credential)" \
+		$(SRC_DIR) $(INCLUDE_DIR) 2>/dev/null | \
+		grep -i -E "(=|:)" | \
+		grep -v "// OK:" | \
+		grep -v "/* OK:" || echo "No hardcoded credentials found"
+	
+	@# Memory safety checks
+	@echo "Checking memory safety patterns..."
+	@$(MAKE) -s check-memory-patterns
+	
+	@# Concurrency safety
+	@echo "Checking concurrency patterns..."
+	@$(MAKE) -s check-concurrency-patterns
+
+check-memory-patterns:
+	@# Check for unchecked malloc
+	@echo "  - Unchecked memory allocations..."
+	@for file in $$(find $(SRC_DIR) -name "*.c"); do \
+		awk '/malloc\(/ { \
+			line = NR; \
+			getline; \
+			if ($$0 !~ /if.*NULL/ && $$0 !~ /if.*!/) { \
+				print FILENAME ":" line ": Warning: Unchecked malloc" \
+			} \
+		}' $$file; \
+	done || true
+	
+	@# Check for potential buffer overflows
+	@echo "  - Buffer overflow risks..."
+	@grep -r -n -E "(\[[0-9]+\]|\[[A-Z_]+\])" $(SRC_DIR) | \
+		grep -E "(strcpy|strcat|sprintf|gets)" || echo "    No buffer overflow patterns found"
+
+check-concurrency-patterns:
+	@# Check for race conditions
+	@echo "  - Global variable access without locks..."
+	@for file in $$(find $(SRC_DIR) -name "*.c"); do \
+		grep -n "^[[:space:]]*extern\|^[[:space:]]*static[[:space:]]*[^(]*;" $$file | \
+		while read -r line; do \
+			var=$$(echo "$$line" | sed 's/.*[[:space:]]\([a-zA-Z_][a-zA-Z0-9_]*\)[[:space:]]*[;=].*/\1/'); \
+			if grep -q "$$var" $$file | grep -v "mutex\|lock\|atomic"; then \
+				echo "$$file: Warning: Global '$$var' accessed without apparent synchronization"; \
+			fi; \
+		done; \
+	done 2>/dev/null || true
+
+# Command validation rules
+validate-build-command:
+	@if [ -f $(TEST_LOCK) ] || [ -f $(DEPLOY_LOCK) ]; then \
+		echo "Error: Cannot run build commands while test/deploy is active"; \
+		exit 1; \
+	fi
+	@$(MAKE) -s acquire-lock LOCK_TYPE=build
+
+validate-test-command:
+	@if [ -f $(BUILD_LOCK) ] || [ -f $(DEPLOY_LOCK) ]; then \
+		echo "Error: Cannot run test commands while build/deploy is active"; \
+		exit 1; \
+	fi
+	@$(MAKE) -s acquire-lock LOCK_TYPE=test
+
+validate-deploy-command:
+	@if [ -f $(BUILD_LOCK) ] || [ -f $(TEST_LOCK) ]; then \
+		echo "Error: Cannot run deploy commands while build/test is active"; \
+		exit 1; \
+	fi
+	@$(MAKE) -s acquire-lock LOCK_TYPE=deploy
+
+# Edge micro security features
+edge-security-check:
+	@echo "Checking edge micro security constraints..."
+	@# Verify no dynamic allocation in edge code
+	@if grep -r "malloc\|calloc\|realloc\|free" $(SRC_DIR)/edge/ 2>/dev/null; then \
+		echo "Error: Dynamic allocation found in edge micro code"; \
+		exit 1; \
+	fi
+	@# Check stack usage
+	@$(MAKE) -s check-stack-usage
+
+check-stack-usage:
+	@echo "Analyzing stack usage for edge micro..."
+	@for file in $$(find $(SRC_DIR)/edge -name "*.c" 2>/dev/null); do \
+		size=$$($(CC) -fstack-usage -c $$file -o /tmp/tmp.o 2>&1 | \
+			grep "stack usage" | \
+			awk '{print $$NF}' | \
+			sed 's/[^0-9]//g'); \
+		if [ -n "$$size" ] && [ "$$size" -gt 256 ]; then \
+			echo "Warning: $$file uses $$size bytes of stack"; \
+		fi; \
+	done || true
+
+# Cleanup on exit
+cleanup-locks:
+	@echo "Cleaning up locks..."
+	@rm -rf $(LOCK_DIR)
+
+# Error recovery
+recover-from-crash:
+	@echo "Recovering from crash..."
+	@# Remove stale locks older than timeout
+	@find $(LOCK_DIR) -name "*.lock" -mmin +$(LOCK_TIMEOUT) -delete 2>/dev/null || true
+	@# Log recovery
+	@echo "Recovery performed at $$(date -u)" >> $(LOCK_DIR)/recovery.log

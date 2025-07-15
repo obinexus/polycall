@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sinphase-toolkit"
+version = "0.1.0"
+description = "🔍 Sinphasé Governance Toolkit - OBINexus Computing"
+requires-python = ">=3.8"
+dependencies = ["typer>=0.9.0", "rich>=13.0.0"]
+
+[project.scripts]
+sinphase = "sinphase_toolkit.cli:main"

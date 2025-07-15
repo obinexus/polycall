@@ -1,8 +1,0 @@
-# Sinphasé Governance Framework Requirements
-# Core package has zero external dependencies for enterprise compatibility
-
-# Development dependencies (optional)
-# pytest>=7.0.0
-# black>=22.0.0
-# flake8>=4.0.0
-# mypy>=0.900

@@ -1,0 +1,36 @@
+.hero {
+    text-align: center;
+    padding: 4rem 0;
+    border-bottom: 1px solid var(--obinexus-accent);
+}
+
+.feature-card {
+    background: var(--obinexus-secondary);
+    padding: 2rem;
+    border-radius: 8px;
+    border: 1px solid var(--obinexus-accent);
+    transition: transform 0.3s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(233, 69, 96, 0.3);
+}
+
+.features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin: 3rem 0;
+}
+
+.status {
+    display: inline-block;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+}
+
+.status.ready { background: #4caf50; }
+.status.loading { background: #ff9800; }
+.status.error { background: #f44336; }

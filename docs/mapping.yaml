@@ -1,0 +1,41 @@
+# docs/mapping.yaml
+mappings:
+  core:
+    - source: src/core/accessibility/
+      docs: docs/api/core/accessibility.md
+      assets: docs/assets/images/architecture/accessibility/
+      
+    - source: src/core/auth/
+      docs: docs/api/core/auth.md
+      assets: docs/assets/images/architecture/auth/
+      
+    - source: src/core/config/
+      docs: docs/api/core/config.md
+      assets: docs/assets/images/architecture/config/
+      
+    - source: src/core/network/
+      docs: docs/api/core/network.md
+      assets: docs/assets/images/architecture/network/
+      
+    - source: src/core/protocol/
+      docs: docs/api/core/protocol.md
+      assets: docs/assets/images/architecture/protocol/
+      
+    - source: src/core/telemetry/
+      docs: docs/api/core/telemetry.md
+      assets: docs/assets/images/architecture/telemetry/
+
+  cli:
+    - source: src/cli/
+      docs: docs/api/cli/
+      assets: docs/assets/images/cli/
+      
+  command:
+    - source: src/command/micro/
+      docs: docs/api/commands/micro.md
+      
+    - source: src/command/edge/
+      docs: docs/api/commands/edge.md
+      
+    - source: src/command/guid/
+      docs: docs/api/commands/guid.md

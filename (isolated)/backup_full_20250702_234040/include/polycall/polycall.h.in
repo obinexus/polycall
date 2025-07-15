@@ -1,0 +1,35 @@
+/**
+ * @file polycall.h
+ * @brief Unified public API for LibPolyCall
+ * @author Implementation based on Nnamdi Okpala's design specifications
+ *
+ * This header provides access to all LibPolyCall functionality.
+ * For component-specific functionality, consider including only
+ * the headers you need.
+ *
+ * Component-specific headers:
+ * - Auth: polycall/core/auth/polycall_auth_context.h
+ * - FFI: polycall/core/ffi/ffi_core.h
+ * - Network: polycall/core/network/network.h
+ * - Protocol: polycall/core/protocol/polycall_protocol_context.h
+ *
+ * Generated automatically by generate_unified_header.py
+ */
+
+ #ifndef POLYCALL_H
+ #define POLYCALL_H
+ 
+ /*
+  * Version information
+  */
+ #define POLYCALL_VERSION_MAJOR 1
+ #define POLYCALL_VERSION_MINOR 1
+ #define POLYCALL_VERSION_PATCH 0
+ #define POLYCALL_VERSION_STRING "1.1.0"
+ 
+ /*
+  * Include all component headers
+  */
+ @COMPONENT_INCLUDES@
+ 
+ #endif /* POLYCALL_H */
