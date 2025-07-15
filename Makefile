@@ -1,6 +1,26 @@
 # OBINexus PolyCall Root Makefile
 # Fixed non-recursive delegation orchestrator
+# Root Makefile delegates to component makefiles
+include src/core/Makefile.core
+include src/cli/Makefile.cli  
+include src/ffi/Makefile.ffi
+include lib/Makefile.lib
 
+.PHONY: build-core build-cli build-ffi build-lib
+
+build-all: build-core build-cli build-ffi build-lib
+
+build-core:
+	$(MAKE) -C src/core all
+
+build-cli: build-core
+	$(MAKE) -C src/cli all
+
+build-ffi: build-core
+	$(MAKE) -C src/ffi all
+
+build-lib: build-core build-ffi
+	$(MAKE) -C lib all
 # Recursion guard
 ifndef POLYCALL_MAKEFILE_INCLUDED
 POLYCALL_MAKEFILE_INCLUDED := 1
