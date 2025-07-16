@@ -51,6 +51,28 @@ FFI_COMPONENTS := ffi bridges adapters
 # Build Targets   #
 ###################
 
+# Makefile.build addition
+.PHONY: qa-validation
+
+qa-validation:
+	@echo "[polycall:QA] Running QA suite validation..."
+	@./scripts/qa_suite_run.sh
+	@GRADE=$$(cat build/metadata/build-grade.txt); \
+	if [ $$GRADE -ge 7 ]; then \
+		echo "[polycall:QA] 🔴 Fault grade $$GRADE exceeds threshold"; \
+		exit 1; \
+	fi
+
+# Ensure qa-validation runs before build completion
+all: qa-validation
+
+# Makefile.topo addition for topology enforcement
+.PHONY: topo-check
+
+topo-check: qa-validation
+	@echo "[polycall:TOPO] Validating system topology..."
+	@./scripts/validate_topology.sh
+
 .PHONY: all
 all: build-all
 

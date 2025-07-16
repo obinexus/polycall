@@ -25,6 +25,37 @@ CRITICAL_THRESHOLD ?= 6
 DANGER_THRESHOLD ?= 9
 PANIC_THRESHOLD ?= 12
 
+# Add to main Makefile
+.PHONY: snapshot-recover
+
+snapshot-recover:
+	@echo "[polycall:RECOVER] Available snapshots:"
+	@ls -l /root/logs/polycall_snapshot/ | grep -v latest | tail -n 5
+	@echo "[polycall:RECOVER] To recover, specify timestamp:"
+	@echo "    make snapshot-recover-from TIMESTAMP=YYYYMMDD-HHMMSS"
+
+snapshot-recover-from:
+ifndef TIMESTAMP
+	@echo "[polycall:RECOVER] ❌ Error: TIMESTAMP parameter required"
+	@echo "    Example: make snapshot-recover-from TIMESTAMP=20250716-120000"
+	@exit 1
+endif
+	@echo "[polycall:RECOVER] Recovering from snapshot: $(TIMESTAMP)"
+	@rsync -avh /root/logs/polycall_snapshot/$(TIMESTAMP)/ ./
+	@echo "[polycall:RECOVER] ✅ Recovery complete. Run tests to verify."
+# Add to main Makefile
+.PHONY: install-hooks
+
+install-hooks:
+	@echo "[polycall:GIT] Installing git hooks..."
+	@mkdir -p .git/hooks
+	@cp scripts/precommit_gate.sh .git/hooks/pre-commit
+	@chmod +x .git/hooks/pre-commit
+	@echo "[polycall:GIT] Hooks installed successfully"
+
+# Should be called during initial setup and after git clone
+setup: install-hooks
+
 # Check health based on warning/error count
 check-health:
 	@echo "Checking build health..."
