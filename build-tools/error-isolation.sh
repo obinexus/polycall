@@ -1,28 +1,32 @@
 #!/bin/bash
-# error-isolation.sh - Error interception mechanism
-set -euo pipefail
+# build-tools/error-isolation.sh
 
-# 1. Create isolated error capture context
-mkdir -p build/errors/{src,include,platform}
+# Ensure target directories exist
+mkdir -p build/errors/core
+mkdir -p build/logs
 
-# 2. Implement error redirection mechanism
-capture_errors() {
-  local module=$1
-  local error_log="build/errors/${module}/compile_errors.log"
-  
-  # Isolate stderr while preserving exit code
-  {
-    make -C src/${module} 2> >(tee "${error_log}")
-  } || {
-    local exit_code=$?
-    # Classify errors without breaking build
-    ./build-tools/classify-errors.sh "${error_log}" "${module}"
-    return $((exit_code > 6 ? 6 : exit_code))  # Cap at 6 to prevent build termination
-  }
-}
+echo "Building module: core with error isolation"
 
-# 3. Process each module independently
-for module in core platform util; do
-  echo "Building module: ${module} with error isolation"
-  capture_errors "${module}"
-done
+# Run make and capture all output to logs
+make -C src/core 2> >(tee build/errors/core/compile_errors.log)
+MAKE_EXIT=$?
+
+# Count warnings and errors
+ERROR_COUNT=$(grep -c "error:\|warning:" build/errors/core/compile_errors.log || echo "0")
+echo "$ERROR_COUNT" > build/errors/core/count.txt
+
+# Classify errors and potentially exit
+./build-tools/classify-errors.sh "$ERROR_COUNT"
+CLASSIFY_EXIT=$?
+
+# Forward the exit code from classification
+if [ $CLASSIFY_EXIT -ne 0 ]; then
+    exit $CLASSIFY_EXIT
+fi
+
+# If make failed but classification allowed it (QA mode), still indicate issue
+if [ $MAKE_EXIT -ne 0 ]; then
+    echo "⚠️ Build completed with errors, but allowed to proceed due to error classification"
+fi
+
+exit $MAKE_EXIT

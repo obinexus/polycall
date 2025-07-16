@@ -1,0 +1,2 @@
+In file src/core/polic.c:22618:
+  warning: implicit declaration of function 'poll_configure'

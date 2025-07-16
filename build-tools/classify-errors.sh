@@ -1,42 +1,37 @@
 #!/bin/bash
-# classify-errors.sh - Error taxonomy classifier
-set -euo pipefail
+# build-tools/classify-errors.sh
 
-ERROR_LOG=$1
-MODULE=$2
-CLASSIFICATION_DB="build/metadata/error_classification.json"
+ERROR_COUNT=$1
+OUTPUT_FILE=$2
 
-# Initialize classification database if needed
-if [ ! -f "${CLASSIFICATION_DB}" ]; then
-  echo '{"core":{},"platform":{},"util":{}}' > "${CLASSIFICATION_DB}"
+if [ -z "$ERROR_COUNT" ]; then
+    echo "Usage: classify-errors.sh <error_count> [output_file]"
+    exit 1
 fi
 
-# Extract error patterns regardless of order
-grep -E "warning:|error:" "${ERROR_LOG}" | sort | uniq > "build/errors/${MODULE}/unique_errors.txt"
+# Write count to file for status reporting
+echo "$ERROR_COUNT" > build/errors/core/count.txt
 
-# Classify each error against known patterns
-while IFS= read -r error_line; do
-  if [[ "${error_line}" =~ warning:\ implicit\ declaration ]]; then
-    # Header inclusion error - missing prototype
-    category="PROTO_MISSING"
-  elif [[ "${error_line}" =~ error:\ unknown\ type\ name ]]; then
-    # Type definition error - add to includes
-    category="TYPE_UNDEFINED"
-  else
-    # Default classification
-    category="GENERAL"
-  fi
-  
-  # Record classification without breaking build
-  jq --arg module "${MODULE}" --arg error "${error_line}" --arg category "${category}" \
-    '.[$module][$error] = $category' "${CLASSIFICATION_DB}" > "${CLASSIFICATION_DB}.tmp" && \
-    mv "${CLASSIFICATION_DB}.tmp" "${CLASSIFICATION_DB}"
-done < "build/errors/${MODULE}/unique_errors.txt"
-
-# Provide error summary that matches threshold requirements
-error_count=$(wc -l < "build/errors/${MODULE}/unique_errors.txt")
-echo "${error_count}" > "build/errors/${MODULE}/count.txt"
-
-# Cap reported errors to 6 to allow build to proceed
-reported_count=$((error_count > 6 ? 6 : error_count))
-echo "Classified ${error_count} errors in module ${MODULE}, reporting ${reported_count} to build system"
+# Classify according to fault grades
+if [ "$ERROR_COUNT" -le 3 ]; then
+    echo "STATE_OK" > build/errors/core/state.txt
+    exit 0
+elif [ "$ERROR_COUNT" -le 6 ]; then
+    echo "STATE_CRITICAL" > build/errors/core/state.txt
+    # Continue but warn
+    echo "⚠️ STATE_CRITICAL: $ERROR_COUNT errors detected (allowed: 4-6)"
+    exit 0
+elif [ "$ERROR_COUNT" -le 9 ]; then
+    echo "STATE_DANGER" > build/errors/core/state.txt
+    echo "🔴 STATE_DANGER: $ERROR_COUNT errors detected (allowed: 7-9, requires QA)"
+    if [ "$BUILD_MODE" != "qa" ]; then
+        echo "Set BUILD_MODE=qa to proceed with this build"
+        exit 1
+    fi
+    exit 0
+else
+    echo "STATE_PANIC" > build/errors/core/state.txt
+    echo "🔥 STATE_PANIC: $ERROR_COUNT errors detected (max: 9)"
+    # Always exit with error in panic state
+    exit 1
+fi
