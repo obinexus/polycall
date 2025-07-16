@@ -13,6 +13,31 @@ endif
 
 .PHONY: all clean $(CORE_COMPONENTS)
 
+# src/core/Makefile
+
+.PHONY: all clean check-topology polycall
+
+# Default target
+all: check-topology polycall
+
+# Topology check
+check-topology:
+	@echo "[CORE] Checking build topology..."
+	@if [ ! -f .build-topology ]; then \
+		echo "Missing .build-topology file"; \
+		exit 1; \
+	fi
+
+# Build polycall target with proper error handling
+polycall:
+	@echo "[CORE] Building polycall..."
+	@$(MAKE) -C polycall
+
+clean:
+	@echo "[CORE] Cleaning..."
+	@$(MAKE) -C polycall clean
+	@rm -rf $(BUILD_DIR)
+
 all: $(CORE_COMPONENTS)
 
 $(CORE_COMPONENTS):
