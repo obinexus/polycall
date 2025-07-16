@@ -1,0 +1,2 @@
+In file src/core/polic.c:6994:
+  error: use of undeclared identifier 'POLIC_FLAG_DETACHED'

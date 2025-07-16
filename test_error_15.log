@@ -1,0 +1,2 @@
+In file src/core/polic.c:6525:
+  error: unknown type name 'polic_context_t'

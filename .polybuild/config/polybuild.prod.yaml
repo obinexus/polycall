@@ -1,0 +1,78 @@
+version: "2.0"
+project: "polycall-v2"
+
+topology:
+  type: "mesh"
+  fault_tolerance:
+    enabled: true
+    auto_recovery: true
+    redundancy_factor: 2
+    health_check_interval: 30s
+    retry_limit: 3
+    timeout: 300s
+
+nodes:
+  - name: "make-primary"
+    type: "make"
+    priority: 1
+    capabilities: ["c", "cpp", "static-lib"]
+    backup_nodes: ["cmake-primary", "meson-primary"]
+    
+  - name: "cmake-primary"
+    type: "cmake"
+    priority: 2
+    capabilities: ["c", "cpp", "shared-lib", "cross-platform"]
+    backup_nodes: ["make-primary", "meson-primary"]
+    
+  - name: "meson-primary"
+    type: "meson"
+    priority: 3
+    capabilities: ["c", "cpp", "fast-build", "ninja-backend"]
+    backup_nodes: ["make-primary", "cmake-primary"]
+
+components:
+  polycall-core:
+    type: "static-library"
+    sources: ["src/core/**/*.c"]
+    includes: ["include/", "lib/shared/"]
+    dependencies: []
+    build_systems: ["make", "cmake", "meson"]
+    
+  polycall-cli:
+    type: "executable"
+    sources: ["src/cli/**/*.c"]
+    includes: ["include/"]
+    dependencies: ["polycall-core"]
+    build_systems: ["make", "cmake", "meson"]
+    
+  freebsd-ffi:
+    type: "shared-library"
+    sources: ["src/ffi/freebsd/**/*.c"]
+    includes: ["include/", "lib/shared/"]
+    dependencies: ["polycall-core"]
+    build_systems: ["make", "cmake"]
+    platform_specific: true
+    platforms: ["freebsd"]
+
+build_matrix:
+  debug:
+    optimization: "none"
+    debug_symbols: true
+    warnings: "all"
+    
+  release:
+    optimization: "aggressive"
+    debug_symbols: false
+    warnings: "error"
+
+cache:
+  enabled: true
+  directory: "${HOME}/.polybuild/cache"
+  max_size: "10GB"
+  eviction_policy: "lru"
+  compression: true
+
+monitoring:
+  enabled: true
+  log_level: "info"
+  metrics_file: "${PROJECT_ROOT}/.polybuild/logs/metrics.json"

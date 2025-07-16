@@ -1,0 +1,18 @@
+-e [0;34m[Status] PolyBuild System Status[0m
+Project: polycall-v2
+Version: 2.0.0
+Build System: meson
+Build Mode: release
+Topology: mesh
+
+Build Tools:
+✓ Make
+✓ CMake
+✗ Meson
+✓ GCC
+✗ Clang
+
+Directory Structure:
+✓ Source directory
+✓ Include directory
+✓ Build directory

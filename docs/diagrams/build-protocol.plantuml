@@ -1,0 +1,250 @@
+@startuml PolyBuild_Architecture
+!theme vibrant
+title PolyBuild Fault-Tolerant Build System Architecture
+
+skinparam backgroundColor #f8f9fa
+skinparam defaultFontName "Arial"
+skinparam defaultFontSize 10
+
+' Define colors
+skinparam rectangle {
+    BackgroundColor<<control>> #e1f5fe
+    BorderColor<<control>> #0277bd
+    BackgroundColor<<build>> #e8f5e8
+    BorderColor<<build>> #2e7d32
+    BackgroundColor<<fault>> #fff3e0
+    BorderColor<<fault>> #f57c00
+    BackgroundColor<<optimize>> #f3e5f5
+    BorderColor<<optimize>> #7b1fa2
+    BackgroundColor<<monitor>> #fff8e1
+    BorderColor<<monitor>> #f9a825
+    BackgroundColor<<external>> #fafafa
+    BorderColor<<external>> #616161
+    BackgroundColor<<artifact>> #e0f2f1
+    BorderColor<<artifact>> #00695c
+}
+
+package "PolyBuild System" {
+    
+    package "Control Layer" <<control>> {
+        rectangle "Build Orchestrator" as orchestrator {
+            + Fault Detection
+            + Load Balancing
+            + Resource Management
+        }
+        
+        rectangle "Topology Manager" as topomgr {
+            + P2P, Bus, Ring, Star, Mesh
+            + Auto-failover
+            + Health Monitoring
+        }
+        
+        rectangle "Cache Manager" as cachemgr {
+            + Distributed Cache
+            + Artifact Storage
+            + Version Control
+        }
+    }
+    
+    package "Build Topologies" <<build>> {
+        
+        package "P2P Network" {
+            rectangle "Make Node\n(Primary)" as p2p_make
+            rectangle "CMake Node\n(Secondary)" as p2p_cmake
+            rectangle "Meson Node\n(Tertiary)" as p2p_meson
+            
+            p2p_make ..> p2p_cmake : peer
+            p2p_cmake ..> p2p_meson : peer
+            p2p_meson ..> p2p_make : peer
+        }
+        
+        package "Bus Topology" {
+            rectangle "Bus Coordinator" as bus_coord
+            rectangle "Make Worker" as bus_make
+            rectangle "CMake Worker" as bus_cmake
+            rectangle "Meson Worker" as bus_meson
+            rectangle "Script Worker" as bus_script
+            
+            bus_coord --> bus_make
+            bus_coord --> bus_cmake
+            bus_coord --> bus_meson
+            bus_coord --> bus_script
+        }
+        
+        package "Mesh Network" {
+            rectangle "Node 1\n(Make+CMake)" as mesh_n1
+            rectangle "Node 2\n(Meson+Scripts)" as mesh_n2
+            rectangle "Node 3\n(Testing+Packaging)" as mesh_n3
+            rectangle "Node 4\n(Cross-compilation)" as mesh_n4
+            
+            mesh_n1 ..> mesh_n2
+            mesh_n1 ..> mesh_n3
+            mesh_n1 ..> mesh_n4
+            mesh_n2 ..> mesh_n3
+            mesh_n2 ..> mesh_n4
+            mesh_n3 ..> mesh_n4
+        }
+    }
+    
+    package "Component Build Pipeline" <<build>> {
+        
+        package "Core Components" {
+            rectangle "polycall-core\n(Static Library)" as core_base
+            rectangle "polycall-config\n(Configuration)" as core_config
+            rectangle "polycall-protocol\n(Communication)" as core_protocol
+            rectangle "polycall-network\n(Networking)" as core_network
+            rectangle "polycall-auth\n(Authentication)" as core_auth
+        }
+        
+        package "CLI Components" {
+            rectangle "polycall-cli\n(Main Executable)" as cli_main
+            rectangle "Command Handlers" as cli_commands
+            rectangle "User Interface" as cli_interface
+        }
+        
+        package "FFI Components" {
+            rectangle "FreeBSD FFI\n(Kernel Integration)" as ffi_freebsd
+            rectangle "Windows FFI\n(Compatibility Layer)" as ffi_windows
+            rectangle "Linux FFI\n(Native Support)" as ffi_linux
+        }
+        
+        package "Test Components" {
+            rectangle "Unit Tests" as test_unit
+            rectangle "Integration Tests" as test_integration
+            rectangle "Performance Tests" as test_performance
+            rectangle "Security Tests" as test_security
+        }
+    }
+    
+    package "Fault Tolerance" <<fault>> {
+        rectangle "Fault Detector" as fault_detector {
+            + Node Health
+            + Network Partition
+            + Build Timeout
+        }
+        
+        rectangle "Recovery Engine" as recovery_engine {
+            + Auto-failover
+            + Load Redistribution
+            + Graceful Degradation
+        }
+        
+        rectangle "Redundancy Manager" as redundancy_mgr {
+            + Backup Nodes
+            + Data Replication
+            + Consensus Protocol
+        }
+    }
+    
+    package "Optimization" <<optimize>> {
+        rectangle "Dependency Resolver\n(O(log n) Complexity)" as dep_resolver
+        rectangle "Cache Optimizer" as cache_optimizer {
+            + Smart Caching
+            + Artifact Sharing
+            + Incremental Builds
+        }
+        rectangle "Parallel Scheduler" as parallel_scheduler {
+            + DAG Analysis
+            + Resource Allocation
+            + Critical Path
+        }
+    }
+    
+    package "Monitoring" <<monitor>> {
+        rectangle "Metrics Collector" as metrics_collector {
+            + Build Times
+            + Success Rates
+            + Resource Usage
+        }
+        rectangle "Health Monitor" as health_monitor {
+            + Node Status
+            + Network Health
+            + Performance Metrics
+        }
+        rectangle "Alert Manager" as alert_manager {
+            + Fault Notifications
+            + Performance Alerts
+            + SLA Monitoring
+        }
+    }
+    
+    package "Artifact Management" <<artifact>> {
+        rectangle "Artifact Repository" as artifact_repo {
+            + Binary Storage
+            + Version Control
+            + Distribution
+        }
+        rectangle "Package Manager" as package_mgr {
+            + Dependency Resolution
+            + Version Management
+            + Security Scanning
+        }
+    }
+}
+
+package "External Integration" <<external>> {
+    rectangle "GitLab CI/CD\n(Source Control)" as gitlab
+    rectangle "Harbor Registry\n(Container Images)" as harbor
+    rectangle "Kubernetes\n(Deployment)" as k8s
+    rectangle "Prometheus\n(Metrics Storage)" as prometheus
+    rectangle "Grafana\n(Visualization)" as grafana
+}
+
+package "Build Artifacts" <<artifact>> {
+    rectangle "libpolycall-core.{a,so}" as lib_core
+    rectangle "polycall executable" as lib_cli
+    rectangle "*.{dll,so,dylib}" as lib_ffi
+    rectangle "Test Reports" as test_results
+    rectangle "Generated Docs" as documentation
+}
+
+' Main Control Flow
+orchestrator --> topomgr
+topomgr --> p2p_make
+topomgr --> bus_coord
+topomgr --> mesh_n1
+
+' Build Dependencies
+core_base --> core_config
+core_base --> core_protocol
+core_base --> core_network
+core_base --> core_auth
+core_base --> cli_main
+core_base --> ffi_freebsd
+core_base --> ffi_windows
+core_base --> ffi_linux
+
+' Fault Tolerance Integration
+fault_detector --> recovery_engine
+recovery_engine --> redundancy_mgr
+fault_detector --> topomgr
+
+' Optimization Flow
+dep_resolver --> parallel_scheduler
+cache_optimizer --> cachemgr
+parallel_scheduler --> orchestrator
+
+' Monitoring Integration
+metrics_collector --> health_monitor
+health_monitor --> alert_manager
+alert_manager --> recovery_engine
+
+' External Integrations
+gitlab --> orchestrator
+orchestrator --> harbor
+harbor --> k8s
+metrics_collector --> prometheus
+prometheus --> grafana
+
+' Artifact Generation
+core_base --> lib_core
+cli_main --> lib_cli
+ffi_freebsd --> lib_ffi
+test_unit --> test_results
+orchestrator --> documentation
+
+' Cache Integration
+cachemgr --> artifact_repo
+artifact_repo --> package_mgr
+
+@enduml
