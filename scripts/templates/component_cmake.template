@@ -1,0 +1,29 @@
+# Component CMakeLists.txt Template
+# Usage: Replace @COMPONENT_NAME@ with actual component name
+
+cmake_minimum_required(VERSION 3.16)
+
+# Component configuration
+set(@COMPONENT_NAME@_VERSION "0.7.0")
+
+# Find component sources
+file(GLOB @COMPONENT_NAME@_SOURCES "*.c" "*.cpp")
+file(GLOB @COMPONENT_NAME@_HEADERS "*.h" "*.hpp")
+
+# Create component library
+if(@COMPONENT_NAME@_SOURCES)
+    add_library(@COMPONENT_NAME@_static STATIC ${@COMPONENT_NAME@_SOURCES})
+    
+    target_include_directories(@COMPONENT_NAME@_static
+        PUBLIC ${CMAKE_SOURCE_DIR}/include
+        PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
+    )
+    
+    target_link_libraries(@COMPONENT_NAME@_static
+        PRIVATE Threads::Threads
+    )
+    
+    set_target_properties(@COMPONENT_NAME@_static PROPERTIES
+        OUTPUT_NAME "@COMPONENT_NAME@"
+    )
+endif()
