@@ -46,6 +46,35 @@ endif
 # Add to main Makefile
 .PHONY: install-hooks
 
+# Add to main Makefile - Divergent branch management
+
+.PHONY: diverge-create diverge-merge
+
+# Create a divergent branch when in danger state
+diverge-create:
+	@if [ ! -f "build/metadata/build-grade.txt" ]; then \
+		echo "[polycall:DIVERGE] Running QA suite first..."; \
+		./scripts/qa_suite_run.sh; \
+	fi
+	@./scripts/fix_branch.sh
+
+# Merge a divergent branch back to target
+diverge-merge:
+	@if [ ! -f "scripts/hooks/post-divergence-merge.sh" ]; then \
+		echo "[polycall:DIVERGE] ❌ Missing post-divergence-merge.sh script"; \
+		exit 1; \
+	fi
+	@echo "[polycall:DIVERGE] Target branch options: main, dev-main, or feature branch"
+	@read -p "Enter target branch [dev-main]: " target; \
+	./scripts/hooks/post-divergence-merge.sh $${target:-dev-main}
+
+# Advanced: Specialized merge targets
+diverge-merge-main:
+	@./scripts/hooks/post-divergence-merge.sh main
+
+diverge-merge-dev:
+	@./scripts/hooks/post-divergence-merge.sh dev-main
+
 install-hooks:
 	@echo "[polycall:GIT] Installing git hooks..."
 	@mkdir -p .git/hooks
