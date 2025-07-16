@@ -29,6 +29,15 @@ set(CORE_COMPONENTS
     socket
 )
 
+# Add to CMakeLists.txt in src/core
+add_custom_target(quality_check
+  COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/../../build-tools/status-check.sh 
+          ${CMAKE_BINARY_DIR}/build/logs/warning_count.txt "cmake"
+  COMMENT "Verifying build quality metrics"
+  DEPENDS ${PROJECT_NAME}
+)
+
+add_dependencies(${PROJECT_NAME} quality_check)
 # Collect sources from each component
 foreach(COMPONENT ${CORE_COMPONENTS})
     if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${COMPONENT})
