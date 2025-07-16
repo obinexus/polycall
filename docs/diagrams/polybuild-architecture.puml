@@ -1,0 +1,76 @@
+@startuml PolyBuild_Architecture
+!theme vibrant
+title PolyBuild Fault-Tolerant Build System Architecture
+skinparam backgroundColor #f8f9fa
+skinparam defaultFontName "Arial"
+skinparam defaultFontSize 10
+' Define colors
+skinparam rectangle {
+    BackgroundColor<<control>> #e1f5fe
+    BorderColor<<control>> #0277bd
+    BackgroundColor<<build>> #e8f5e8
+    BorderColor<<build>> #2e7d32
+    BackgroundColor<<fault>> #fff3e0
+    BorderColor<<fault>> #f57c00
+    BackgroundColor<<optimize>> #f3e5f5
+    BorderColor<<optimize>> #7b1fa2
+    BackgroundColor<<monitor>> #fff8e1
+    BorderColor<<monitor>> #f9a825
+    BackgroundColor<<external>> #fafafa
+    BorderColor<<external>> #616161
+    BackgroundColor<<artifact>> #e0f2f1
+    BorderColor<<artifact>> #00695c
+}
+package "PolyBuild System" {
+    package "Control Layer" <<control>> {
+        rectangle "Build Orchestrator" as orchestrator {
+            + Fault Detection
+            + Load Balancing
+            + Resource Management
+        }
+        rectangle "Topology Manager" as topomgr {
+            + P2P, Bus, Ring, Star, Mesh
+            + Auto-failover
+            + Health Monitoring
+        }
+        rectangle "Cache Manager" as cachemgr {
+            + Distributed Cache
+            + Artifact Storage
+            + Version Control
+        }
+    }
+    package "Build Topologies" <<build>> {
+        package "P2P Network" {
+            rectangle "Make Node\n(Primary)" as p2p_make
+            rectangle "CMake Node\n(Secondary)" as p2p_cmake
+            rectangle "Meson Node\n(Tertiary)" as p2p_meson
+            p2p_make ..> p2p_cmake : peer
+            p2p_cmake ..> p2p_meson : peer
+            p2p_meson ..> p2p_make : peer
+        }
+        package "Bus Topology" {
+            rectangle "Bus Coordinator" as bus_coord
+            rectangle "Make Worker" as bus_make
+            rectangle "CMake Worker" as bus_cmake
+            rectangle "Meson Worker" as bus_meson
+            rectangle "Script Worker" as bus_script
+            bus_coord --> bus_make
+            bus_coord --> bus_cmake
+            bus_coord --> bus_meson
+            bus_coord --> bus_script
+        }
+        package "Mesh Network" {
+            rectangle "Node 1\n(Make+CMake)" as mesh_n1
+            rectangle "Node 2\n(Meson+Scripts)" as mesh_n2
+            rectangle "Node 3\n(Testing+Packaging)" as mesh_n3
+            rectangle "Node 4\n(Cross-compilation)" as mesh_n4
+            mesh_n1 ..> mesh_n2
+            mesh_n1 ..> mesh_n3
+            mesh_n1 ..> mesh_n4
+            mesh_n2 ..> mesh_n3
+            mesh_n2 ..> mesh_n4
+            mesh_n3 ..> mesh_n4
+        }
+    }
+}
+@enduml

@@ -1,0 +1,26 @@
+# Polycall Topology Fault-Tolerant Build Controller
+# Context: Fault-aware enforcement of build execution
+# Purpose: Prevent downstream execution if topology fails
+
+.PHONY: check-topology validate-grade
+
+check-topology:
+	@echo "[🧠] Topology integrity preflight"
+	@mkdir -p build/logs build/metadata
+	@find src/ -type f -name "*.c" | while read file; do \
+	  log="build/logs/$$(basename $$file .c).log"; \
+	  gcc -Wall -Wextra -o /dev/null $$file 2> $$log || true; \
+	done
+	@grep -E 'error:|warning:' build/logs/*.log > build/logs/build-grade.log || true
+	@wc -l < build/logs/build-grade.log | tr -d ' ' > build/metadata/build-grade.txt
+	@grade=$$(cat build/metadata/build-grade.txt); \
+	if [ $$grade -le 3 ]; then \
+	  echo -e "[STATE_OK] $$grade issues — continuing build"; \
+	elif [ $$grade -le 6 ]; then \
+	  echo -e "[STATE_CRITICAL] $$grade issues — proceed with caution"; \
+	elif [ $$grade -le 9 ]; then \
+	  echo -e "[STATE_DANGER] $$grade issues — QA intervention required"; \
+	else \
+	  echo -e "-e [STATE_PANIC] $$grade issues — terminating build"; \
+	  exit 1; \
+	fi

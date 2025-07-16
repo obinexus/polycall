@@ -1,0 +1,4 @@
+# star topology specific settings
+TOPOLOGY=star
+ARTIFACT_PREFIX=star
+CONNECTION_MODEL=STAR

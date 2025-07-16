@@ -1,0 +1,4 @@
+# bus topology specific settings
+TOPOLOGY=bus
+ARTIFACT_PREFIX=bus
+CONNECTION_MODEL=BUS

@@ -1,0 +1,4 @@
+# ring topology specific settings
+TOPOLOGY=ring
+ARTIFACT_PREFIX=ring
+CONNECTION_MODEL=RING

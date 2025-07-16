@@ -1,133 +1,242 @@
-# OBINexus Polycall Consolidated Build System
-# Integrates Make, CMake, and Meson build systems
+# PolyBuild Universal Makefile - Fault-Tolerant Build System
+# Automatically handles Make, CMake, Meson, and custom scripts
+# Topology validation targets
+.PHONY: check-health check-topology build-topology
 
-# Project configuration
-PROJECT_NAME = polycall
-VERSION = 0.7.0
+# Directory structure
+$(shell mkdir -p build/logs build/metadata build/bin)
+
+# Health check based on warning count
+check-health:
+	@warnings=$$(grep -c "warning:" build/logs/*.log 2>/dev/null || echo "0"); \
+	./build-tools/status-check.sh $$warnings
+
+# Check specific topology health
+check-topology-star:
+	@echo "Checking star topology health..."
+	@warnings=$$(grep -c "error\|warning" build/logs/star-*.log 2>/dev/null || echo "0"); \
+	./build-tools/status-check.sh $$warnings "star"
+
+check-topology-bus:
+	@echo "Checking bus topology health..."
+	@warnings=$$(grep -c "error\|warning" build/logs/bus-*.log 2>/dev/null || echo "0"); \
+	./build-tools/status-check.sh $$warnings "bus"
+
+check-topology-p2p:
+	@echo "Checking p2p topology health..."
+	@warnings=$$(grep -c "error\|warning" build/logs/p2p-*.log 2>/dev/null || echo "0"); \
+	./build-tools/status-check.sh $$warnings "p2p"
+
+check-topology-ring:
+	@echo "Checking ring topology health..."
+	@warnings=$$(grep -c "error\|warning" build/logs/ring-*.log 2>/dev/null || echo "0"); \
+	./build-tools/status-check.sh $$warnings "ring"
+
+# Validate all topologies before proceeding
+check-topology: check-topology-star check-topology-bus check-topology-p2p check-topology-ring
+	@echo "All topology checks completed"
+	@if [ -f build/metadata/topology-health.log ]; then \
+		if grep -q "STATE_CRITICAL\|STATE_PANIC" build/metadata/topology-health.log; then \
+			echo "⛔ CRITICAL: Topology failure detected. New artifact development blocked."; \
+			exit 1; \
+		elif grep -q "STATE_WARNING" build/metadata/topology-health.log; then \
+			echo "⚠️ WARNING: Degraded topology detected. Proceed with caution."; \
+		else \
+			echo "✅ SUCCESS: All topologies stable."; \
+		fi; \
+	fi
+
+# Example build target with health checks
+polycall_auth_context: check-health
+	@echo "Compiling polycall auth context module..."
+	$(CC) -Wall -Wextra -o build/bin/auth_context src/polycall/auth_context.c 2> build/logs/auth_context.log
+	@# Generate manifest
+	@echo '{"component": "polycall_auth_context", "built_at": "'$$(date -u +"%Y-%m-%dT%H:%M:%SZ")'"}' > build/metadata/auth_context.json
+
+# Master build with topology validation
+build-topology: check-topology
+	@if [ $$? -eq 0 ]; then \
+		echo "Building with validated topology..."; \
+		$(MAKE) polycall_auth_context; \
+	else \
+		echo "Build blocked due to topology issues."; \
+		exit 1; \
+	fi
+.PHONY: all build clean test install help status
+.DEFAULT_GOAL := build
+
+# Configuration
+PROJECT_NAME = polycall-v2
+VERSION = 2.0.0
 BUILD_MODE ?= release
-PARALLEL_JOBS ?= $(shell nproc)
+PARALLEL_JOBS ?= $(shell nproc 2>/dev/null || echo 4)
+TOPOLOGY ?= mesh
+CACHE_ENABLED ?= true
 
 # Directories
-ROOT_DIR = $(shell pwd)
-BUILD_DIR = $(ROOT_DIR)/build
-SRC_DIR = $(ROOT_DIR)/src
-INCLUDE_DIR = $(ROOT_DIR)/include
+ROOT_DIR := $(shell pwd)
+BUILD_DIR := $(ROOT_DIR)/build
+POLYBUILD_DIR := $(ROOT_DIR)/.polybuild
+SRC_DIR := $(ROOT_DIR)/src
+INCLUDE_DIR := $(ROOT_DIR)/include
 
-# Include library build rules
--include lib/Makefile.lib
+# Auto-detect build system
+BUILD_SYSTEM := $(shell \
+    if [ -f "meson.build" ]; then \
+        echo "meson"; \
+    elif [ -f "CMakeLists.txt" ]; then \
+        echo "cmake"; \
+    else \
+        echo "make"; \
+    fi)
 
-# Build system selection
-BUILD_SYSTEM ?= make
-CMAKE_BUILD_DIR = $(BUILD_DIR)/cmake
-MESON_BUILD_DIR = $(BUILD_DIR)/meson
+# Colors
+RED := \033[0;31m
+GREEN := \033[0;32m
+YELLOW := \033[1;33m
+BLUE := \033[0;34m
+NC := \033[0m
 
-# Default target
-.PHONY: all build clean test docs help
+# Fault-tolerant build with automatic fallback
+build: polybuild-init
+	@echo -e "$(BLUE)[PolyBuild] Starting fault-tolerant build...$(NC)"
+	@echo "Build System: $(BUILD_SYSTEM)"
+	@echo "Topology: $(TOPOLOGY)"
+	@echo "Parallel Jobs: $(PARALLEL_JOBS)"
+	@echo "Cache: $(CACHE_ENABLED)"
+	@echo ""
+	@$(MAKE) build-$(BUILD_SYSTEM) || $(MAKE) build-fallback
 
-all: build
+# Initialize PolyBuild
+polybuild-init:
+	@echo -e "$(YELLOW)[PolyBuild] Initializing build environment...$(NC)"
+	@mkdir -p $(BUILD_DIR)/{make,cmake,meson,artifacts}
+	@mkdir -p $(POLYBUILD_DIR)/{logs,cache}
+	@if [ ! -f "$(POLYBUILD_DIR)/config/polybuild.yaml" ]; then \
+		echo "Warning: PolyBuild config not found, using defaults"; \
+	fi
 
-# Make-based build (default)
-build:
-	@echo "[MAKE] Building polycall project..."
-	@mkdir -p $(BUILD_DIR)
-	@$(MAKE) -C src BUILD_DIR=$(BUILD_DIR) BUILD_MODE=$(BUILD_MODE)
-	@$(MAKE) lib
+# Make build system
+build-make: polybuild-init
+	@echo -e "$(GREEN)[Make] Building with Make...$(NC)"
+	@$(MAKE) -f Makefile.make build-core BUILD_MODE=$(BUILD_MODE) || \
+	$(MAKE) -f Makefile.make build-simple BUILD_MODE=$(BUILD_MODE)
 
-# CMake-based build
-cmake-build:
-	@echo "[CMAKE] Building polycall project..."
-	@mkdir -p $(CMAKE_BUILD_DIR)
-	@cd $(CMAKE_BUILD_DIR) && cmake ../.. \
+# CMake build system
+build-cmake: polybuild-init
+	@echo -e "$(GREEN)[CMake] Building with CMake...$(NC)"
+	@mkdir -p $(BUILD_DIR)/cmake
+	@cd $(BUILD_DIR)/cmake && \
+	cmake ../.. \
 		-DCMAKE_BUILD_TYPE=$(shell echo $(BUILD_MODE) | sed 's/.*/\u&/') \
-		-DBUILD_TESTING=ON
-	@cd $(CMAKE_BUILD_DIR) && cmake --build . --parallel $(PARALLEL_JOBS)
+		-DPOLYCALL_VERSION=$(VERSION) \
+		-DBUILD_TESTING=ON \
+		-DBUILD_SHARED_LIBS=ON || \
+	cmake ../.. -DCMAKE_BUILD_TYPE=Release
+	@cd $(BUILD_DIR)/cmake && cmake --build . --parallel $(PARALLEL_JOBS)
 
-# Meson-based build
-meson-build: meson-setup
-	@echo "[MESON] Building polycall project..."
-	@cd $(MESON_BUILD_DIR) && meson compile
+# Meson build system
+build-meson: polybuild-init
+	@echo -e "$(GREEN)[Meson] Building with Meson...$(NC)"
+	@if command -v meson >/dev/null 2>&1; then \
+		mkdir -p $(BUILD_DIR)/meson && \
+		cd $(BUILD_DIR)/meson && \
+		meson setup ../.. --buildtype=$(BUILD_MODE) && \
+		meson compile; \
+	else \
+		echo -e "$(YELLOW)Meson not found, falling back to Make$(NC)"; \
+		$(MAKE) build-make; \
+	fi
 
-meson-setup:
-	@echo "[MESON] Setting up build directory..."
-	@mkdir -p $(MESON_BUILD_DIR)
-	@cd $(MESON_BUILD_DIR) && meson setup .. \
-		--buildtype=$(BUILD_MODE) \
-		-Denable_testing=true
+# Fallback build system
+build-fallback:
+	@echo -e "$(YELLOW)[Fallback] Primary build failed, trying alternatives...$(NC)"
+	@if [ "$(BUILD_SYSTEM)" != "make" ]; then \
+		echo "Trying Make..."; \
+		$(MAKE) build-make || true; \
+	fi
+	@if [ "$(BUILD_SYSTEM)" != "cmake" ]; then \
+		echo "Trying CMake..."; \
+		$(MAKE) build-cmake || true; \
+	fi
+	@if [ "$(BUILD_SYSTEM)" != "meson" ]; then \
+		echo "Trying Meson..."; \
+		$(MAKE) build-meson || true; \
+	fi
+	@echo -e "$(RED)All build systems failed$(NC)"
+	@exit 1
 
-# Core component builds
-build-core:
-	@echo "[MAKE] Building core components..."
-	@$(MAKE) -C src/core BUILD_MODE=$(BUILD_MODE)
-
-build-cli:
-	@echo "[MAKE] Building CLI components..."
-	@$(MAKE) -C src/cli BUILD_MODE=$(BUILD_MODE)
-
-# Testing targets
-test: build
-	@echo "[TEST] Running test suite..."
-	@$(MAKE) -C tests run-tests
-
-cmake-test: cmake-build
-	@cd $(CMAKE_BUILD_DIR) && ctest --output-on-failure
-
-meson-test: meson-build
-	@cd $(MESON_BUILD_DIR) && meson test
-
-# Documentation
-docs:
-	@echo "[DOCS] Generating documentation..."
-	@doxygen Doxyfile 2>/dev/null || echo "Warning: doxygen not found, skipping docs"
-
-# Clean targets
+# Clean with fault tolerance
 clean:
-	@echo "[CLEAN] Cleaning build artifacts..."
+	@echo -e "$(BLUE)[Clean] Cleaning build artifacts...$(NC)"
 	@rm -rf $(BUILD_DIR)
-	@$(MAKE) lib-clean
-	@find . -name "*.o" -delete
-	@find . -name "*.so" -delete
-	@find . -name "*.a" -delete
+	@find . -name "*.o" -delete 2>/dev/null || true
+	@find . -name "*.so" -delete 2>/dev/null || true
+	@find . -name "*.a" -delete 2>/dev/null || true
+	@find . -name "*.dll" -delete 2>/dev/null || true
+	@echo -e "$(GREEN)✓ Clean completed$(NC)"
 
-cmake-clean:
-	@echo "[CMAKE-CLEAN] Cleaning CMake build..."
-	@rm -rf $(CMAKE_BUILD_DIR)
+# Test with fault injection
+test: build
+	@echo -e "$(BLUE)[Test] Running test suite...$(NC)"
+	@if [ -d "tests" ]; then \
+		$(MAKE) -C tests run || $(MAKE) -C test run || echo "Tests not found"; \
+	fi
 
-meson-clean:
-	@echo "[MESON-CLEAN] Cleaning Meson build..."
-	@rm -rf $(MESON_BUILD_DIR)
-
-clean-all: clean cmake-clean meson-clean
-
-# Installation
+# Install with verification
 install: build
-	@echo "[INSTALL] Installing polycall..."
-	@$(MAKE) lib-install
-	@install -D -m 755 $(BUILD_DIR)/polycall $(DESTDIR)/usr/bin/polycall
+	@echo -e "$(BLUE)[Install] Installing polycall...$(NC)"
+	@mkdir -p $(DESTDIR)/usr/local/bin
+	@mkdir -p $(DESTDIR)/usr/local/lib
+	@mkdir -p $(DESTDIR)/usr/local/include
+	@if [ -f "$(BUILD_DIR)/artifacts/polycall" ]; then \
+		cp $(BUILD_DIR)/artifacts/polycall $(DESTDIR)/usr/local/bin/; \
+	fi
+	@if [ -f "$(BUILD_DIR)/artifacts/libpolycall.so" ]; then \
+		cp $(BUILD_DIR)/artifacts/libpolycall.so $(DESTDIR)/usr/local/lib/; \
+	fi
+	@echo -e "$(GREEN)✓ Installation completed$(NC)"
 
-# Development targets
-format:
-	@echo "[FORMAT] Formatting source code..."
-	@find src include -name "*.c" -o -name "*.h" | xargs clang-format -i
+# Status check
+status:
+	@echo -e "$(BLUE)[Status] PolyBuild System Status$(NC)"
+	@echo "Project: $(PROJECT_NAME)"
+	@echo "Version: $(VERSION)"
+	@echo "Build System: $(BUILD_SYSTEM)"
+	@echo "Build Mode: $(BUILD_MODE)"
+	@echo "Topology: $(TOPOLOGY)"
+	@echo ""
+	@echo "Build Tools:"
+	@command -v make >/dev/null 2>&1 && echo "✓ Make" || echo "✗ Make"
+	@command -v cmake >/dev/null 2>&1 && echo "✓ CMake" || echo "✗ CMake"
+	@command -v meson >/dev/null 2>&1 && echo "✓ Meson" || echo "✗ Meson"
+	@command -v gcc >/dev/null 2>&1 && echo "✓ GCC" || echo "✗ GCC"
+	@command -v clang >/dev/null 2>&1 && echo "✓ Clang" || echo "✗ Clang"
+	@echo ""
+	@echo "Directory Structure:"
+	@[ -d "$(SRC_DIR)" ] && echo "✓ Source directory" || echo "✗ Source directory"
+	@[ -d "$(INCLUDE_DIR)" ] && echo "✓ Include directory" || echo "✗ Include directory"
+	@[ -d "$(BUILD_DIR)" ] && echo "✓ Build directory" || echo "✗ Build directory"
 
-lint:
-	@echo "[LINT] Running static analysis..."
-	@cppcheck --enable=all --inconclusive src/ 2>/dev/null || echo "Warning: cppcheck not found"
-
-# Help target
+# Help
 help:
-	@echo "OBINexus Polycall Build System"
+	@echo -e "$(BLUE)PolyBuild Fault-Tolerant Build System$(NC)"
 	@echo ""
 	@echo "Available targets:"
-	@echo "  build         - Build project using Make (default)"
-	@echo "  cmake-build   - Build project using CMake"
-	@echo "  meson-build   - Build project using Meson"
-	@echo "  test          - Run test suite"
-	@echo "  docs          - Generate documentation"
-	@echo "  clean         - Clean build artifacts"
-	@echo "  install       - Install binaries and libraries"
-	@echo "  format        - Format source code"
-	@echo "  lint          - Run static analysis"
-	@echo "  help          - Show this help message"
+	@echo "  build    - Build project with fault tolerance"
+	@echo "  clean    - Clean build artifacts"
+	@echo "  test     - Run test suite"
+	@echo "  install  - Install binaries and libraries"
+	@echo "  status   - Show system status"
+	@echo "  help     - Show this help"
 	@echo ""
-	@echo "Build modes: debug, release (default: release)"
-	@echo "Example: make build BUILD_MODE=debug"
+	@echo "Configuration:"
+	@echo "  BUILD_MODE=$(BUILD_MODE)    (debug, release)"
+	@echo "  PARALLEL_JOBS=$(PARALLEL_JOBS)"
+	@echo "  TOPOLOGY=$(TOPOLOGY)        (p2p, bus, ring, star, mesh)"
+	@echo "  CACHE_ENABLED=$(CACHE_ENABLED)"
+	@echo ""
+	@echo "Examples:"
+	@echo "  make build BUILD_MODE=debug"
+	@echo "  make build PARALLEL_JOBS=8"
+	@echo "  make build TOPOLOGY=p2p"

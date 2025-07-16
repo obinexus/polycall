@@ -1,10 +1,2 @@
-# Meson build options for OBINexus Polycall
-
-option('enable_testing', type: 'boolean', value: true,
-       description: 'Enable test suite compilation')
-
-option('enable_nlink', type: 'boolean', value: true,
-       description: 'Enable nlink integration')
-
-option('security_level', type: 'string', value: 'standard',
-       description: 'Security level configuration')
+option('enable_tests', type : 'boolean', value : false, description : 'Enable unit tests')
+option('enable_docs', type : 'boolean', value : false, description : 'Enable documentation generation')

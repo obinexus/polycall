@@ -1,0 +1,4 @@
+# p2p topology specific settings
+TOPOLOGY=p2p
+ARTIFACT_PREFIX=p2p
+CONNECTION_MODEL=P2P
