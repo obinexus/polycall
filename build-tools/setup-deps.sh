@@ -2,6 +2,27 @@
 #!/bin/bash
 set -euo pipefail
 
+# Add to build-tools/setup-deps.sh
+install_build_hooks() {
+  mkdir -p .git/hooks
+  cat > .git/hooks/pre-commit << 'EOF'
+#!/bin/bash
+set -e
+
+# Run static analysis
+./build-tools/static-analysis.sh
+
+# Get warning count
+warning_count=$(grep -c "warning:" build/logs/static-analysis.log || echo "0")
+
+# Enforce threshold
+./build-tools/status-check.sh "$warning_count" "pre-commit"
+
+# Exit with status check result
+exit $?
+EOF
+  chmod +x .git/hooks/pre-commit
+}
 detect_platform() {
     case "$(uname -s)" in
         Darwin*)  echo "macos" ;;

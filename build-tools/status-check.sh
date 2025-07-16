@@ -1,44 +1,38 @@
 #!/bin/bash
-# build-tools/status-check.sh
+# build-tools/status-check.sh - Fixed version
 
-assess_distress_state() {
-    local warnings=$1
-    case $warnings in
-        0|1|2|3) echo "STATE_OK :: Artifact stable ✅" ;;
-        4|5|6) echo "STATE_WARNING :: Degraded but buildable ⚠️" ;;
-        7|8|9) echo "STATE_CRITICAL :: Major faults 🚨" ;;
-        10|11|12) echo "STATE_PANIC :: Kill node to protect ring ❌" ;;
-        *) echo "STATE_UNKNOWN :: Inconclusive" ;;
-    esac
-}
+# Default to 0 if no count provided
+count=${1:-0}
+topology=${2:-global}
 
-log_topology_state() {
-    local topology=$1
-    local state=$2
-    
-    echo "$(date +"%Y-%m-%d %H:%M:%S") - TOPOLOGY: $topology - STATE: $state" >> build/metadata/topology-health.log
-}
+# Load thresholds from manifest if available
+if [ -f "config/build/in/topology.in" ]; then
+  source config/build/in/topology.in
+fi
 
-# Main function
-main() {
-    local warnings=$1
-    local topology=${2:-"unknown"}
-    
-    mkdir -p build/metadata
-    
-    state=$(assess_distress_state $warnings)
-    log_topology_state "$topology" "$state"
-    
-    echo $state
-    
-    # Return exit code based on state
-    case $state in
-        *"STATE_OK"*) return 0 ;;
-        *"STATE_WARNING"*) return 1 ;;
-        *"STATE_CRITICAL"*) return 2 ;;
-        *"STATE_PANIC"*) return 3 ;;
-        *) return 4 ;;
-    esac
-}
+# Modified thresholds to match requirements (3-6 range)
+WARNING_THRESHOLD=${WARNING_THRESHOLD:-3}
+CRITICAL_THRESHOLD=${CRITICAL_THRESHOLD:-6}
+PANIC_THRESHOLD=${PANIC_THRESHOLD:-9}
 
-main "$@"
+# Create the metadata directory if it doesn't exist
+mkdir -p build/metadata
+
+# Check against thresholds and set status
+if [ "$count" -ge "$PANIC_THRESHOLD" ]; then
+  echo "STATE_PANIC :: $count issues in $topology topology" > build/metadata/topology-health.log
+  echo "STATE_PANIC :: Build halted - exceeds maximum threshold ❌"
+  exit 3
+elif [ "$count" -ge "$CRITICAL_THRESHOLD" ]; then
+  echo "STATE_CRITICAL :: $count issues in $topology topology" >> build/metadata/topology-health.log
+  echo "STATE_CRITICAL :: Artifact requires immediate review 🚨"
+  exit 2
+elif [ "$count" -ge "$WARNING_THRESHOLD" ]; then
+  echo "STATE_WARNING :: $count issues in $topology topology" >> build/metadata/topology-health.log
+  echo "STATE_WARNING :: Build proceeded with minor issues ⚠️"
+  exit 1
+else
+  echo "STATE_OK :: $count issues in $topology topology" >> build/metadata/topology-health.log
+  echo "STATE_OK :: Artifact stable ✅"
+  exit 0
+fi

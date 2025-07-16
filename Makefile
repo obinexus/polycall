@@ -3,6 +3,112 @@
 # Topology validation targets
 .PHONY: check-health check-topology build-topology
 
+# Enhanced PolyBuild Makefile with Fault Tolerance Grading
+.PHONY: check-health check-topology build-topology
+
+# Directory structure (ensure they exist)
+$(shell mkdir -p build/{bin,obj,logs,metadata})
+
+# Include all .in manifest files
+include $(shell find config -name "*.in" 2>/dev/null)
+
+# Default compiler flags
+CC ?= gcc
+CFLAGS ?= -Wall -Wextra -I$(ROOT_DIR)/include
+
+# Find all C source files using wildcard globbing
+SRC_FILES := $(shell find src -name "*.c")
+OBJ_FILES := $(patsubst src/%.c,build/obj/%.o,$(SRC_FILES))
+
+# Fault tolerance grading thresholds (from topology.in or defaults)
+CRITICAL_THRESHOLD ?= 6
+DANGER_THRESHOLD ?= 9
+PANIC_THRESHOLD ?= 12
+
+# Check health based on warning/error count
+check-health:
+	@echo "Checking build health..."
+	@warnings=$$(grep -c "warning:" build/logs/*.log 2>/dev/null || echo "0"); \
+	errors=$$(grep -c "error:" build/logs/*.log 2>/dev/null || echo "0"); \
+	total=$$((warnings + errors)); \
+	if [ $$total -ge $(PANIC_THRESHOLD) ]; then \
+		echo "🔥 STATE_PANIC: $$total issues detected. Build halted."; \
+		echo "STATE_PANIC :: Errors: $$errors, Warnings: $$warnings" > build/metadata/health.log; \
+		exit 1; \
+	elif [ $$total -ge $(DANGER_THRESHOLD) ]; then \
+		echo "🔴 STATE_DANGER: $$total issues detected. QA review required."; \
+		echo "STATE_DANGER :: Errors: $$errors, Warnings: $$warnings" > build/metadata/health.log; \
+	elif [ $$total -ge $(CRITICAL_THRESHOLD) ]; then \
+		echo "🟡 STATE_CRITICAL: $$total issues detected. Proceed with caution."; \
+		echo "STATE_CRITICAL :: Errors: $$errors, Warnings: $$warnings" > build/metadata/health.log; \
+	else \
+		echo "🟢 STATE_OK: $$total issues detected. Artifact stable."; \
+		echo "STATE_OK :: Artifact stable" > build/metadata/health.log; \
+	fi
+
+# Topology health checks
+check-topology: check-topology-star check-topology-bus check-topology-p2p check-topology-ring
+	@echo "All topology checks completed"
+	@if grep -q "STATE_PANIC" build/metadata/topology-health.log 2>/dev/null; then \
+		echo "🔥 PANIC: Topology failure detected. Build blocked."; \
+		exit 1; \
+	elif grep -q "STATE_DANGER" build/metadata/topology-health.log 2>/dev/null; then \
+		echo "🔴 DANGER: Degraded topology detected. QA required."; \
+	elif grep -q "STATE_CRITICAL" build/metadata/topology-health.log 2>/dev/null; then \
+		echo "🟡 CRITICAL: Issues in topology. Proceed with caution."; \
+	else \
+		echo "🟢 SUCCESS: All topologies stable."; \
+	fi
+
+# Generic rule for compiling C files with proper logging
+build/obj/%.o: src/%.c
+	@mkdir -p $(dir $@)
+	@mkdir -p build/logs/$(dir $(patsubst src/%,%,$<))
+	@echo "Compiling $(notdir $<)..."
+	@$(CC) $(CFLAGS) -c $< -o $@ 2> build/logs/$(patsubst src/%,%,$<).log
+	@if grep -q "error:" build/logs/$(patsubst src/%,%,$<).log; then \
+		echo "⛔ ERROR in $(notdir $<)"; \
+	elif grep -q "warning:" build/logs/$(patsubst src/%,%,$<).log; then \
+		echo "⚠️ WARNING in $(notdir $<)"; \
+	else \
+		echo "✓ $(notdir $<)"; \
+	fi
+
+# The auth_context module compilation using wildcard pattern
+polycall_auth_context: $(filter %/auth_context.o,$(OBJ_FILES))
+	@echo "Linking polycall auth context module..."
+	@mkdir -p build/bin
+	@$(CC) $(CFLAGS) -o build/bin/auth_context $^ 2> build/logs/auth_context_link.log
+	@# Generate manifest
+	@echo '{"component":"polycall_auth_context","built_at":"'$$(date -u +"%Y-%m-%dT%H:%M:%SZ")'","topology":"$(TOPOLOGY)"}' > build/metadata/auth_context.json
+	@echo "Auth context module built successfully"
+
+# Master build with topology validation
+build-topology: check-topology
+	@if [ $$? -eq 0 ]; then \
+		echo "Building with validated topology..."; \
+		$(MAKE) build-components; \
+	else \
+		echo "Build blocked due to topology issues."; \
+		exit 1; \
+	fi
+
+# Build all components
+build-components: check-health
+	@echo "Building all components..."
+	@$(MAKE) polycall_auth_context
+	@# Add other components here
+	@echo "All components built successfully"
+
+# Clean with fault tolerance
+clean:
+	@echo "Cleaning build artifacts..."
+	@rm -rf build/obj build/bin
+	@find build/logs -name "*.log" -delete 2>/dev/null || true
+	@echo "Clean completed"
+
+# Default target
+all: build-topology
 # Directory structure
 $(shell mkdir -p build/logs build/metadata build/bin)
 
