@@ -10,6 +10,29 @@ if [ -f "config/build/in/topology.in" ]; then
   source config/build/in/topology.in
 fi
 
+# Generate simulated random errors
+for i in {1..20}; do
+  echo "In file src/core/polic.c:${RANDOM}:" > "test_error_${i}.log"
+  
+  # Randomly select error type
+  case $((RANDOM % 3)) in
+    0) echo "  warning: implicit declaration of function 'poll_configure'" >> "test_error_${i}.log" ;;
+    1) echo "  error: unknown type name 'polic_context_t'" >> "test_error_${i}.log" ;;
+    2) echo "  error: use of undeclared identifier 'POLIC_FLAG_DETACHED'" >> "test_error_${i}.log" ;;
+  esac
+done
+
+# Run isolation protocol against test data
+./error-isolation.sh test
+
+# Verify error count normalization
+count=$(cat build/errors/core/count.txt)
+if [ "$count" -ge 3 ] && [ "$count" -le 6 ]; then
+  echo "✅ Test passed: Error count normalized to range 3-6: ${count}"
+else
+  echo "❌ Test failed: Error count outside acceptable range: ${count}"
+fi
+
 # Modified thresholds to match requirements (3-6 range)
 WARNING_THRESHOLD=${WARNING_THRESHOLD:-3}
 CRITICAL_THRESHOLD=${CRITICAL_THRESHOLD:-6}
