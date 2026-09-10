@@ -1,0 +1,27 @@
+# Keep build- and shell-critical files LF regardless of core.autocrlf so a
+# Windows checkout does not hand CRLF scripts to /bin/sh or CRLF recipes to make.
+*.sh            text eol=lf
+*.bash          text eol=lf
+Makefile        text eol=lf
+*.mk            text eol=lf
+*.cmake         text eol=lf
+*.cmake.in      text eol=lf
+CMakeLists.txt  text eol=lf
+*.c             text eol=lf
+*.h             text eol=lf
+*.mjs           text eol=lf
+*.py            text eol=lf
+Polycallfile    text eol=lf
+Polycallrc*     text eol=lf
+*.ps1           text eol=crlf
+
+# CRLF test fixture must keep its bytes exactly as committed
+tests/fixtures/crlf/**  -text
+
+# NOTE: the libpolycall-main snapshot shipped Git LFS filters for *.so *.a
+# *.pdf *.jar *.class and bindings/*/target/**. A GitHub "Download ZIP" only
+# contains the LFS *pointer* text, not the blobs, so importing it produced 35
+# dangling LFS pointers that make `git push` fail. Those filters are removed
+# here and the affected paths are build artifacts / binaries that do not
+# belong in the repo (see .gitignore). Re-enable LFS deliberately with
+# `git lfs track` + a real `git lfs` setup if large binaries are ever needed.
