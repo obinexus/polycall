@@ -181,7 +181,10 @@ $(STAMP): FORCE | $(OBJ_DIR)
 	  "cppflags=$(ALL_CPPFLAGS)" "cflags=$(ALL_CFLAGS)" > $@.tmp
 	@if [ ! -f $@ ] || ! cmp -s $@ $@.tmp; then \
 	  echo "toolchain fingerprint changed - clearing $(OBJ_DIR)"; \
-	  rm -rf $(OBJ_DIR); mkdir -p $(OBJ_DIR) $(OBJ_DIR)/shared $(OBJ_DIR)/cli; \
+	  rm -rf $(OBJ_DIR); \
+	  mkdir -p $(OBJ_DIR) $(OBJ_DIR)/config $(OBJ_DIR)/runtime \
+	           $(OBJ_DIR)/shared $(OBJ_DIR)/shared/config $(OBJ_DIR)/shared/runtime \
+	           $(OBJ_DIR)/cli; \
 	  mv $@.tmp $@; \
 	else rm -f $@.tmp; fi
 

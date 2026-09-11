@@ -1,0 +1,95 @@
+name: CI
+
+# Build + test matrix (docs/TODO.md P0). Independent Make and CMake paths are
+# both exercised on every PR, with Make built in parallel (-j) so a repeat of
+# the toolchain-fingerprint object-directory race
+# (see Makefile: "toolchain fingerprint changed - clearing $(OBJ_DIR)")
+# fails the build instead of only reproducing locally.
+
+on:
+  push:
+    branches: [main, polycall-cli-redesign]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  linux-make:
+    name: Linux / GNU Make (-j, GCC + Clang)
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        cc: [gcc, clang]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Toolchain
+        run: |
+          ${{ matrix.cc }} --version
+          make --version
+      - name: make all (parallel)
+        run: make BUILD_DIR=build/linux-${{ matrix.cc }} CC=${{ matrix.cc }} -j"$(nproc)" all
+      - name: make test
+        run: make BUILD_DIR=build/linux-${{ matrix.cc }} CC=${{ matrix.cc }} test
+
+  linux-cmake:
+    name: Linux / CMake + ctest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: cmake -S . -B build/linux-cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON
+      - name: Build (parallel)
+        run: cmake --build build/linux-cmake --parallel
+      - name: ctest
+        run: ctest --test-dir build/linux-cmake --output-on-failure
+
+  windows-msvc:
+    name: Windows / MSVC (CMake, via build-windows.ps1)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: build-windows.ps1 (configure + build + ctest)
+        shell: pwsh
+        run: ./build-windows.ps1 -Generator "Visual Studio 17 2022" -BuildType Release -Test
+
+  windows-msys2-make:
+    name: Windows / MSYS2 Make (MINGW64 GCC)
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: >-
+            mingw-w64-x86_64-gcc
+            make
+      - name: Toolchain
+        run: |
+          gcc --version
+          gcc -dumpmachine
+      - name: make all (parallel)
+        run: make BUILD_DIR=build/win-msys2 CC=gcc -j$(nproc) all
+      - name: make test
+        run: make BUILD_DIR=build/win-msys2 CC=gcc test
+
+  macos-make:
+    name: macOS / Make (Apple Clang)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Toolchain
+        run: |
+          cc --version
+          make --version
+      - name: make all (parallel)
+        run: make BUILD_DIR=build/macos CC=cc -j"$(sysctl -n hw.ncpu)" all
+      - name: make test
+        run: make BUILD_DIR=build/macos CC=cc test
