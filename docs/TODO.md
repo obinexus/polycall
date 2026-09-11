@@ -156,34 +156,44 @@ separate change.
 The current sources of truth are `CMakeLists.txt` (`VERSION 1.0.1`) and `include/polycall_export.h`
 (`POLYCALL_ABI_VERSION_STRING "1.0.1"`).
 
-- [ ] README line 3 says v1.0.0 → change to 1.0.1
-- [ ] The README section "Version 1.1.0 - Unified Architecture (2024-09-10)" and the top `[1.1.0]` entry in `docs/CHANGELOG.md` conflict with 1.0.1 → reconcile them and add a 1.0.1 entry for the CLI redesign
-- [ ] The README points to `obinexus/libpolycall-v1trial` and "v1trial" → point to this repository instead
-- [ ] `docs/VMILESTONE.md` marks the Go, Java and Lua bindings stable, but they are not on polycall_rpc v1 → re-mark them from P2 conformance results
-- [ ] Update the Dockerfile version `ARG` (tracked in P0)
-- [ ] Make one version source feed Make, CMake, the Dockerfile and the bindings
+- [x] README line 3 says v1.0.0 → change to 1.0.1
+- [x] The README section "Version 1.1.0 - Unified Architecture (2024-09-10)" and the top `[1.1.0]` entry in `docs/CHANGELOG.md` conflict with 1.0.1 → reconcile them and add a 1.0.1 entry for the CLI redesign
+  - **Done 2026-09-11.** Added a `[1.0.1] - 2026-09-11 - CLI Redesign` entry (newest first) to both README and `docs/CHANGELOG.md`, plus an explicit version-numbering note: the library/ABI has read 1.0.1 throughout; the "1.1.0" entry was a documentation label from an earlier merge, never matched by an actual version bump. Kept as the historical record, not deleted.
+- [x] The README points to `obinexus/libpolycall-v1trial` and "v1trial" → point to this repository instead
+- [x] `docs/VMILESTONE.md` marks the Go, Java and Lua bindings stable, but they are not on polycall_rpc v1 → re-mark them from P2 conformance results
+  - **Done 2026-09-11.** Added a `polycall_rpc` v1 status table (C/Node/Python "stable", Go/Java "verified-on-one-platform", Lua "not stable", Zig/COBOL "no client yet") sourced directly from `docs/CONFORMANCE.md`; the original checklist is left untouched as the historical record (it predates this pass and covers claims -- e.g. "Banking demo functional" -- this pass has no evidence for either way).
+- [x] Update the Dockerfile version `ARG` (tracked in P0)
+- [x] Make one version source feed Make, CMake, the Dockerfile and the bindings
+  - **Done 2026-09-11**, with one honest gap. `include/polycall_export.h`'s `POLYCALL_ABI_VERSION_{MAJOR,MINOR,PATCH}` is now the single source: `src/polycall.c` derives `polycall_get_version()` from it (was a second hardcoded `"1.0.1"` string before -- removed); `CMakeLists.txt` reads the same three macros out of the header with `file(STRINGS ...)` before `project(VERSION ...)`, verified via `CMAKE_PROJECT_VERSION` = `1.0.1` in a fresh configure. The **Dockerfile's `ARG POLYCALL_VERSION`** stays a manually-synced literal, documented as such in a comment -- a Docker `ARG` is resolved before the build context (including the header) is even copied in, so automating that fully needs a different mechanism (e.g. a `RUN` step that fails the build on mismatch) not attempted here. The Go/Java/Node/Python clients carry no product version string of their own (they only speak the versioned wire protocol), so there was nothing to synchronise there.
 - [ ] Tag the release per SemVerX once P0 is clear
+  - Not done in this pass -- P0 is clear, but tagging is a publish-shaped action left for the maintainer to trigger deliberately (an earlier ad hoc tag, `v1.0.1-redesign.1` on the pre-P0 commit, already exists; a proper SemVerX tag for the current state should follow the maintainer's own scheme, not a guess made here).
 
 ### README fixes
 
-- [ ] Line 15 has broken image syntax, `![LibPolycall Version Favicon)(./favicon.png)` → fix to `![LibPolycall Version Favicon](./favicon.png)`
-- [ ] The README ends on an empty "Web IaaS Architecture" heading → fill it or remove it
-- [ ] Add a quick start drawn from `docs/CLI.md`: build, test, `polycall run`, `polycall call`
+- [x] Line 15 has broken image syntax, `![LibPolycall Version Favicon)(./favicon.png)` → fix to `![LibPolycall Version Favicon](./favicon.png)`
+- [x] The README ends on an empty "Web IaaS Architecture" heading → fill it or remove it
+  - Removed (no real IaaS-architecture content existed to fill it with, and inventing marketing copy isn't this pass's call to make).
+- [x] Add a quick start drawn from `docs/CLI.md`: build, test, `polycall run`, `polycall call`
 
 ---
 
 ## P6 — Repository hygiene
 
-- [ ] Remove backup artifacts; git history already preserves them:
+- [x] Remove backup artifacts; git history already preserves them:
   - `bindings/cbl-polycall/src/MAIN.CBL.backup`
   - `bindings/cbl-polycall/src/POLYCALL.CBL.backup`
   - `bindings/cbl-polycall/Makefile.backup`
   - `bindings/cbl-polycall/Makefile.v1.0.backup`
   - `bindings/cbl-polycall/build.bat.v1.0.backup`
   - `bindings/pypolycall/backup_20250603_233522/`
-- [ ] Remove the byte-identical duplicate docs:
+  - **Done 2026-09-11.** All six removed with `git rm`; confirmed present and unmodified before removal.
+- [x] Remove the byte-identical duplicate docs:
   - `docs/LibPolyCall Architecture Definition Document` (no extension) duplicates the `.md` version
   - `docs/web-polycall-integration-guide (1).md` duplicates `docs/web-polycall-integration-guide.md`
-- [ ] Neither Make nor CMake builds `test/test_polystate.c` or `test/test_polystate_machine.c` → either wire them into `tests/run_all.sh` or remove them, then merge `test/` into `tests/`
+  - **Done 2026-09-11.** Verified byte-identical with `diff -q` before removing either (the extensionless / `(1)` copy in each pair, keeping the properly-named `.md`).
+- [x] Neither Make nor CMake builds `test/test_polystate.c` or `test/test_polystate_machine.c` → either wire them into `tests/run_all.sh` or remove them, then merge `test/` into `tests/`
+  - **Removed, `test/` folded away.** On inspection neither file was a wireable unit test: `test_polystate.c` carries the exact misleading `// main.c - PolyCall CLI Implementation` header noted as a known issue in an unrelated snapshot's own fix log, defines its own local `struct polycall_context` that has drifted from `src/polycall.c`'s real one, and is actually an interactive demo program (`int main(void)` running a REPL) rather than a test. `test_polystate_machine.c` defines one assertion-based test function that nothing ever calls -- no runner, no `main()`. Neither has been built by any build system already (per this item's own premise). Reviving them correctly would be a rewrite, not a wire-in; `polycall_state_machine.c` itself is unaffected (still compiled into the library for ABI compatibility, just not exercised by the CLI, which no longer has state-machine REPL commands after the Stage 1 redesign) and remains a coverage gap worth a dedicated pass.
 - [ ] `LICENSE` ("Use It, Respect It") and `LICENSE.md` (OBINexus NT Open Access, MIT text) differ, and the Dockerfile label declares MIT → maintainer decides the canonical licence and makes all three consistent
+  - **Not done -- maintainer decision, confirmed still needed.** Read both in full: they are genuinely different licensing schemes, not a formatting variant of the same one. Left untouched; picking one is not this pass's call.
 - [ ] Consider slug filenames for docs that contain spaces or en dashes. Do **not** rename `tests/fixtures/with space/`, which is an intentional fixture.
+  - **Not done.** Low priority, cosmetic, and renaming touches every inbound link/reference to those files; left for a dedicated pass rather than done partially here.

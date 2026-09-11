@@ -1,7 +1,25 @@
 cmake_minimum_required(VERSION 3.20)
 
+# One version source (docs/TODO.md P5): read POLYCALL_ABI_VERSION_{MAJOR,
+# MINOR,PATCH} out of the public header instead of a second hardcoded
+# literal here. src/polycall.c does the equivalent for polycall_get_version().
+file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/include/polycall_export.h"
+  _pc_ver_lines REGEX "^#define POLYCALL_ABI_VERSION_(MAJOR|MINOR|PATCH) ")
+foreach(_line IN LISTS _pc_ver_lines)
+  if(_line MATCHES "^#define POLYCALL_ABI_VERSION_MAJOR ([0-9]+)")
+    set(_pc_ver_major "${CMAKE_MATCH_1}")
+  elseif(_line MATCHES "^#define POLYCALL_ABI_VERSION_MINOR ([0-9]+)")
+    set(_pc_ver_minor "${CMAKE_MATCH_1}")
+  elseif(_line MATCHES "^#define POLYCALL_ABI_VERSION_PATCH ([0-9]+)")
+    set(_pc_ver_patch "${CMAKE_MATCH_1}")
+  endif()
+endforeach()
+if(NOT _pc_ver_major OR NOT DEFINED _pc_ver_minor OR NOT DEFINED _pc_ver_patch)
+  message(FATAL_ERROR "could not read POLYCALL_ABI_VERSION_* from include/polycall_export.h")
+endif()
+
 project(polycall
-  VERSION 1.0.1
+  VERSION "${_pc_ver_major}.${_pc_ver_minor}.${_pc_ver_patch}"
   DESCRIPTION "Program-first cross-language runtime"
   LANGUAGES C)
 

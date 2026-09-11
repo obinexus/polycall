@@ -1,5 +1,10 @@
 # syntax=docker/dockerfile:1.7
 
+# Keep in sync with POLYCALL_ABI_VERSION_{MAJOR,MINOR,PATCH} in
+# include/polycall_export.h -- the canonical version source (docs/TODO.md
+# P5). CMake reads it automatically (file(STRINGS ...) in CMakeLists.txt);
+# a Docker ARG can't do that before the build context is even copied in, so
+# this one is manually synced and worth checking whenever the header changes.
 ARG POLYCALL_VERSION=1.0.1
 
 FROM gcc:12-bookworm AS builder

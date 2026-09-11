@@ -2,7 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define POLYCALL_VERSION "1.0.1"
+/* Single version source: POLYCALL_ABI_VERSION_STRING (polycall_export.h),
+ * so polycall_get_version() and the library's ABI version can never drift
+ * apart the way a second hardcoded "1.0.1" here once could. */
+#define POLYCALL_VERSION POLYCALL_ABI_VERSION_STRING
 #define MAX_ERROR_LENGTH 256
 
 /* Internal context structure */

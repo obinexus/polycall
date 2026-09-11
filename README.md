@@ -1,10 +1,13 @@
 # The Future is Now: LibPolyCall Vision Statement
 
-LibPolyCall v1.0.0 configuration uses `Polycallfile` for writable project
+LibPolyCall v1.0.1 configuration uses `Polycallfile` for writable project
 topology, `Polycallrc` for global read-only runtime defaults, and
 `Polycallrc.<language>` for language overrides. See
 [docs/CONFIGURATION_STANDARD.md](docs/CONFIGURATION_STANDARD.md) for load
-order, validation, migration, and CLI commands.
+order, validation, migration, and CLI commands. For the CLI redesign
+(program-first runtime, native config, `polycall_rpc` v1, operation plugins)
+delivered on the `polycall-cli-redesign` branch, start with
+[docs/CLI.md](docs/CLI.md) and the quick start below.
 
 **From the Desk of Nnamdi Michael Okpala, Founder - OBINexusComputing**
 ---
@@ -12,7 +15,34 @@ order, validation, migration, and CLI commands.
 
 ![Founder](founder.png)
 
-![LibPolycall Version Favicon)(./favicon.png)
+![LibPolycall Version Favicon](./favicon.png)
+
+## Quick start
+
+```sh
+# build (GNU Make and CMake are independent; either is enough)
+make BUILD_DIR=build/linux-gcc CC=gcc all test
+# or: cmake -S . -B build/cmake -DBUILD_TESTING=ON && cmake --build build/cmake --parallel && ctest --test-dir build/cmake
+
+# help / version / doctor never touch the network or start anything
+build/linux-gcc/bin/polycall --version
+build/linux-gcc/bin/polycall doctor
+
+# start the runtime in the foreground, on an ephemeral port
+build/linux-gcc/bin/polycall run --endpoint 127.0.0.1:0 &
+
+# call a registered operation through it (docs/RPC.md)
+build/linux-gcc/bin/polycall call inventory get --endpoint 127.0.0.1:<port> \
+  --input-value '{"item_id":"widget-a"}'
+```
+
+See [docs/CLI.md](docs/CLI.md) for the full command reference,
+[docs/NATIVE_CONFIG.md](docs/NATIVE_CONFIG.md) for language-native
+configuration, [docs/RPC.md](docs/RPC.md) for the wire protocol,
+[docs/PLUGINS.md](docs/PLUGINS.md) for loading operations without a core
+rebuild, and [docs/PLATFORM_REPORT.md](docs/PLATFORM_REPORT.md) for exactly
+what has and hasn't been verified on which platform.
+
 ## "The future isn't coming—it's here. And it speaks every language."
 
 For too long, we've accepted the fragmentation of our digital ecosystem. Python talks to Python. Node.js whispers to JavaScript. Java shouts in its own dialect. Meanwhile, developers waste countless hours building bridges between languages, creating duplicate APIs, and maintaining separate implementations for what should be unified solutions.
@@ -69,7 +99,7 @@ LibPolyCall eliminates this waste through **polymorphic core architecture**:
 
 Imagine deploying a single API specification that instantly works across Python, Node.js, Java, Go, and languages not yet invented. Imagine debugging production issues with perfect state reproduction. Imagine microservices that communicate as naturally as neurons in a brain.
 
-**This isn't imagination—this is LibPolyCall v1trial.**
+**This isn't imagination—this is LibPolyCall.**
 
 ## For the Technical Visionaries
 
@@ -94,9 +124,9 @@ The debugging nightmare of distributed systems is over—if you implement intell
 
 ---
 
-**LibPolyCall v1trial**: Where program-first architecture meets zero-trust security meets intelligent telemetry.
+**LibPolyCall**: Where program-first architecture meets zero-trust security meets intelligent telemetry.
 
-**Repository**: `obinexus/libpolycall-v1trial`  
+**Repository**: `obinexus/polycall` ([github.com/obinexus/polycall](https://github.com/obinexus/polycall))
 **The future is now. The choice is yours.**
 
 *Nnamdi Michael Okpala*  
@@ -106,6 +136,28 @@ The debugging nightmare of distributed systems is over—if you implement intell
 ---
 
 *"In a world of language silos, be the universal protocol. In an age of security breaches, be the zero-trust solution. In an era of blind systems, be the intelligent observer. The future isn't coming—it's here, and it's written in C."*
+
+## Version 1.0.1 - CLI Redesign (2026-09-11)
+
+Delivered on the `polycall-cli-redesign` branch: one predictable CLI
+contract, a typed native configuration model alongside the legacy loader,
+the `polycall_rpc` v1 wire and a real cross-language operation runtime, an
+operation-plugin loader (`run --load`, no core rebuild), and
+`polycall_rpc` v1 clients for Node.js, Python, Go and Java, verified with a
+cross-language conformance harness. See
+[docs/IMPLEMENTATION.md](docs/IMPLEMENTATION.md) for the full account and
+[docs/PLATFORM_REPORT.md](docs/PLATFORM_REPORT.md) /
+[docs/CONFORMANCE.md](docs/CONFORMANCE.md) for what was actually verified,
+on which platform, and what was not.
+
+**Version numbering note:** the library/ABI version has read `1.0.1`
+throughout (`include/polycall_export.h` is the canonical source; `src/polycall.c`
+derives its reported version from it rather than a separately hardcoded
+string, so the two cannot drift). The "Version 1.1.0" entry directly below
+was a documentation label recorded alongside an earlier merge and was never
+matched by an actual library-version bump -- it's kept here as the
+historical record, not as a claim that 1.1.0 ever shipped.
+
 ## Version 1.1.0 - Unified Architecture (2024-09-10)
 
 ### What's New
@@ -118,9 +170,3 @@ The debugging nightmare of distributed systems is over—if you implement intell
 - Original polycall v1 preserved in `polycall-v1/` directory
 - All bindings now in unified `bindings/` structure
 - See MIGRATION_REPORT.md for full details
-
-## 🌐 LibPolyCall as Infrastructure as a Service (IaaS)
-
-LibPolyCall is the **polymorphic binding layer** that powers OBINexus Web IaaS platform:
-
-### Web IaaS Architecture
