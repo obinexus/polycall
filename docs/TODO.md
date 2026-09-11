@@ -149,10 +149,37 @@ protocol in `include/polycall_protocol.h`.
 The runtime is single-threaded and serves one connection at a time. `docs/RPC.md` scopes concurrency as a
 separate change.
 
-- [ ] Write the scope document first: threading model, per-connection deadlines, shutdown semantics
-- [ ] Serve multiple concurrent clients without changing the wire format
-- [ ] Keep the existing rule: signal handlers only set a flag, and all cleanup runs in normal code
+- [x] Write the scope document first: threading model, per-connection deadlines, shutdown semantics
+  - **Done 2026-09-11.** `docs/CONCURRENCY.md`, written before any change to `src/runtime/runtime.c`.
+- [x] Serve multiple concurrent clients without changing the wire format
+  - **Done 2026-09-11.** One thread per connection (`_beginthreadex`/`pthread_create`, detached), bounded to
+    `RT_MAX_CONNS` (64) live connections; the accept loop just hands off and goes back to `accept()`. The wire
+    format (`docs/RPC.md`) is untouched. Along the way, fixed a real pre-existing hazard this change made
+    reachable: `dispatch_request()`'s re-serialised "input" buffer was a function-`static char[8192]` -- safe
+    single-threaded, but shared mutable state once more than one thread could be inside `dispatch_request()`
+    at once. Now a per-call stack buffer.
+- [x] Keep the existing rule: signal handlers only set a flag, and all cleanup runs in normal code
+  - **Done 2026-09-11.** `on_signal()` is unchanged. `polycall_runtime_serve()` now also waits (polling
+    `g_active_conns`, normal execution, not the handler) for every connection thread to finish before
+    returning, since the caller destroys `rt` the instant `serve()` returns -- see docs/CONCURRENCY.md
+    "Shutdown semantics".
 - **Acceptance:** the ledger demo runs with N concurrent clients, and all existing tests pass unchanged.
+  - **Done 2026-09-11.** `examples/ledger/demo.sh` gained a concurrent phase (`LEDGER_CONCURRENCY`, default
+    8): N simultaneous `debug.sleep` calls finish in ~1 wall-clock second, not the ~4s serial execution would
+    take, proving genuine overlap; N simultaneous `ledger.transfer` calls (alice -> bob) leave both balances
+    exactly N away from their starting point, proving no lost update (the ledger plugin gained its own mutex
+    around `g_accounts` for exactly this -- built-ins needed no change, they touch no shared state). Ran clean
+    3x back-to-back on Linux (WSL2 GCC) and once on Windows (TDM-GCC, Node+Go clients; Python NOT RUN --
+    no interpreter on that PATH). Full suite green on both hosts under `make test` afterward, same counts as
+    P3, plus a clean CMake+MinGW build including `ledger_plugin.dll`.
+  - **Honest side note:** `ctest` (not `make test`) fails one assertion in `tests/config/equivalence.sh`
+    ("could not obtain both envelopes") on this Windows/MSYS setup, regardless of P4 -- confirmed by stashing
+    every P4 change and reproducing the identical failure against the P3 commit. It's an MSYS argv
+    path-mangling issue specific to how `ctest` launches `tests/run_all.sh` (a `node:` absolute path gets
+    doubled, e.g. `C:\c\Users\...`), not a product bug and not something P4 introduced or regressed; `make
+    test`, the suite this project's own CI and every prior stage of this pass has relied on, is unaffected and
+    passes cleanly. Left as a pre-existing, environment-specific `ctest` fragility for the maintainer to
+    decide whether to chase.
 
 ---
 

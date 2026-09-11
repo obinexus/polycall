@@ -1,7 +1,9 @@
 #!/bin/sh
-# Flagship demo (docs/TODO.md P3): a ledger operation plugin, loaded into the
-# runtime with no core rebuild, driven from every polycall_rpc v1 client
-# available on this host. From a clean checkout:
+# Flagship demo (docs/TODO.md P3, P4): a ledger operation plugin, loaded into
+# the runtime with no core rebuild, driven from every polycall_rpc v1 client
+# available on this host, then from LEDGER_CONCURRENCY (default 8)
+# simultaneous clients at once to prove the runtime's concurrency
+# (docs/CONCURRENCY.md). From a clean checkout:
 #
 #   make BUILD_DIR=build/demo CC=gcc all
 #   sh examples/ledger/demo.sh build/demo gcc
@@ -116,6 +118,71 @@ if command -v go >/dev/null 2>&1; then
   fi
 else
   echo "NOT RUN  Go (go not on PATH)"
+fi
+
+N=${LEDGER_CONCURRENCY:-8}
+SLEEP_MS=500
+
+say "P4: $N concurrent debug.sleep calls prove the runtime genuinely overlaps connections (docs/CONCURRENCY.md), not just that this script backgrounds them -- if it still served one at a time, $N x ${SLEEP_MS}ms would take ~$((N * SLEEP_MS / 1000))s"
+t0=$(date +%s)
+pids=""
+i=0
+while [ $i -lt $N ]; do
+  call_c debug sleep "{\"ms\":$SLEEP_MS}" >"$TMP/sleep_$i.out" 2>&1 &
+  pids="$pids $!"
+  i=$((i + 1))
+done
+# wait only on the client PIDs just launched -- a bare `wait` would also
+# block on $RUNPID, the runtime server itself, which never exits on its own
+wait $pids
+t1=$(date +%s)
+elapsed=$((t1 - t0))
+echo "elapsed: ${elapsed}s"
+if [ "$elapsed" -le 2 ]; then
+  printf 'PASS  %s\n' "$N concurrent sleeps overlapped (${elapsed}s, not ~$((N * SLEEP_MS / 1000))s serial)"
+else
+  printf 'FAIL  %s\n' "$N concurrent sleeps took ${elapsed}s -- looks serialized"
+  fail=1
+fi
+i=0
+while [ $i -lt $N ]; do
+  out=$(cat "$TMP/sleep_$i.out")
+  check "sleep #$i completed" '"slept_ms"' "$out"
+  i=$((i + 1))
+done
+
+say "P4: $N concurrent ledger.transfer calls (alice -> bob, 1 each) prove no lost update under real concurrency"
+out=$(call_c ledger balance '{"account":"alice"}')
+alice_before=$(printf '%s' "$out" | sed -n 's/.*"balance":\(-\{0,1\}[0-9]*\).*/\1/p')
+out=$(call_c ledger balance '{"account":"bob"}')
+bob_before=$(printf '%s' "$out" | sed -n 's/.*"balance":\(-\{0,1\}[0-9]*\).*/\1/p')
+echo "before: alice=$alice_before bob=$bob_before"
+pids=""
+i=0
+while [ $i -lt $N ]; do
+  call_c ledger transfer '{"from":"alice","to":"bob","amount":1}' >"$TMP/xfer_$i.out" 2>&1 &
+  pids="$pids $!"
+  i=$((i + 1))
+done
+wait $pids
+i=0
+while [ $i -lt $N ]; do
+  out=$(cat "$TMP/xfer_$i.out")
+  check "concurrent transfer #$i succeeded" '"from_balance"' "$out"
+  i=$((i + 1))
+done
+out=$(call_c ledger balance '{"account":"alice"}')
+alice_after=$(printf '%s' "$out" | sed -n 's/.*"balance":\(-\{0,1\}[0-9]*\).*/\1/p')
+out=$(call_c ledger balance '{"account":"bob"}')
+bob_after=$(printf '%s' "$out" | sed -n 's/.*"balance":\(-\{0,1\}[0-9]*\).*/\1/p')
+echo "after:  alice=$alice_after bob=$bob_after"
+want_alice=$((alice_before - N))
+want_bob=$((bob_before + N))
+if [ "$alice_after" -eq "$want_alice" ] && [ "$bob_after" -eq "$want_bob" ]; then
+  printf 'PASS  %s\n' "$N concurrent transfers, zero lost updates (alice $alice_before->$alice_after, bob $bob_before->$bob_after)"
+else
+  printf 'FAIL  %s\n' "$N concurrent transfers: expected alice=$want_alice bob=$want_bob, got alice=$alice_after bob=$bob_after"
+  fail=1
 fi
 
 say "final state, and every client agrees (C CLI)"

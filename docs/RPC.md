@@ -47,11 +47,11 @@ one-line input/output schema hints, `idempotent`). `shutdown` requires the
 
 `polycall run` binds loopback by default (`--endpoint host:port`, port 0 =
 ephemeral; the resolved endpoint is printed and, with `--endpoint-file`,
-written to a file). It is single-threaded and serves one connection at a time
--- sufficient for deterministic operation; concurrency is a later, separately
-scoped change. `SIGINT`/`SIGTERM` only set a flag; the accept loop notices
-within 200 ms and **all cleanup runs in normal execution**, never in the
-handler.
+written to a file). It serves each connection on its own thread, bounded to
+64 simultaneous connections (`docs/CONCURRENCY.md` has the full threading
+model, per-connection deadline and shutdown scope). `SIGINT`/`SIGTERM` only
+set a flag; the accept loop notices within 200 ms and **all cleanup runs in
+normal execution**, never in the handler.
 
 Built-in operations (deterministic, no network, no I/O):
 

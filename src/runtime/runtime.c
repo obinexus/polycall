@@ -16,11 +16,13 @@
 #if defined(_WIN32)
 #  include <ws2tcpip.h>
 #  include <windows.h>
+#  include <process.h>
 #else
 #  include <arpa/inet.h>
 #  include <dlfcn.h>
 #  include <errno.h>
 #  include <netinet/in.h>
+#  include <pthread.h>
 #  include <sys/select.h>
 #  include <sys/socket.h>
 #  include <time.h>
@@ -29,6 +31,7 @@
 
 #define RT_MAX_OPS 32
 #define RT_MAX_PLUGINS 16
+#define RT_MAX_CONNS 64   /* bounded backpressure; see docs/CONCURRENCY.md */
 
 struct polycall_runtime {
     polycall_op_desc_t ops[RT_MAX_OPS];
@@ -322,6 +325,13 @@ static char *dispatch_request(const polycall_runtime_t *rt, const char *payload,
     const polycall_op_desc_t *desc;
     uint32_t deadline;
     char out[8192], ec[64], em[256];
+    /* Re-serialised "input" sub-object text, sized and scoped for the whole
+     * function (not `static`): with one handler thread per connection
+     * (docs/CONCURRENCY.md), a static buffer here would be shared, unlocked,
+     * mutable state torn apart by concurrent requests. It must outlive the
+     * block below, since input_raw keeps pointing into it through the
+     * desc->fn() call further down. */
+    char inbuf[8192];
     char *resp;
     polycall_op_status_t st;
 
@@ -367,7 +377,6 @@ static char *dispatch_request(const polycall_runtime_t *rt, const char *payload,
          * object, so pass the original slice. Cheap + safe: hand the handler
          * the whole request's "input" by re-reading it from payload via a
          * minimal re-emit. */
-        static char inbuf[8192];
         if (jin && jin->type == JSON_OBJECT) {
             size_t k;
             size_t w = 0;
@@ -493,6 +502,51 @@ static char *control_reply(const polycall_runtime_t *rt, const char *payload,
 }
 
 /* ================================================================== */
+/* concurrency: one thread per connection -- see docs/CONCURRENCY.md   */
+/* ================================================================== */
+
+#if defined(_WIN32)
+typedef CRITICAL_SECTION pcr_mutex_t;
+static void pcr_mutex_init(pcr_mutex_t *m) { InitializeCriticalSection(m); }
+static void pcr_mutex_destroy(pcr_mutex_t *m) { DeleteCriticalSection(m); }
+static void pcr_mutex_lock(pcr_mutex_t *m) { EnterCriticalSection(m); }
+static void pcr_mutex_unlock(pcr_mutex_t *m) { LeaveCriticalSection(m); }
+#else
+typedef pthread_mutex_t pcr_mutex_t;
+static void pcr_mutex_init(pcr_mutex_t *m) { pthread_mutex_init(m, NULL); }
+static void pcr_mutex_destroy(pcr_mutex_t *m) { pthread_mutex_destroy(m); }
+static void pcr_mutex_lock(pcr_mutex_t *m) { pthread_mutex_lock(m); }
+static void pcr_mutex_unlock(pcr_mutex_t *m) { pthread_mutex_unlock(m); }
+#endif
+
+/* Bookkeeping only -- see "what's shared, and what isn't" in
+ * docs/CONCURRENCY.md. Neither the op registry nor the plugin table needs
+ * a lock: both are write-once, before polycall_runtime_serve() is ever
+ * called, and read-only for its entire duration. */
+static pcr_mutex_t g_conn_mutex;
+static int g_active_conns = 0;
+
+/* True if at least one byte is waiting on `s` within `ms`. Used only to
+ * poll for shutdown between frames on an otherwise idle connection; once
+ * this returns true, the proven, unchanged, blocking pcr_recv() below
+ * reads that frame to completion, so a frame that is genuinely slow to
+ * arrive is never abandoned mid-read. */
+static int readable_within(pcr_sock_t s, unsigned ms)
+{
+    fd_set rf;
+    struct timeval tv;
+    FD_ZERO(&rf);
+    FD_SET(s, &rf);
+    tv.tv_sec = 0;
+    tv.tv_usec = (long)ms * 1000;
+#if defined(_WIN32)
+    return select(0, &rf, NULL, NULL, &tv) > 0;
+#else
+    return select((int)s + 1, &rf, NULL, NULL, &tv) > 0;
+#endif
+}
+
+/* ================================================================== */
 /* serve loop                                                          */
 /* ================================================================== */
 
@@ -501,11 +555,15 @@ static void handle_client(polycall_runtime_t *rt, pcr_sock_t c,
 {
     for (;;) {
         pcr_frame_t f;
-        int rc = pcr_recv(c, &f, 0);
         char *reply = NULL;
         uint8_t rtype = PCR_T_RESPONSE;
         uint32_t sclass = 0;
+        int rc;
 
+        while (!g_stop && !readable_within(c, 200)) { }
+        if (g_stop) return;
+
+        rc = pcr_recv(c, &f, 0);
         if (rc != 0) { pcr_frame_free(&f); return; }
 
         if (f.type == PCR_T_REQUEST) {
@@ -533,6 +591,101 @@ static void handle_client(polycall_runtime_t *rt, pcr_sock_t c,
     }
 }
 
+typedef struct {
+    polycall_runtime_t *rt;
+    pcr_sock_t sock;
+    const char *auth_token;
+} conn_ctx_t;
+
+static void run_connection(conn_ctx_t *ctx)
+{
+    handle_client(ctx->rt, ctx->sock, ctx->auth_token);
+    pcr_close(ctx->sock);
+    pcr_mutex_lock(&g_conn_mutex);
+    g_active_conns--;
+    pcr_mutex_unlock(&g_conn_mutex);
+    free(ctx);
+}
+
+#if defined(_WIN32)
+static unsigned __stdcall conn_thread_main(void *arg)
+{
+    run_connection((conn_ctx_t *)arg);
+    return 0;
+}
+#else
+static void *conn_thread_main(void *arg)
+{
+    run_connection((conn_ctx_t *)arg);
+    return NULL;
+}
+#endif
+
+/* Called once per accepted connection, from the accept loop's thread. It
+ * never blocks on the connection itself: either a detached thread now owns
+ * `c` (and will close it and decrement g_active_conns when done), or `c` is
+ * refused here and closed immediately -- RT_MAX_CONNS backpressure, or a
+ * thread failed to start. Either way the accept loop is free to go straight
+ * back to accept() for the next connection. */
+static void spawn_connection(polycall_runtime_t *rt, pcr_sock_t c,
+                             const char *auth_token)
+{
+    conn_ctx_t *ctx;
+
+    pcr_mutex_lock(&g_conn_mutex);
+    if (g_active_conns >= RT_MAX_CONNS) {
+        pcr_mutex_unlock(&g_conn_mutex);
+        pcr_close(c);
+        return;
+    }
+    g_active_conns++;
+    pcr_mutex_unlock(&g_conn_mutex);
+
+    ctx = malloc(sizeof *ctx);
+    if (!ctx) {
+        pcr_mutex_lock(&g_conn_mutex);
+        g_active_conns--;
+        pcr_mutex_unlock(&g_conn_mutex);
+        pcr_close(c);
+        return;
+    }
+    ctx->rt = rt;
+    ctx->sock = c;
+    ctx->auth_token = auth_token;
+
+#if defined(_WIN32)
+    {
+        HANDLE h = (HANDLE)_beginthreadex(NULL, 0, conn_thread_main, ctx, 0, NULL);
+        if (h) {
+            CloseHandle(h);   /* detach: the thread runs on regardless */
+        } else {
+            pcr_mutex_lock(&g_conn_mutex);
+            g_active_conns--;
+            pcr_mutex_unlock(&g_conn_mutex);
+            free(ctx);
+            pcr_close(c);
+        }
+    }
+#else
+    {
+        pthread_t tid;
+        pthread_attr_t attr;
+        int ok;
+        pthread_attr_init(&attr);
+        pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+        ok = (pthread_create(&tid, &attr, conn_thread_main, ctx) == 0);
+        pthread_attr_destroy(&attr);
+        if (!ok) {
+            pcr_mutex_lock(&g_conn_mutex);
+            g_active_conns--;
+            pcr_mutex_unlock(&g_conn_mutex);
+            free(ctx);
+            pcr_close(c);
+        }
+    }
+#endif
+}
+
 int polycall_runtime_serve(polycall_runtime_t *rt, const char *bind_host,
                            uint16_t port, const char *auth_token,
                            polycall_on_bound_fn on_bound, void *on_bound_user)
@@ -546,6 +699,8 @@ int polycall_runtime_serve(polycall_runtime_t *rt, const char *bind_host,
 
     if (!rt) return -1;
     g_stop = 0;
+    g_active_conns = 0;
+    pcr_mutex_init(&g_conn_mutex);
     pcr_net_init();
 
     ls = socket(AF_INET, SOCK_STREAM, 0);
@@ -599,12 +754,24 @@ int polycall_runtime_serve(polycall_runtime_t *rt, const char *bind_host,
 
         c = accept(ls, NULL, NULL);
         if (c == PCR_BAD_SOCKET) continue;
-        handle_client(rt, c, auth_token);
-        pcr_close(c);
+        spawn_connection(rt, c, auth_token);
     }
 
-    /* cleanup here, in normal execution -- never in the signal handler */
+    /* cleanup here, in normal execution -- never in the signal handler.
+     * Stop accepting first, then wait for every in-flight connection's
+     * thread to actually finish: the caller (polycall_cmd_run()) destroys
+     * `rt` the instant this function returns, so a thread still touching
+     * `rt` after that would be a use-after-free. See docs/CONCURRENCY.md. */
     pcr_close(ls);
+    for (;;) {
+        int n;
+        pcr_mutex_lock(&g_conn_mutex);
+        n = g_active_conns;
+        pcr_mutex_unlock(&g_conn_mutex);
+        if (n <= 0) break;
+        sleep_ms(50);
+    }
+    pcr_mutex_destroy(&g_conn_mutex);
     pcr_net_shutdown();
     return 0;
 }

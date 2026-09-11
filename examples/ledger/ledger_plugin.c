@@ -6,11 +6,13 @@
  *   ledger.transfer  NOT idempotent  {"from","to","amount"} -> {"from","to","amount","from_balance","to_balance"}
  *
  * Accounts and balances are a fixed, deterministic, in-memory table (this is
- * a demo, not a real ledger): alice=100, bob=50, carol=0. The runtime is
- * single-threaded today (one connection at a time; see docs/RPC.md), so the
- * plain in-memory update below is safe as written -- it is not a general
- * concurrency pattern and would need a lock if P4 (runtime concurrency) adds
- * multiple simultaneous connections.
+ * a demo, not a real ledger): alice=100, bob=50, carol=0. The runtime serves
+ * one thread per connection (docs/CONCURRENCY.md), so this table -- unlike
+ * the runtime's own read-only operation registry -- is genuinely shared,
+ * mutable state that more than one client can reach at the same instant;
+ * every read and every transfer below runs under a single plugin-wide
+ * mutex so concurrent transfers neither lose an update nor observe another
+ * transfer half-applied.
  *
  * Input parsing is intentionally minimal, hand-rolled field extraction (not
  * a JSON parser): plugins only depend on include/polycall_runtime.h, and the
@@ -27,9 +29,24 @@
 
 #if defined(_WIN32)
 #  define PLUGIN_EXPORT __declspec(dllexport)
+#  include <windows.h>
+typedef CRITICAL_SECTION ledger_lock_t;
+static void ledger_lock_init(ledger_lock_t *l) { InitializeCriticalSection(l); }
+static void ledger_lock(ledger_lock_t *l) { EnterCriticalSection(l); }
+static void ledger_unlock(ledger_lock_t *l) { LeaveCriticalSection(l); }
 #else
 #  define PLUGIN_EXPORT __attribute__((visibility("default")))
+#  include <pthread.h>
+typedef pthread_mutex_t ledger_lock_t;
+static void ledger_lock_init(ledger_lock_t *l) { pthread_mutex_init(l, NULL); }
+static void ledger_lock(ledger_lock_t *l) { pthread_mutex_lock(l); }
+static void ledger_unlock(ledger_lock_t *l) { pthread_mutex_unlock(l); }
 #endif
+
+/* Guards every read and write of g_accounts below. Initialized once from
+ * polycall_ops_register(), which the runtime calls exactly once per `--load`
+ * of this plugin, before it starts serving any connection. */
+static ledger_lock_t g_lock;
 
 /* ---- tiny field extraction over a flat, compact JSON object ------------ */
 
@@ -101,13 +118,16 @@ static polycall_op_status_t op_ledger_balance(
         snprintf(em, em_cap, "ledger.balance requires a string 'account'");
         return POLYCALL_OP_ERR_INPUT;
     }
+    ledger_lock(&g_lock);
     a = find_account(account);
     if (!a) {
+        ledger_unlock(&g_lock);
         snprintf(ec, ec_cap, "account.unknown");
         snprintf(em, em_cap, "no account '%s'", account);
         return POLYCALL_OP_ERR_NOTFOUND;
     }
     snprintf(out, out_cap, "{\"account\":\"%s\",\"balance\":%ld}", a->name, a->balance);
+    ledger_unlock(&g_lock);
     return POLYCALL_OP_OK;
 }
 
@@ -144,14 +164,21 @@ static polycall_op_status_t op_ledger_transfer(
         snprintf(em, em_cap, "'from' and 'to' must differ");
         return POLYCALL_OP_ERR_INPUT;
     }
+    /* Account lookup, the funds check, and the mutation all run under one
+     * critical section: two concurrent transfers out of the same account
+     * must see each other's effect, not both check a stale balance and
+     * both succeed against money that isn't there twice over. */
+    ledger_lock(&g_lock);
     from = find_account(from_name);
     to = find_account(to_name);
     if (!from || !to) {
+        ledger_unlock(&g_lock);
         snprintf(ec, ec_cap, "account.unknown");
         snprintf(em, em_cap, "no account '%s'", from ? to_name : from_name);
         return POLYCALL_OP_ERR_NOTFOUND;
     }
     if (from->balance < amount) {
+        ledger_unlock(&g_lock);
         snprintf(ec, ec_cap, "funds.insufficient");
         snprintf(em, em_cap, "'%s' has %ld, cannot send %ld",
                  from->name, from->balance, amount);
@@ -166,6 +193,7 @@ static polycall_op_status_t op_ledger_transfer(
              "{\"from\":\"%s\",\"to\":\"%s\",\"amount\":%ld,"
              "\"from_balance\":%ld,\"to_balance\":%ld}",
              from->name, to->name, amount, from->balance, to->balance);
+    ledger_unlock(&g_lock);
     return POLYCALL_OP_OK;
 }
 
@@ -187,6 +215,7 @@ polycall_ops_register(polycall_runtime_t *rt, uint32_t abi_major)
     if (abi_major != (uint32_t)POLYCALL_RUNTIME_ABI_VERSION) {
         return POLYCALL_PLUGIN_ABI_MISMATCH;
     }
+    ledger_lock_init(&g_lock);
     if (polycall_runtime_register(rt, &balance_desc) != 0) return POLYCALL_PLUGIN_ERROR;
     if (polycall_runtime_register(rt, &transfer_desc) != 0) return POLYCALL_PLUGIN_ERROR;
     return POLYCALL_PLUGIN_OK;

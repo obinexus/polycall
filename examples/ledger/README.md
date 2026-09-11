@@ -34,9 +34,14 @@ It starts the runtime with `ledger_plugin` loaded, drives two independent
 transfers (different amounts, so the output makes it obvious the second is
 its own round trip and not a retried copy of the first -- `call` never
 retries, docs/RPC.md), shows an insufficient-funds transfer being rejected
-without moving anything, and then repeats a query/transfer from whichever of
-the Node.js, Python and Go `polycall_rpc` v1 clients are on `PATH` (skipping,
-not failing, on a missing toolchain -- see `docs/CONFORMANCE.md` for why).
+without moving anything, repeats a query/transfer from whichever of the
+Node.js, Python and Go `polycall_rpc` v1 clients are on `PATH` (skipping, not
+failing, on a missing toolchain -- see `docs/CONFORMANCE.md` for why), and
+finally launches `LEDGER_CONCURRENCY` (default 8) simultaneous clients
+against the same running runtime -- one round of concurrent `debug.sleep`
+calls that only finish quickly if the runtime truly serves them in parallel,
+and one round of concurrent `ledger.transfer` calls whose before/after
+balances prove no update was lost (`docs/CONCURRENCY.md`, `docs/TODO.md` P4).
 
 ## Windows
 
