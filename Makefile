@@ -161,6 +161,21 @@ $(C_PROVIDER): bindings/c-provider/example_provider.c $(STATIC_LIB) | $(LIB_DIR)
 	$(CC) $(ALL_CPPFLAGS) $(ALL_CFLAGS) $(SHARED_LDFLAGS) -o $@ $< \
 	  $(STATIC_LIB) $(LDFLAGS) $(ALL_LDLIBS)
 
+# fixture operation plugin for `polycall run --load` (P1): the normal build
+# and a deliberately-mismatched-ABI build from the same source file.
+FIXTURE_PLUGIN     := $(LIB_DIR)/fixture_ops_plugin.$(SHARED_EXT)
+FIXTURE_PLUGIN_BAD := $(LIB_DIR)/fixture_ops_plugin_bad_abi.$(SHARED_EXT)
+.PHONY: plugin-fixture
+plugin-fixture: $(FIXTURE_PLUGIN) $(FIXTURE_PLUGIN_BAD)
+
+$(FIXTURE_PLUGIN): tests/fixtures/plugins/fixture_ops_plugin.c $(STATIC_LIB) | $(LIB_DIR)
+	$(CC) $(ALL_CPPFLAGS) $(ALL_CFLAGS) $(SHARED_LDFLAGS) -o $@ $< \
+	  $(STATIC_LIB) $(LDFLAGS) $(ALL_LDLIBS)
+
+$(FIXTURE_PLUGIN_BAD): tests/fixtures/plugins/fixture_ops_plugin.c $(STATIC_LIB) | $(LIB_DIR)
+	$(CC) $(ALL_CPPFLAGS) -DFIXTURE_ABI_MAJOR=999 $(ALL_CFLAGS) $(SHARED_LDFLAGS) -o $@ $< \
+	  $(STATIC_LIB) $(LDFLAGS) $(ALL_LDLIBS)
+
 .DEFAULT_GOAL := all
 
 # ---- directories (order-only) ----------------------------------------
@@ -230,7 +245,7 @@ $(EXECUTABLE): $(MAIN_OBJ) $(CLI_OBJS) $(STATIC_LIB) | $(BIN_DIR)
 
 # ---- tests --------------------------------------------------------
 .PHONY: test
-test: cli shared static provider-c
+test: cli shared static provider-c plugin-fixture
 	@BUILD_DIR="$(BUILD_DIR)" CC="$(CC)" EXE_EXT="$(EXE_EXT)" \
 	  SHARED_EXT="$(SHARED_EXT)" IS_WINDOWS="$(IS_WINDOWS)" \
 	  sh tests/run_all.sh

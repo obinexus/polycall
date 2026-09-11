@@ -150,6 +150,14 @@ _run call
 _run call inventory get
 [ "$RC" -eq 2 ] && ok "call without --endpoint -> exit 2" || bad "call without --endpoint (rc=$RC)"
 
+# 20a. run --load: argument handling and fast-fail paths (P1). These never
+# bind a socket, so they return promptly without backgrounding anything --
+# see tests/runtime/plugin.sh for the full load/call/status flow.
+_run run --load
+[ "$RC" -eq 2 ] && ok "run --load with no value -> exit 2" || bad "run --load no value (rc=$RC)"
+_run run --load this/path/does/not/exist.so
+[ "$RC" -eq 4 ] && ok "run --load nonexistent path -> exit 4" || bad "run --load nonexistent (rc=$RC)"
+
 # 20b. bindings list is implemented (Stage 2) -> exit 0, names the c provider
 _run bindings list
 { [ "$RC" -eq 0 ] && echo "$STDOUT" | grep -q "^  c "; } \

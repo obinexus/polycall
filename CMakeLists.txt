@@ -165,6 +165,27 @@ set_target_properties(example_c_provider PROPERTIES
   LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 
+# ---------------------------------------------------------------- fixture operation plugin
+# `polycall run --load`. Same source built twice: normal (matches the
+# runtime's ABI major) and deliberately mismatched, to exercise both paths.
+add_library(fixture_ops_plugin MODULE tests/fixtures/plugins/fixture_ops_plugin.c)
+target_link_libraries(fixture_ops_plugin PRIVATE polycall_static)
+target_compile_definitions(fixture_ops_plugin PRIVATE ${_os_defs})
+set_target_properties(fixture_ops_plugin PROPERTIES
+  OUTPUT_NAME fixture_ops_plugin
+  PREFIX ""
+  LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
+
+add_library(fixture_ops_plugin_bad_abi MODULE tests/fixtures/plugins/fixture_ops_plugin.c)
+target_link_libraries(fixture_ops_plugin_bad_abi PRIVATE polycall_static)
+target_compile_definitions(fixture_ops_plugin_bad_abi PRIVATE ${_os_defs} FIXTURE_ABI_MAJOR=999)
+set_target_properties(fixture_ops_plugin_bad_abi PROPERTIES
+  OUTPUT_NAME fixture_ops_plugin_bad_abi
+  PREFIX ""
+  LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
+
 # ---------------------------------------------------------------- tests
 include(CTest)
 if(BUILD_TESTING)

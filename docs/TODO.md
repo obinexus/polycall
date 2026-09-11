@@ -69,21 +69,25 @@ unified ABI flags → register with the C DRIVER daemon. Today `run` serves only
 (`inventory.get`, `debug.echo`, `debug.sleep`), so adding an operation means editing C and rebuilding
 the binary.
 
-- [ ] Declare the exported entry point in `include/polycall_runtime.h`:
+- [x] Declare the exported entry point in `include/polycall_runtime.h`:
   ```c
   POLYCALL_API int POLYCALL_CALL
   polycall_ops_register(polycall_runtime_t *rt, uint32_t abi_major);
   ```
-- [ ] Implement `polycall run --load PATH` (repeatable) in `src/cli/cmd_runtime.c`: `dlopen` / `LoadLibrary`, resolve the symbol, check the ABI major version, call register
-- [ ] Map failures onto the existing exit contract: an unloadable library, missing symbol or ABI mismatch → exit 4
-- [ ] Decide and document what happens when two plugins register the same `service.operation` (refuse vs last-wins)
-- [ ] Unload libraries in the normal shutdown path, never in a signal handler (same rule as `docs/RPC.md`)
-- [ ] Loaded operations appear in `polycall status` (`describe`) with schema hints and the `idempotent` flag
-- [ ] Update the `docs/CLI.md` command table and help text, and add CLI contract tests for the new flag
-- [ ] Add a fixture plugin under `tests/fixtures/plugins/`; `tests/runtime/` covers load, call, ABI mismatch and missing symbol
+  - Declared as the `polycall_ops_register_fn` typedef (the plugin, not the host, implements the symbol -- matches the existing `polycall_config_provider_v1_fn` convention in `polycall_provider.h`), plus `POLYCALL_PLUGIN_OK` / `POLYCALL_PLUGIN_ABI_MISMATCH` / `POLYCALL_PLUGIN_ERROR` return codes and `polycall_runtime_load_plugin()`.
+- [x] Implement `polycall run --load PATH` (repeatable) in `src/cli/cmd_runtime.c`: `dlopen` / `LoadLibrary`, resolve the symbol, check the ABI major version, call register
+- [x] Map failures onto the existing exit contract: an unloadable library, missing symbol or ABI mismatch → exit 4
+- [x] Decide and document what happens when two plugins register the same `service.operation` (refuse vs last-wins)
+  - **Decision: refuse.** `polycall_runtime_register()` already rejects a duplicate `service.operation` (built-in vs. plugin, or plugin vs. plugin); the fixture plugin propagates that failure as `POLYCALL_PLUGIN_ERROR`. Documented in `docs/PLUGINS.md`.
+- [x] Unload libraries in the normal shutdown path, never in a signal handler (same rule as `docs/RPC.md`)
+- [x] Loaded operations appear in `polycall status` (`describe`) with schema hints and the `idempotent` flag
+- [x] Update the `docs/CLI.md` command table and help text, and add CLI contract tests for the new flag
+- [x] Add a fixture plugin under `tests/fixtures/plugins/`; `tests/runtime/` covers load, call, ABI mismatch and missing symbol
 - **Acceptance:** the fixture plugin is callable from the C CLI and the Node and Python clients with no core rebuild, on Linux and Windows.
+  - **Done 2026-09-11.** Verified on Windows (TDM-GCC, both Make and CMake) and Linux (WSL2, GCC 15.2, both Make and CMake): `tests/runtime/plugin.sh`, 11/11 on Linux (C CLI + Node client + Python client all get `{"message":"hello, world"}` from `demo.greet`, byte-identical), 10/11 on Windows (Python NOT RUN — no interpreter on that host; C CLI + Node client both pass there too). Also covers: nonexistent plugin path, a real library missing `polycall_ops_register` (reused `example_provider`), and the deliberately ABI-mismatched build — each fails fast with exit 4 and no socket bound.
+  - While verifying `status`/`describe`, found and fixed two pre-existing bugs it depended on (both predate this TODO, never caught because nothing asserted on `describe`'s content): (1) the `status` control request's payload length was hardcoded to 20 bytes for a 21-byte JSON literal, silently truncating it to invalid JSON, so `describe` always fell through to "unknown control action"; (2) the `describe` reply spliced operation schema-hint strings (themselves containing literal `"` characters, e.g. `{"item_id":"string"}`) directly into an already-quoted JSON string without escaping, corrupting the whole reply. Both fixed in `src/cli/cmd_runtime.c` / `src/runtime/runtime.c`.
 
-**Open decision:** whether `Polycallfile` gains a plugin key. `docs/CONFIGURATION_STANDARD.md` gives topology to `Polycallfile`, so decide after the CLI flag lands.
+**Open decision:** whether `Polycallfile` gains a plugin key. `docs/CONFIGURATION_STANDARD.md` gives topology to `Polycallfile`, so decide after the CLI flag lands. **Still open** — `--load` today is CLI-only, by design (P1 didn't require a config-file surface); revisit once there's a concrete need for plugin lists to persist across invocations.
 
 ---
 

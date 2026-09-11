@@ -71,6 +71,65 @@ polycall_runtime_destroy(polycall_runtime_t *rt);
 POLYCALL_API int POLYCALL_CALL
 polycall_runtime_register(polycall_runtime_t *rt, const polycall_op_desc_t *desc);
 
+/* ================================================================== */
+/* operation plugins (`polycall run --load PATH`, repeatable)          */
+/* ================================================================== */
+
+/*
+ * Contract implemented by an operation plugin: a shared library loaded
+ * explicitly via `polycall run --load PATH`. Only the exact path given is
+ * loaded -- parent directories are never scanned.
+ *
+ * The plugin exports exactly one symbol, matching this signature:
+ *
+ *   int polycall_ops_register(polycall_runtime_t *rt, uint32_t abi_major);
+ *
+ * `abi_major` is the host's POLYCALL_RUNTIME_ABI_VERSION. The plugin must
+ * compare it against the value it was itself compiled against (its own
+ * POLYCALL_RUNTIME_ABI_VERSION) and refuse to register on a mismatch. Inside
+ * a compatible call, register operations with polycall_runtime_register().
+ *
+ * Return POLYCALL_PLUGIN_OK on success.
+ * Return POLYCALL_PLUGIN_ABI_MISMATCH when abi_major is not what the plugin
+ * expects -- the loader reports this distinctly from other failures.
+ * Return POLYCALL_PLUGIN_ERROR for any other registration failure (for
+ * example, polycall_runtime_register() itself refuses a duplicate
+ * service.operation -- registering the same service.operation twice, whether
+ * from two plugins or a plugin and a built-in, is always refused, never
+ * "last one wins"; see docs/PLUGINS.md).
+ *
+ * A non-zero return rejects the WHOLE plugin: none of its operations are
+ * served, and `run --load` exits with POLYCALL_EXIT_UNSUPPORTED (4).
+ */
+#define POLYCALL_PLUGIN_OK           0
+#define POLYCALL_PLUGIN_ABI_MISMATCH 1
+#define POLYCALL_PLUGIN_ERROR        2
+
+typedef int (POLYCALL_CALL *polycall_ops_register_fn)(
+    polycall_runtime_t *rt, uint32_t abi_major);
+
+/*
+ * Load one plugin from an explicit path: open the library, resolve
+ * polycall_ops_register, call it with this build's ABI major, and register
+ * whatever it adds. `err`/`err_cap` (may be NULL/0) receive a one-line
+ * diagnostic on failure. The library is kept open (even on a registration
+ * failure) and is only ever unloaded by polycall_runtime_destroy(), in
+ * normal execution -- never from a signal handler.
+ *
+ * Returns POLYCALL_PLUGIN_OK, POLYCALL_PLUGIN_ABI_MISMATCH, or
+ * POLYCALL_PLUGIN_ERROR (the last also covers "cannot open the library" and
+ * "missing polycall_ops_register").
+ */
+POLYCALL_API int POLYCALL_CALL
+polycall_runtime_load_plugin(polycall_runtime_t *rt, const char *path,
+                             char *err, size_t err_cap);
+
+/* `polycall status` (control action "describe") reports every registered
+ * operation -- built-in or plugin -- through the same list built by
+ * polycall_runtime_register(), so a loaded plugin's operations appear there
+ * automatically with their schema hints and idempotent flag; nothing extra
+ * is needed at the plugin-loading call site for that to happen. */
+
 /* Called once, right after bind/listen and before the accept loop, with the
  * actually-bound "host:port". Lets a supervisor learn an ephemeral port. */
 typedef void (POLYCALL_CALL *polycall_on_bound_fn)(const char *endpoint,

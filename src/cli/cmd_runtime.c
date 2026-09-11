@@ -47,6 +47,8 @@ static int split_endpoint(const char *ep, char *host, size_t hostcap,
 
 /* ---- local option scan -------------------------------------------- */
 
+#define RARGS_MAX_LOAD 16
+
 typedef struct {
     const char *endpoint;
     const char *endpoint_file;   /* run: write the resolved endpoint here */
@@ -54,6 +56,8 @@ typedef struct {
     const char *input_file;
     const char *input_value;
     long deadline_ms;
+    const char *load_paths[RARGS_MAX_LOAD];  /* run --load PATH, repeatable */
+    int load_count;
     const char *pos[8];
     int npos;
 } rargs_t;
@@ -89,6 +93,11 @@ static int scan_rargs(const polycall_invocation_t *inv, rargs_t *a, const char *
         else if (!strcmp(name, "--input"))      { NEEDV("--input");      a->input_file = val; }
         else if (!strcmp(name, "--input-value")) { NEEDV("--input-value"); a->input_value = val; }
         else if (!strcmp(name, "--deadline-ms")) { NEEDV("--deadline-ms"); a->deadline_ms = strtol(val, NULL, 10); }
+        else if (!strcmp(name, "--load")) {
+            NEEDV("--load");
+            if (a->load_count >= RARGS_MAX_LOAD) { *bad = "--load"; return -1; }
+            a->load_paths[a->load_count++] = val;
+        }
         else { *bad = t; return -1; }
         #undef NEEDV
     }
@@ -160,6 +169,35 @@ int polycall_cmd_run(const polycall_invocation_t *inv)
         return POLYCALL_EXIT_RUNTIME;
     }
 
+    /* Load plugins before binding anything: an unloadable library, a
+     * missing polycall_ops_register, or an ABI mismatch fails run fast,
+     * with no socket ever opened. */
+    {
+        int i;
+        for (i = 0; i < a.load_count; ++i) {
+            char err[256];
+            int prc = polycall_runtime_load_plugin(rt, a.load_paths[i],
+                                                    err, sizeof err);
+            if (prc != POLYCALL_PLUGIN_OK) {
+                polycall_runtime_destroy(rt);
+                if (inv->g->format == POLYCALL_FMT_JSON) {
+                    polycall_json_result(inv->out, "run", false, NULL,
+                        prc == POLYCALL_PLUGIN_ABI_MISMATCH
+                            ? "plugin.abi_mismatch" : "plugin.load_failed",
+                        err, "check the plugin was built against this "
+                             "runtime's ABI major version");
+                } else {
+                    fprintf(inv->err, "polycall run: %s\n", err);
+                }
+                return POLYCALL_EXIT_UNSUPPORTED;
+            }
+            if (inv->g->format != POLYCALL_FMT_JSON) {
+                fprintf(inv->out, "polycall run: loaded plugin %s\n",
+                        a.load_paths[i]);
+            }
+        }
+    }
+
     signal(SIGINT, on_signal);
 #ifdef SIGTERM
     signal(SIGTERM, on_signal);
@@ -219,8 +257,16 @@ int polycall_cmd_status(const polycall_invocation_t *inv)
         return rusage(inv, "invalid --endpoint", a.endpoint);
     }
 
-    rc = pcr_roundtrip(host, port, PCR_T_CONTROL,
-                       "{\"action\":\"describe\"}", 20, &rep, 3000);
+    {
+        /* Fixed-length literal instead of a hardcoded byte count: a
+         * hand-counted length here previously truncated the payload
+         * ({"action":"describe"} is 21 bytes, not 20), producing an
+         * unterminated-JSON control request that always fell through to
+         * "unknown control action". */
+        static const char req[] = "{\"action\":\"describe\"}";
+        rc = pcr_roundtrip(host, port, PCR_T_CONTROL, req,
+                           (uint32_t)(sizeof req - 1), &rep, 3000);
+    }
     if (rc != 0) {
         if (inv->g->format == POLYCALL_FMT_JSON) {
             polycall_json_result(inv->out, "status", false, NULL, "transport",

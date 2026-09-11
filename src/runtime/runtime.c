@@ -15,8 +15,10 @@
 
 #if defined(_WIN32)
 #  include <ws2tcpip.h>
+#  include <windows.h>
 #else
 #  include <arpa/inet.h>
+#  include <dlfcn.h>
 #  include <errno.h>
 #  include <netinet/in.h>
 #  include <sys/select.h>
@@ -26,10 +28,13 @@
 #endif
 
 #define RT_MAX_OPS 32
+#define RT_MAX_PLUGINS 16
 
 struct polycall_runtime {
     polycall_op_desc_t ops[RT_MAX_OPS];
     int op_count;
+    void *plugin_handles[RT_MAX_PLUGINS];
+    int plugin_count;
 };
 
 static volatile sig_atomic_t g_stop = 0;
@@ -151,7 +156,30 @@ polycall_runtime_t *polycall_runtime_create(void)
     return rt;
 }
 
-void polycall_runtime_destroy(polycall_runtime_t *rt) { free(rt); }
+/* Unload every plugin library. Only ever called from here -- normal
+ * execution after polycall_runtime_serve() returns -- never a signal
+ * handler; see polycall_runtime_request_stop(). */
+static void unload_plugins(polycall_runtime_t *rt)
+{
+    int i;
+    for (i = 0; i < rt->plugin_count; ++i) {
+        if (!rt->plugin_handles[i]) continue;
+#if defined(_WIN32)
+        FreeLibrary((HMODULE)rt->plugin_handles[i]);
+#else
+        dlclose(rt->plugin_handles[i]);
+#endif
+        rt->plugin_handles[i] = NULL;
+    }
+    rt->plugin_count = 0;
+}
+
+void polycall_runtime_destroy(polycall_runtime_t *rt)
+{
+    if (!rt) return;
+    unload_plugins(rt);
+    free(rt);
+}
 
 int polycall_runtime_register(polycall_runtime_t *rt, const polycall_op_desc_t *d)
 {
@@ -161,11 +189,91 @@ int polycall_runtime_register(polycall_runtime_t *rt, const polycall_op_desc_t *
     for (i = 0; i < rt->op_count; ++i) {
         if (!strcmp(rt->ops[i].service, d->service) &&
             !strcmp(rt->ops[i].operation, d->operation)) {
-            return -1;   /* duplicate */
+            return -1;   /* duplicate: always refused, never "last wins" */
         }
     }
     rt->ops[rt->op_count++] = *d;
     return 0;
+}
+
+int polycall_runtime_load_plugin(polycall_runtime_t *rt, const char *path,
+                                 char *err, size_t err_cap)
+{
+    polycall_ops_register_fn entry = NULL;
+    void *handle;
+    int rc;
+
+    if (err && err_cap) err[0] = '\0';
+    if (!rt || !path || !*path) {
+        if (err) snprintf(err, err_cap, "no plugin path given");
+        return POLYCALL_PLUGIN_ERROR;
+    }
+    if (rt->plugin_count >= RT_MAX_PLUGINS) {
+        if (err) snprintf(err, err_cap, "too many plugins loaded (max %d)",
+                          RT_MAX_PLUGINS);
+        return POLYCALL_PLUGIN_ERROR;
+    }
+
+#if defined(_WIN32)
+    {
+        wchar_t wpath[1024];
+        int wn = MultiByteToWideChar(CP_UTF8, 0, path, -1, wpath,
+                                     (int)(sizeof wpath / sizeof wpath[0]));
+        if (wn <= 0) {
+            if (err) snprintf(err, err_cap, "cannot widen plugin path");
+            return POLYCALL_PLUGIN_ERROR;
+        }
+        handle = LoadLibraryExW(wpath, NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
+        if (!handle) {
+            if (err) snprintf(err, err_cap,
+                              "cannot load plugin '%s' (error %lu)", path,
+                              (unsigned long)GetLastError());
+            return POLYCALL_PLUGIN_ERROR;
+        }
+        entry = (polycall_ops_register_fn)(void *)
+                GetProcAddress((HMODULE)handle, "polycall_ops_register");
+    }
+#else
+    handle = dlopen(path, RTLD_NOW | RTLD_LOCAL);
+    if (!handle) {
+        if (err) snprintf(err, err_cap, "cannot load plugin '%s': %s", path,
+                          dlerror());
+        return POLYCALL_PLUGIN_ERROR;
+    }
+    *(void **)(&entry) = dlsym(handle, "polycall_ops_register");
+#endif
+
+    if (!entry) {
+        if (err) snprintf(err, err_cap,
+                          "plugin '%s' has no polycall_ops_register", path);
+#if defined(_WIN32)
+        FreeLibrary((HMODULE)handle);
+#else
+        dlclose(handle);
+#endif
+        return POLYCALL_PLUGIN_ERROR;
+    }
+
+    /* Keep the library open even on a registration failure: the plugin may
+     * have partially touched process state, and unloading a library whose
+     * code might still be referenced (e.g. by a handler it half-registered)
+     * is its own hazard. Unload happens only in polycall_runtime_destroy(). */
+    rt->plugin_handles[rt->plugin_count++] = handle;
+
+    rc = entry(rt, (uint32_t)POLYCALL_RUNTIME_ABI_VERSION);
+    if (rc == POLYCALL_PLUGIN_ABI_MISMATCH) {
+        if (err) snprintf(err, err_cap,
+                          "plugin '%s' rejected ABI major %d", path,
+                          POLYCALL_RUNTIME_ABI_VERSION);
+        return POLYCALL_PLUGIN_ABI_MISMATCH;
+    }
+    if (rc != POLYCALL_PLUGIN_OK) {
+        if (err) snprintf(err, err_cap,
+                          "plugin '%s' failed to register its operations "
+                          "(status %d)", path, rc);
+        return POLYCALL_PLUGIN_ERROR;
+    }
+    return POLYCALL_PLUGIN_OK;
 }
 
 static const polycall_op_desc_t *find_op(const polycall_runtime_t *rt,
@@ -310,6 +418,40 @@ static char *dispatch_request(const polycall_runtime_t *rt, const char *payload,
     return resp;
 }
 
+/* generous, fixed reply buffer for ping/shutdown/unknown; describe below
+ * allocates its own, sized to the actual (built-in + plugin) op count. */
+#define CTRL_REPLY_CAP 512
+
+static char *control_reply_describe(const polycall_runtime_t *rt)
+{
+    /* input/output are literal JSON snippets (e.g. {"item_id":"string"}),
+     * so they -- like summary -- must be JSON-string-escaped before being
+     * embedded as a quoted string, not spliced in raw. */
+    size_t cap = 128 + (size_t)rt->op_count * 700;
+    char *r = malloc(cap);
+    size_t w = 0;
+    int i;
+    if (!r) return NULL;
+
+    w += (size_t)snprintf(r + w, cap - w, "{\"ok\":true,\"data\":{\"operations\":[");
+    for (i = 0; i < rt->op_count; ++i) {
+        const polycall_op_desc_t *d = &rt->ops[i];
+        char qs[80], qo[80], qsum[256], qin[300], qout[300];
+        jesc(d->service, qs, sizeof qs);
+        jesc(d->operation, qo, sizeof qo);
+        jesc(d->summary, qsum, sizeof qsum);
+        jesc(d->input_schema, qin, sizeof qin);
+        jesc(d->output_schema, qout, sizeof qout);
+        w += (size_t)snprintf(r + w, cap - w,
+            "%s{\"service\":\"%s\",\"operation\":\"%s\",\"summary\":\"%s\","
+            "\"input\":\"%s\",\"output\":\"%s\",\"idempotent\":%s}",
+            i ? "," : "", qs, qo, qsum, qin, qout,
+            d->idempotent ? "true" : "false");
+    }
+    snprintf(r + w, cap - w, "]}}");
+    return r;
+}
+
 static char *control_reply(const polycall_runtime_t *rt, const char *payload,
                            const char *auth_token, int *want_stop)
 {
@@ -317,39 +459,32 @@ static char *control_reply(const polycall_runtime_t *rt, const char *payload,
     json_value *c = json_parse(payload, strlen(payload), jerr, sizeof jerr);
     const char *action = c ? json_str(json_get(c, "action"), "", NULL) : "";
     const char *tok = c ? json_str(json_get(c, "auth_token"), NULL, NULL) : NULL;
-    char *r = malloc(4096);
+    char *r;
     *want_stop = 0;
+
+    if (!strcmp(action, "describe")) {
+        r = control_reply_describe(rt);
+        json_free(c);
+        return r;
+    }
+
+    r = malloc(CTRL_REPLY_CAP);
     if (!r) { json_free(c); return NULL; }
 
     if (!strcmp(action, "ping")) {
-        snprintf(r, 4096, "{\"ok\":true,\"data\":{\"pong\":true,\"abi\":%d}}",
+        snprintf(r, CTRL_REPLY_CAP, "{\"ok\":true,\"data\":{\"pong\":true,\"abi\":%d}}",
                  POLYCALL_RUNTIME_ABI_VERSION);
-    } else if (!strcmp(action, "describe")) {
-        size_t w = 0;
-        int i;
-        w += (size_t)snprintf(r + w, 4096 - w,
-                              "{\"ok\":true,\"data\":{\"operations\":[");
-        for (i = 0; i < rt->op_count && w < 3600; ++i) {
-            const polycall_op_desc_t *d = &rt->ops[i];
-            w += (size_t)snprintf(r + w, 4096 - w,
-                "%s{\"service\":\"%s\",\"operation\":\"%s\",\"summary\":\"%s\","
-                "\"input\":\"%s\",\"output\":\"%s\",\"idempotent\":%s}",
-                i ? "," : "", d->service, d->operation, d->summary,
-                d->input_schema, d->output_schema,
-                d->idempotent ? "true" : "false");
-        }
-        snprintf(r + w, 4096 - w, "]}}");
     } else if (!strcmp(action, "shutdown")) {
         if (auth_token && *auth_token && (!tok || strcmp(tok, auth_token) != 0)) {
-            snprintf(r, 4096,
+            snprintf(r, CTRL_REPLY_CAP,
                      "{\"ok\":false,\"error\":{\"code\":\"auth.denied\","
                      "\"message\":\"shutdown requires the matching --auth-token\"}}");
         } else {
-            snprintf(r, 4096, "{\"ok\":true,\"data\":{\"stopping\":true}}");
+            snprintf(r, CTRL_REPLY_CAP, "{\"ok\":true,\"data\":{\"stopping\":true}}");
             *want_stop = 1;
         }
     } else {
-        snprintf(r, 4096,
+        snprintf(r, CTRL_REPLY_CAP,
                  "{\"ok\":false,\"error\":{\"code\":\"control.unknown\","
                  "\"message\":\"unknown control action\"}}");
     }

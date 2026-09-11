@@ -67,7 +67,7 @@ Globals are accepted before or after the command tokens, but never after `--`.
 | `config migrate --from-legacy [--language L] --output F` | 2 | legacy effective model -> v2 envelope; refuses to overwrite; reports unmapped keys |
 | `bindings list` | 2 | providers available on this host (c always; node/python if on PATH) |
 | `repl` | 1 | explicit interactive session over this registry |
-| `run --endpoint host:port [--auth-token T] [--endpoint-file F]` | 3 | foreground runtime; port 0 = ephemeral; SIGINT stops it, cleanup in normal code |
+| `run --endpoint host:port [--auth-token T] [--endpoint-file F] [--load PATH ...]` | 3 | foreground runtime; port 0 = ephemeral; SIGINT stops it, cleanup in normal code; `--load` (repeatable) adds operations from a plugin shared library before binding -- see `docs/PLUGINS.md` |
 | `status --endpoint host:port` | 3 | describe registered operations over the control channel; never infers health from a file |
 | `stop --endpoint host:port [--auth-token T]` | 3 | authenticated shutdown; exit 7 on token mismatch, 5 on no runtime |
 | `call SERVICE OPERATION --endpoint host:port [--input F\|- \| --input-value JSON]` | 3 | one round trip, no retry; see `docs/RPC.md` for the exit-code map |
