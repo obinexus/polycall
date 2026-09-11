@@ -5,6 +5,7 @@
 #   - provider equivalence + legacy migration (tests/config/equivalence.sh)
 #   - cross-language runtime roundtrip (tests/runtime/roundtrip.sh)
 #   - operation plugin loader: run --load (tests/runtime/plugin.sh)
+#   - cross-language conformance harness (tests/conformance/run.sh)
 #   - MicroVM strict-mode adapter (tests/microvm/strict_mode.sh)
 #   - three independent C consumers: static link, import-lib link, dlopen
 #
@@ -111,6 +112,10 @@ sh "$ROOT/tests/runtime/roundtrip.sh" "$BIN" "$ROOT" || fail=1
 # ---------------------------------------------------------------- operation plugin loader
 note ""; note "### operation plugin loader: run --load (P1)"
 sh "$ROOT/tests/runtime/plugin.sh" "$BIN" "$ROOT" "$LIBDIR" "$SHARED_EXT" || fail=1
+
+# ---------------------------------------------------------------- cross-language conformance
+note ""; note "### cross-language conformance harness (P2)"
+sh "$ROOT/tests/conformance/run.sh" "$BIN" "$ROOT" "$LIBDIR" "$SHARED_EXT" || fail=1
 
 # ---------------------------------------------------------------- microvm strict mode
 note ""; note "### MicroVM strict-mode adapter (Stage 4, optional follow-up)"
