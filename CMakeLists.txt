@@ -204,6 +204,18 @@ set_target_properties(fixture_ops_plugin_bad_abi PROPERTIES
   LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 
+# ---------------------------------------------------------------- flagship demo (P3)
+# ledger.balance / ledger.transfer, loaded via `polycall run --load` --
+# see examples/ledger/demo.sh.
+add_library(ledger_plugin MODULE examples/ledger/ledger_plugin.c)
+target_link_libraries(ledger_plugin PRIVATE polycall_static)
+target_compile_definitions(ledger_plugin PRIVATE ${_os_defs})
+set_target_properties(ledger_plugin PROPERTIES
+  OUTPUT_NAME ledger_plugin
+  PREFIX ""
+  LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
+
 # ---------------------------------------------------------------- tests
 include(CTest)
 if(BUILD_TESTING)

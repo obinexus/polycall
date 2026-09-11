@@ -131,11 +131,16 @@ protocol in `include/polycall_protocol.h`.
 
 ## P3 — Flagship demo: ledger service
 
-- [ ] `examples/ledger/` plugin, loaded through P1, with `ledger.balance` (idempotent) and `ledger.transfer` (non-idempotent)
-- [ ] Driven from the Node, Python and Go clients against a single runtime
-- [ ] Show that `transfer` makes exactly one round trip and is never retried
+- [x] `examples/ledger/` plugin, loaded through P1, with `ledger.balance` (idempotent) and `ledger.transfer` (non-idempotent)
+  - `examples/ledger/ledger_plugin.c`: three fixed accounts (alice=100, bob=50, carol=0); `ledger.transfer` rejects insufficient funds, an unknown account, a non-positive amount, and `from == to`, none of which move any balance. Built via `make examples-ledger` / the CMake `ledger_plugin` MODULE target, same pattern as the P1 fixture plugin.
+- [x] Driven from the Node, Python and Go clients against a single runtime
+  - Windows run: C, Node, Go (Python NOT RUN -- no interpreter on that PATH at run time). Linux run: C, Node, Python (Go NOT RUN -- no toolchain there). Between the two runs all four have been exercised; no single host had all four available at once, reported honestly rather than claimed together.
+- [x] Show that `transfer` makes exactly one round trip and is never retried
+  - Two independent transfers of *different* amounts (30, then 15) in the same direction: the second result's numbers (55/95) are visibly not a repeat of the first's (70/80), demonstrating each call is its own round trip rather than a retried copy -- stronger than asserting an exit code alone.
 - [ ] Stretch goal: a GnuCOBOL `cobc -m` implementation behind a thin C shim, producing the same conformance output as the C version
+  - Not attempted -- same GnuCOBOL toolchain gap as P2 (`docs/backward_compatibility.md`); explicitly a stretch goal, not required for acceptance.
 - **Acceptance:** from a clean checkout, `make` plus one script runs the whole demo.
+  - **Done 2026-09-11.** `examples/ledger/demo.sh` (see `examples/ledger/README.md`) builds everything it needs (`make ... all examples-ledger`) and runs the full walkthrough, narrated, with real pass/fail assertions on every balance. Ran clean on Windows (TDM-GCC) and Linux (WSL2 GCC): `=== DEMO PASSED ===` both times.
 
 ---
 

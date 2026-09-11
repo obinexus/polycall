@@ -176,6 +176,16 @@ $(FIXTURE_PLUGIN_BAD): tests/fixtures/plugins/fixture_ops_plugin.c $(STATIC_LIB)
 	$(CC) $(ALL_CPPFLAGS) -DFIXTURE_ABI_MAJOR=999 $(ALL_CFLAGS) $(SHARED_LDFLAGS) -o $@ $< \
 	  $(STATIC_LIB) $(LDFLAGS) $(ALL_LDLIBS)
 
+# flagship demo plugin (P3): ledger.balance / ledger.transfer, loaded via
+# `polycall run --load` -- see examples/ledger/demo.sh.
+LEDGER_PLUGIN := $(LIB_DIR)/ledger_plugin.$(SHARED_EXT)
+.PHONY: examples-ledger
+examples-ledger: $(LEDGER_PLUGIN)
+
+$(LEDGER_PLUGIN): examples/ledger/ledger_plugin.c $(STATIC_LIB) | $(LIB_DIR)
+	$(CC) $(ALL_CPPFLAGS) $(ALL_CFLAGS) $(SHARED_LDFLAGS) -o $@ $< \
+	  $(STATIC_LIB) $(LDFLAGS) $(ALL_LDLIBS)
+
 .DEFAULT_GOAL := all
 
 # ---- directories (order-only) ----------------------------------------
