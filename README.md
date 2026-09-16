@@ -36,12 +36,40 @@ build/linux-gcc/bin/polycall call inventory get --endpoint 127.0.0.1:<port> \
   --input-value '{"item_id":"widget-a"}'
 ```
 
+![polycall --help](docs/assets/cli-help.png)
+
 See [docs/CLI.md](docs/CLI.md) for the full command reference,
 [docs/NATIVE_CONFIG.md](docs/NATIVE_CONFIG.md) for language-native
 configuration, [docs/RPC.md](docs/RPC.md) for the wire protocol,
 [docs/PLUGINS.md](docs/PLUGINS.md) for loading operations without a core
 rebuild, and [docs/PLATFORM_REPORT.md](docs/PLATFORM_REPORT.md) for exactly
 what has and hasn't been verified on which platform.
+
+### Running as a background daemon
+
+`start --daemon` detaches the runtime into the background and returns
+immediately, printing the detached process's PID:
+
+```powershell
+# Windows
+.\build\windows-cmake\bin\Release\polycall.exe --project-root . --config .\Polycallfile start --daemon
+```
+
+```sh
+# Linux / macOS
+build/linux-gcc/bin/polycall --project-root . --config ./Polycallfile start --daemon
+```
+
+`--project-root` controls where the telemetry sink
+(`.polycall/telemetry.jsonl`) and any relative `--endpoint-file`/`--load`
+paths resolve; `--config` is accepted as a global option here but has no
+effect on `start` itself (it's read by `config validate`/`config show`).
+Learn the daemon's bound address with `--endpoint-file PATH`, and shut it
+down cleanly with `polycall stop --endpoint host:port`. On POSIX this is a
+standard double-fork detach; on Windows, which has no `fork()`, it re-execs
+the same binary with `DETACHED_PROCESS`. See
+[docs/CLI.md](docs/CLI.md#commands) and
+[docs/CHANGELOG.md](docs/CHANGELOG.md) for the full contract.
 
 ## "The future isn't coming—it's here. And it speaks every language."
 
