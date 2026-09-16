@@ -1,5 +1,5 @@
 /*
- * Native (schema v2) config subcommands + the binding inventory.
+ * Native (schema v2) config subcommands.
  *
  *   config validate  --provider <c:LIB | node:MODULE | python:MODULE>
  *   config validate  --envelope <file>
@@ -7,7 +7,6 @@
  *   config show      <same selectors> [--provenance]
  *   config migrate   <src> <Polycallrc.lang>            (legacy form, bridge)
  *   config migrate   --from-legacy [--language L] --output <file>  (v2 form)
- *   bindings list
  *
  * Selecting a provider executes local code. Only the explicitly named module /
  * library is used; parent directories are never scanned. `doctor` never runs
@@ -482,47 +481,5 @@ int polycall_config_migrate_to_v2(const polycall_invocation_t *inv,
             fprintf(inv->out, "all legacy keys mapped into the v2 model.\n");
         }
     }
-    return POLYCALL_EXIT_OK;
-}
-
-/* ---- bindings list ------------------------------------------------- */
-
-static bool on_path(const char *prog)
-{
-#if defined(_WIN32)
-    char cmd[128];
-    snprintf(cmd, sizeof cmd, "where %s >NUL 2>NUL", prog);
-#else
-    char cmd[128];
-    snprintf(cmd, sizeof cmd, "command -v %s >/dev/null 2>&1", prog);
-#endif
-    return system(cmd) == 0;
-}
-
-int polycall_cmd_bindings_list(const polycall_invocation_t *inv)
-{
-    bool node_ok = on_path("node");
-    bool py_ok = on_path("python") || on_path("python3");
-
-    if (inv->g->format == POLYCALL_FMT_JSON) {
-        char body[512];
-        snprintf(body, sizeof body,
-            "{\"providers\":["
-            "{\"kind\":\"c\",\"host\":\"in-process\",\"available\":true},"
-            "{\"kind\":\"node\",\"host\":\"subprocess\",\"available\":%s},"
-            "{\"kind\":\"python\",\"host\":\"subprocess\",\"available\":%s}"
-            "],\"planned\":[\"cpp\",\"typescript\",\"go\",\"java\",\"lua\",\"cobol\"]}",
-            node_ok ? "true" : "false", py_ok ? "true" : "false");
-        polycall_json_result(inv->out, "bindings", true, body, NULL, NULL, NULL);
-        return POLYCALL_EXIT_OK;
-    }
-
-    fprintf(inv->out, "configuration providers:\n");
-    fprintf(inv->out, "  c        in-process   available (LoadLibrary/dlopen of an explicit .so/.dll)\n");
-    fprintf(inv->out, "  node     subprocess   %s\n",
-            node_ok ? "available (node on PATH)" : "unavailable (node not on PATH)");
-    fprintf(inv->out, "  python   subprocess   %s\n",
-            py_ok ? "available (python on PATH)" : "unavailable (python not on PATH)");
-    fprintf(inv->out, "planned (not implemented): cpp, typescript, go, java, lua, cobol\n");
     return POLYCALL_EXIT_OK;
 }

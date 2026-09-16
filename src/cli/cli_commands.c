@@ -171,8 +171,7 @@ static int cmd_doctor(const polycall_invocation_t *inv)
     }
     fprintf(inv->out, "  core context      : %s\n",
             ctx_ok ? "constructs OK" : "FAILED to construct");
-    fprintf(inv->out, "  adapters          : none reported by this build "
-                      "(see 'polycall bindings list')\n");
+    fprintf(inv->out, "  adapters          : none reported by this build\n");
 
     if (failures) {
         fprintf(inv->err,
@@ -267,11 +266,6 @@ static const polycall_subcommand_t CONFIG_SUBS[] = {
       polycall_cmd_config_migrate },
 };
 
-static const polycall_subcommand_t BINDINGS_SUBS[] = {
-    { "list", "report configuration providers actually available on this host",
-      "bindings list", polycall_cmd_bindings_list },
-};
-
 static const polycall_subcommand_t TELEMETRY_SUBS[] = {
     { "emit", "append one GUID + timestamp correlated event to the sink",
       "telemetry emit --event NAME [--service S] [--operation OP]\n"
@@ -306,11 +300,6 @@ static const polycall_command_t COMMANDS[] = {
       "legacy Polycallfile / Polycallrc loader. Selecting a provider executes\n"
       "the explicitly named module only. None of these start the runtime.\n",
       NULL, CONFIG_SUBS, (int)(sizeof CONFIG_SUBS / sizeof CONFIG_SUBS[0]),
-      false, true },
-
-    { "bindings", "report configuration providers",
-      "bindings <subcommand>", NULL,
-      NULL, BINDINGS_SUBS, (int)(sizeof BINDINGS_SUBS / sizeof BINDINGS_SUBS[0]),
       false, true },
 
     { "telemetry", "record and inspect GUID + timestamp correlated events",

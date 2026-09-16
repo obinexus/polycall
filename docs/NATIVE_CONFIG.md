@@ -1,8 +1,8 @@
 # Native configuration (schema v2)
 
 Status: **Stage 2 implemented** for the C, Node and Python providers. C++, Go,
-Java, Lua, TypeScript and COBOL are planned and reported as such by
-`polycall bindings list`.
+Java, Lua, TypeScript and COBOL are not implemented as providers in this CLI;
+client SDKs for those languages are published separately.
 
 ## Model
 

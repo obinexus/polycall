@@ -104,7 +104,6 @@ int polycall_config_cli(int argc, char *argv[]);
 int polycall_cmd_config_validate(const polycall_invocation_t *inv);
 int polycall_cmd_config_show(const polycall_invocation_t *inv);
 int polycall_cmd_config_migrate(const polycall_invocation_t *inv);
-int polycall_cmd_bindings_list(const polycall_invocation_t *inv);
 
 /* runtime dispatch: run/status/stop/call (src/cli/cmd_runtime.c) */
 int polycall_cmd_run(const polycall_invocation_t *inv);

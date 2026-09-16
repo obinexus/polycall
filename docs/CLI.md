@@ -6,8 +6,7 @@ argv parser, exit-code mapping and `--format json` are in place
 schema-v2 selector (`--provider c:LIB | node:MOD | python:MOD`, or
 `--envelope FILE`) and validate through the typed C model; with no selector they
 fall back to the unchanged legacy loader. `config migrate --from-legacy` writes
-a native envelope from the legacy effective model. `bindings list` reports the
-providers actually available on the host. `run` / `status` / `stop` / `call`
+a native envelope from the legacy effective model. `run` / `status` / `stop` / `call`
 drive a real foreground runtime over `polycall_rpc` v1 -- the C CLI and the Node
 / Python clients all reach the same registered C operation; a missing runtime is
 a failure, not a stub, and `call` never retries. `run` and `call` each emit
@@ -67,7 +66,6 @@ Globals are accepted before or after the command tokens, but never after `--`.
 | `config load [language]` | 1 (legacy bridge) | report legacy load order |
 | `config migrate <src> <Polycallrc.lang>` | 1 (legacy bridge) | copy-migrate a legacy file, refuses to overwrite |
 | `config migrate --from-legacy [--language L] --output F` | 2 | legacy effective model -> v2 envelope; refuses to overwrite; reports unmapped keys |
-| `bindings list` | 2 | providers available on this host (c always; node/python if on PATH) |
 | `telemetry emit --event NAME [--service S] [--operation OP] [--status ST] [--detail TEXT] [--correlation-id GUID]` | -- | append one structured event to the sink; prints the correlation id used |
 | `telemetry show [--limit N]` | -- | print the most recent recorded events (default 20, newest last) |
 | `telemetry status` | -- | whether telemetry is enabled and where it writes; never starts the runtime |

@@ -158,10 +158,11 @@ _run run --load
 _run run --load this/path/does/not/exist.so
 [ "$RC" -eq 4 ] && ok "run --load nonexistent path -> exit 4" || bad "run --load nonexistent (rc=$RC)"
 
-# 20b. bindings list is implemented (Stage 2) -> exit 0, names the c provider
+# 20b. bindings command was removed (language bindings are published
+# separately, not vendored/reported by this CLI) -> unknown command, exit 2
 _run bindings list
-{ [ "$RC" -eq 0 ] && echo "$STDOUT" | grep -q "^  c "; } \
-  && ok "bindings list -> exit 0, reports providers" || bad "bindings list (rc=$RC)"
+{ [ "$RC" -eq 2 ] && echo "$STDERR" | grep -q "unknown command"; } \
+  && ok "bindings removed -> exit 2, unknown command" || bad "bindings removed (rc=$RC)"
 
 # 20c. a command that DOES take local options still rejects an unknown one
 _run config validate --nope
