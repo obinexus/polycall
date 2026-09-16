@@ -11,7 +11,7 @@ ok()   { PASS=$((PASS+1)); printf 'PASS  %s\n' "$1"; }
 bad()  { FAIL=$((FAIL+1)); printf 'FAIL  %s\n' "$1"; }
 skip() { SKIP=$((SKIP+1)); printf 'NOT RUN  %s\n' "$1"; }
 
-ADAPTER="$ROOT/bindings/microvm/strict_adapter.mjs"
+ADAPTER="$ROOT/tools/rpc-clients/microvm/strict_adapter.mjs"
 if ! command -v node >/dev/null 2>&1; then
   skip "microvm strict adapter (node not on PATH)"
   echo "--- microvm: 0/0, 1 not run ---"; exit 0

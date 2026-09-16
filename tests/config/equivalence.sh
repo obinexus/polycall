@@ -15,9 +15,10 @@ ok()   { PASS=$((PASS+1)); printf 'PASS  %s\n' "$1"; }
 bad()  { FAIL=$((FAIL+1)); printf 'FAIL  %s\n' "$1"; }
 skip() { SKIP=$((SKIP+1)); printf 'NOT RUN  %s\n' "$1"; }
 
-export POLYCALL_PROVIDER_ROOT="$ROOT"
-NODE_CFG="$ROOT/bindings/node-provider/example.config.mjs"
-PY_CFG="$ROOT/bindings/python-provider/example_config.py"
+NODE_CFG="$ROOT/tests/fixtures/providers/node-provider/example.config.mjs"
+PY_CFG="$ROOT/tests/fixtures/providers/python-provider/example_config.py"
+export POLYCALL_NODE_PROVIDER="$ROOT/tests/fixtures/providers/node-provider/run.mjs"
+export POLYCALL_PYTHON_PROVIDER="$ROOT/tests/fixtures/providers/python-provider/run.py"
 TMP=$(mktemp -d 2>/dev/null || echo "${TMPDIR:-/tmp}/pc_eqv.$$"); mkdir -p "$TMP"
 trap 'rm -rf "$TMP"' EXIT
 
@@ -69,8 +70,7 @@ printf '%s' '{"schema_version":2,"project":{"name":"p"},"services":[{"id":"a","l
 cat > "$TMP/crash.mjs" <<'EOF'
 process.stderr.write("boom\n"); process.exit(1);
 EOF
-POLYCALL_NODE_PROVIDER="$ROOT/bindings/node-provider/run.mjs" \
-  "$PC" config validate --provider "node:$TMP/does-not-exist.mjs" >/dev/null 2>&1
+"$PC" config validate --provider "node:$TMP/does-not-exist.mjs" >/dev/null 2>&1
 rc=$?; [ $rc -eq 3 ] && ok "provider load failure -> exit 3" || bad "provider failure exit ($rc)"
 
 # provider that never terminates -> deadline

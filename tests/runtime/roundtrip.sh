@@ -16,8 +16,8 @@ skip() { SKIP=$((SKIP+1)); printf 'NOT RUN  %s\n' "$1"; }
 TMP=$(mktemp -d 2>/dev/null || echo "${TMPDIR:-/tmp}/pc_rt.$$"); mkdir -p "$TMP"
 EPF="$TMP/endpoint"
 TOK="stage3-token"
-NODE_CLIENT="$ROOT/bindings/node-client/inventory_client.mjs"
-PY_CLIENT="$ROOT/bindings/python-client/inventory_client.py"
+NODE_CLIENT="$ROOT/tools/rpc-clients/node/inventory_client.mjs"
+PY_CLIENT="$ROOT/tools/rpc-clients/python/inventory_client.py"
 
 RUNLOG="$TMP/run.log"
 "$PC" run --endpoint 127.0.0.1:0 --endpoint-file "$EPF" --auth-token "$TOK" \

@@ -112,6 +112,11 @@ int polycall_cmd_status(const polycall_invocation_t *inv);
 int polycall_cmd_stop(const polycall_invocation_t *inv);
 int polycall_cmd_call(const polycall_invocation_t *inv);
 
+/* telemetry emit/show/status (src/cli/cmd_telemetry.c) */
+int polycall_cmd_telemetry_emit(const polycall_invocation_t *inv);
+int polycall_cmd_telemetry_show(const polycall_invocation_t *inv);
+int polycall_cmd_telemetry_status(const polycall_invocation_t *inv);
+
 /* generic exit-4 handler for staged-but-unavailable commands */
 int polycall_cmd_unsupported(const polycall_invocation_t *inv);
 

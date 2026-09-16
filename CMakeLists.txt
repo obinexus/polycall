@@ -66,7 +66,8 @@ set(POLYCALL_CORE_SOURCES
   src/config/legacy_import.c
   src/config/provider_host.c
   src/runtime/rpc_wire.c
-  src/runtime/runtime.c)
+  src/runtime/runtime.c
+  src/runtime/telemetry.c)
 
 set(POLYCALL_CLI_SOURCES
   src/cli/cli.c
@@ -74,6 +75,7 @@ set(POLYCALL_CLI_SOURCES
   src/cli/cli_json.c
   src/cli/cmd_config2.c
   src/cli/cmd_runtime.c
+  src/cli/cmd_telemetry.c
   src/cli/repl.c)
 
 set(POLYCALL_PUBLIC_HEADERS
@@ -82,7 +84,8 @@ set(POLYCALL_PUBLIC_HEADERS
   include/polycall_cli.h
   include/polycall_config2.h
   include/polycall_provider.h
-  include/polycall_runtime.h)
+  include/polycall_runtime.h
+  include/polycall_telemetry.h)
 
 # Parity guard: the Make build compiles the same core list. Keep in sync.
 file(GLOB _disk_core RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "src/*.c" "src/config/*.c" "src/runtime/*.c")
@@ -174,7 +177,7 @@ target_link_libraries(polycall_cli PRIVATE polycall_static)
 # A loadable module exporting polycall_config_provider_v1; self-contained
 # (statically links the builder objects). Loaded by `config validate
 # --provider c:<path>` via polycall_provider_load_c().
-add_library(example_c_provider MODULE bindings/c-provider/example_provider.c)
+add_library(example_c_provider MODULE tests/fixtures/providers/c-provider/example_provider.c)
 target_link_libraries(example_c_provider PRIVATE polycall_static)
 target_compile_definitions(example_c_provider PRIVATE ${_os_defs})
 set_target_properties(example_c_provider PROPERTIES

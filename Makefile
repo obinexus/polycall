@@ -157,7 +157,7 @@ C_PROVIDER := $(LIB_DIR)/example_provider.$(SHARED_EXT)
 .PHONY: provider-c
 provider-c: $(C_PROVIDER)
 
-$(C_PROVIDER): bindings/c-provider/example_provider.c $(STATIC_LIB) | $(LIB_DIR)
+$(C_PROVIDER): tests/fixtures/providers/c-provider/example_provider.c $(STATIC_LIB) | $(LIB_DIR)
 	$(CC) $(ALL_CPPFLAGS) $(ALL_CFLAGS) $(SHARED_LDFLAGS) -o $@ $< \
 	  $(STATIC_LIB) $(LDFLAGS) $(ALL_LDLIBS)
 

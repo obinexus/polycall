@@ -272,6 +272,17 @@ static const polycall_subcommand_t BINDINGS_SUBS[] = {
       "bindings list", polycall_cmd_bindings_list },
 };
 
+static const polycall_subcommand_t TELEMETRY_SUBS[] = {
+    { "emit", "append one GUID + timestamp correlated event to the sink",
+      "telemetry emit --event NAME [--service S] [--operation OP]\n"
+      "                [--status ST] [--detail TEXT] [--correlation-id GUID]",
+      polycall_cmd_telemetry_emit },
+    { "show", "print the most recent recorded events (newest last)",
+      "telemetry show [--limit N]", polycall_cmd_telemetry_show },
+    { "status", "report whether telemetry is enabled and where it writes",
+      "telemetry status", polycall_cmd_telemetry_status },
+};
+
 static const polycall_command_t COMMANDS[] = {
     /* name, summary, usage, help_body, run, subs, sub_count,
        starts_runtime, takes_local_opts */
@@ -300,6 +311,17 @@ static const polycall_command_t COMMANDS[] = {
     { "bindings", "report configuration providers",
       "bindings <subcommand>", NULL,
       NULL, BINDINGS_SUBS, (int)(sizeof BINDINGS_SUBS / sizeof BINDINGS_SUBS[0]),
+      false, true },
+
+    { "telemetry", "record and inspect GUID + timestamp correlated events",
+      "telemetry <subcommand> [args]",
+      "Every event carries a v4 GUID correlation_id and a millisecond UTC\n"
+      "timestamp; 'run' and 'call' emit their own lifecycle events under the\n"
+      "same sink automatically. Disable with POLYCALL_TELEMETRY=off; override\n"
+      "the sink file with POLYCALL_TELEMETRY_LOG (default:\n"
+      "<project-root>/.polycall/telemetry.jsonl). None of these start the\n"
+      "runtime.\n",
+      NULL, TELEMETRY_SUBS, (int)(sizeof TELEMETRY_SUBS / sizeof TELEMETRY_SUBS[0]),
       false, true },
 
     { "repl", "start an explicit interactive session (same command set)",

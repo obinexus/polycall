@@ -91,7 +91,7 @@ check "carol is still at 0 after the rejected transfer" '"balance":0' "$out"
 
 say "the same ledger, driven from every polycall_rpc v1 client available on this host"
 if command -v node >/dev/null 2>&1; then
-  out=$(node "$ROOT/bindings/node-client/polycall_call.mjs" "$EP" ledger balance '{"account":"alice"}')
+  out=$(node "$ROOT/tools/rpc-clients/node/polycall_call.mjs" "$EP" ledger balance '{"account":"alice"}')
   echo "node:   $out"
   check "Node.js sees the same balance" '"balance":55' "$out"
 else
@@ -100,7 +100,7 @@ fi
 
 PY=$(command -v python3 2>/dev/null || command -v python 2>/dev/null || true)
 if [ -n "$PY" ]; then
-  out=$("$PY" "$ROOT/bindings/python-client/polycall_call.py" "$EP" ledger balance '{"account":"bob"}')
+  out=$("$PY" "$ROOT/tools/rpc-clients/python/polycall_call.py" "$EP" ledger balance '{"account":"bob"}')
   echo "python: $out"
   check "Python sees the same balance" '"balance":95' "$out"
 else
@@ -109,7 +109,7 @@ fi
 
 if command -v go >/dev/null 2>&1; then
   GO_BIN="$TMP/polycall-call$EXE_EXT"
-  if ( cd "$ROOT/bindings/go-polycall/rpcv1" && go build -o "$GO_BIN" ./cmd/polycall-call ) >"$TMP/go_build.log" 2>&1; then
+  if ( cd "$ROOT/tools/rpc-clients/go" && go build -o "$GO_BIN" ./cmd/polycall-call ) >"$TMP/go_build.log" 2>&1; then
     out=$("$GO_BIN" "$EP" ledger transfer '{"from":"alice","to":"carol","amount":20}')
     echo "go:     $out"
     check "Go performs a real transfer (alice 55 -> 35, carol 0 -> 20)" '"from_balance":35,"to_balance":20' "$out"

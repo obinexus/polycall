@@ -1,0 +1,10 @@
+title: PolyCall
+description: program-first cross-language runtime -- CLI, RPC v1, native configuration and telemetry docs
+theme: jekyll-theme-cayman
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+exclude:
+  - "*.puml"
+  - "assets/*.svg"

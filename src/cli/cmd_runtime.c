@@ -13,6 +13,7 @@
 #include <string.h>
 
 #include "polycall_runtime.h"
+#include "polycall_telemetry.h"
 #include "../runtime/rpc_wire.h"
 #include "../config/json.h"
 
@@ -132,11 +133,17 @@ typedef struct {
 static void POLYCALL_CALL on_bound(const char *endpoint, void *user)
 {
     bound_ctx_t *bc = user;
+    polycall_telemetry_event_t tev;
     snprintf(bc->endpoint, sizeof bc->endpoint, "%s", endpoint);
     if (bc->endpoint_file) {
         FILE *f = fopen(bc->endpoint_file, "w");
         if (f) { fprintf(f, "%s\n", endpoint); fclose(f); }
     }
+    memset(&tev, 0, sizeof tev);
+    tev.event = "run.bound";
+    tev.detail = endpoint;
+    tev.duration_ns = -1;
+    polycall_telemetry_emit(bc->inv->g->project_root, &tev);
     if (bc->inv->g->format == POLYCALL_FMT_JSON) {
         fprintf(bc->inv->out,
                 "{\"event\":\"listening\",\"endpoint\":\"%s\"}\n", endpoint);
@@ -218,6 +225,14 @@ int polycall_cmd_run(const polycall_invocation_t *inv)
             fprintf(inv->err, "polycall run: could not bind %s\n", host);
         }
         return POLYCALL_EXIT_TRANSPORT;
+    }
+    {
+        polycall_telemetry_event_t tev;
+        memset(&tev, 0, sizeof tev);
+        tev.event = "run.stopped";
+        tev.detail = bc.endpoint;
+        tev.duration_ns = -1;
+        polycall_telemetry_emit(inv->g->project_root, &tev);
     }
     if (inv->g->format == POLYCALL_FMT_JSON) {
         fprintf(inv->out, "{\"event\":\"stopped\",\"endpoint\":\"%s\"}\n",
@@ -430,6 +445,9 @@ int polycall_cmd_call(const polycall_invocation_t *inv)
     uint32_t deadline;
     pcr_frame_t rep;
     int rc, exit_code = POLYCALL_EXIT_OK;
+    char corr[POLYCALL_TELEMETRY_GUID_LEN];
+    uint64_t t0;
+    polycall_telemetry_event_t tev;
 
     if (scan_rargs(inv, &a, &bad) != 0) return rusage(inv, "bad option", bad);
     if (a.npos < 2) {
@@ -441,6 +459,16 @@ int polycall_cmd_call(const polycall_invocation_t *inv)
     if (split_endpoint(a.endpoint, host, sizeof host, &port) != 0 || port == 0) {
         return rusage(inv, "call requires --endpoint host:port", a.endpoint);
     }
+
+    polycall_telemetry_new_guid(corr);
+    t0 = polycall_telemetry_mono_ns();
+    memset(&tev, 0, sizeof tev);
+    tev.event = "call.start";
+    tev.correlation_id = corr;
+    tev.service = service;
+    tev.operation = operation;
+    tev.duration_ns = -1;
+    polycall_telemetry_emit(inv->g->project_root, &tev);
 
     if (a.input_value) {
         input = strdup(a.input_value);
@@ -471,16 +499,23 @@ int polycall_cmd_call(const polycall_invocation_t *inv)
                        &rep, deadline + 1000);
     free(req);
     if (rc != 0) {
+        const char *reason = rc == -3 ? "no reply before the deadline"
+                                       : "could not reach the runtime";
+        memset(&tev, 0, sizeof tev);
+        tev.event = "call.end";
+        tev.correlation_id = corr;
+        tev.service = service;
+        tev.operation = operation;
+        tev.status = "error";
+        tev.detail = reason;
+        tev.duration_ns = (int64_t)(polycall_telemetry_mono_ns() - t0);
+        polycall_telemetry_emit(inv->g->project_root, &tev);
         if (inv->g->format == POLYCALL_FMT_JSON) {
             polycall_json_result(inv->out, "call", false, NULL,
                                  rc == -3 ? "deadline" : "transport",
-                                 rc == -3 ? "no reply before the deadline"
-                                          : "could not reach the runtime",
-                                 a.endpoint);
+                                 reason, a.endpoint);
         } else {
-            fprintf(inv->err, "polycall call: %s\n",
-                    rc == -3 ? "no reply before the deadline"
-                             : "could not reach the runtime");
+            fprintf(inv->err, "polycall call: %s\n", reason);
         }
         return map_transport(rc);
     }
@@ -513,6 +548,16 @@ int polycall_cmd_call(const polycall_invocation_t *inv)
             exit_code = err_code_to_exit(
                 json_str(json_get(json_get(v, "error"), "code"), "", NULL));
         }
+        memset(&tev, 0, sizeof tev);
+        tev.event = "call.end";
+        tev.correlation_id = corr;
+        tev.service = service;
+        tev.operation = operation;
+        tev.status = ok ? "ok" : "error";
+        tev.detail = ok ? NULL
+                        : json_str(json_get(json_get(v, "error"), "code"), "", NULL);
+        tev.duration_ns = (int64_t)(polycall_telemetry_mono_ns() - t0);
+        polycall_telemetry_emit(inv->g->project_root, &tev);
         json_free(v);
     }
     pcr_frame_free(&rep);

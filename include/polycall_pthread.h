@@ -28,6 +28,26 @@ static inline int pthread_mutex_unlock(pthread_mutex_t* mutex) {
     LeaveCriticalSection(mutex);
     return 0;
 }
+
+/* A plain spinlock-based once, not INIT_ONCE/InitOnceExecuteOnce: that API
+ * needs Vista+ headers that not every "supports C11" mingw toolchain
+ * actually declares. InterlockedCompareExchange has been available and
+ * declared unconditionally since Windows 2000. States: 0 = untouched,
+ * 1 = a thread is running init_fn, 2 = done. */
+typedef volatile LONG pthread_once_t;
+#define PTHREAD_ONCE_INIT 0
+
+static inline int pthread_once(pthread_once_t *once, void (*init_fn)(void)) {
+    if (InterlockedCompareExchange(once, 1, 0) == 0) {
+        init_fn();
+        InterlockedExchange(once, 2);
+    } else {
+        while (*once != 2) {
+            Sleep(0);
+        }
+    }
+    return 0;
+}
 #else
 #include <pthread.h>
 #endif

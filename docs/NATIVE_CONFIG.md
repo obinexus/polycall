@@ -43,9 +43,9 @@ Authored config is real language values, not a DSL:
 
 | Ecosystem | File | Contract |
 | --- | --- | --- |
-| C | `bindings/c-provider/example_provider.c` | shared library exporting `polycall_config_provider_v1(builder, ctx)`; loaded from an explicit path via `LoadLibraryExW` / `dlopen` (`polycall_provider_load_c`) |
-| Node | `bindings/node-provider/example.config.mjs` + `run.mjs` | ES module exporting a default object; `run.mjs` prints one canonical envelope |
-| Python | `bindings/python-provider/example_config.py` + `run.py` | module defining `configure()`; `run.py` prints one canonical envelope |
+| C | `tests/fixtures/providers/c-provider/example_provider.c` | shared library exporting `polycall_config_provider_v1(builder, ctx)`; loaded from an explicit path via `LoadLibraryExW` / `dlopen` (`polycall_provider_load_c`) |
+| Node | `tests/fixtures/providers/node-provider/example.config.mjs` + `run.mjs` | ES module exporting a default object; `run.mjs` prints one canonical envelope |
+| Python | `tests/fixtures/providers/python-provider/example_config.py` + `run.py` | module defining `configure()`; `run.py` prints one canonical envelope |
 
 Sub-process providers are launched with an **argv array** (never a shell
 string), an explicit working directory, a **1 MiB** output budget and a **10 s**
@@ -58,13 +58,18 @@ CLI selection:
 
 ```sh
 polycall config validate --provider c:./build/lib/example_provider.so
-polycall config show     --provider node:bindings/node-provider/example.config.mjs --provenance
-polycall config validate --provider python:bindings/python-provider/example_config.py
+POLYCALL_NODE_PROVIDER=tests/fixtures/providers/node-provider/run.mjs \
+  polycall config show --provider node:tests/fixtures/providers/node-provider/example.config.mjs --provenance
+POLYCALL_PYTHON_PROVIDER=tests/fixtures/providers/python-provider/run.py \
+  polycall config validate --provider python:tests/fixtures/providers/python-provider/example_config.py
 polycall config validate --envelope /tmp/generated.json
 ```
 
-`POLYCALL_PROVIDER_ROOT` (or `--project-root`) locates `bindings/<lang>-provider/run.*`;
-`POLYCALL_NODE_PROVIDER` / `POLYCALL_PYTHON_PROVIDER` override the runner path.
+`node`/`python` providers have no built-in runner path: `POLYCALL_NODE_PROVIDER` /
+`POLYCALL_PYTHON_PROVIDER` must name the runner script explicitly, or
+`config validate`/`config show` fails with `provider.runner_unset`. Only the
+explicitly named module / library is ever loaded -- parent directories are
+never scanned.
 
 ## Precedence and legacy coexistence
 

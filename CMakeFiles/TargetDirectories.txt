@@ -1,0 +1,15 @@
+C:/Users/Nnamdi/Projects/polycall/CMakeFiles/polycall_static.dir
+C:/Users/Nnamdi/Projects/polycall/CMakeFiles/polycall_shared.dir
+C:/Users/Nnamdi/Projects/polycall/CMakeFiles/polycall_cli.dir
+C:/Users/Nnamdi/Projects/polycall/CMakeFiles/example_c_provider.dir
+C:/Users/Nnamdi/Projects/polycall/CMakeFiles/fixture_ops_plugin.dir
+C:/Users/Nnamdi/Projects/polycall/CMakeFiles/fixture_ops_plugin_bad_abi.dir
+C:/Users/Nnamdi/Projects/polycall/CMakeFiles/ledger_plugin.dir
+C:/Users/Nnamdi/Projects/polycall/CMakeFiles/Experimental.dir
+C:/Users/Nnamdi/Projects/polycall/CMakeFiles/Nightly.dir
+C:/Users/Nnamdi/Projects/polycall/CMakeFiles/Continuous.dir
+C:/Users/Nnamdi/Projects/polycall/CMakeFiles/NightlyMemoryCheck.dir
+C:/Users/Nnamdi/Projects/polycall/CMakeFiles/RUN_TESTS.dir
+C:/Users/Nnamdi/Projects/polycall/CMakeFiles/INSTALL.dir
+C:/Users/Nnamdi/Projects/polycall/CMakeFiles/ALL_BUILD.dir
+C:/Users/Nnamdi/Projects/polycall/CMakeFiles/ZERO_CHECK.dir

@@ -80,6 +80,6 @@ operations are therefore safe). Error mapping to the CLI exit contract:
 | cannot connect / connection dropped | 5 |
 | any other operation error | 1 |
 
-Clients in other languages: `bindings/node-client/inventory_client.mjs`,
-`bindings/python-client/inventory_client.py` -- each frames one REQUEST and
+Clients in other languages: `tools/rpc-clients/node/inventory_client.mjs`,
+`tools/rpc-clients/python/inventory_client.py` -- each frames one REQUEST and
 reads one RESPONSE from the same runtime.

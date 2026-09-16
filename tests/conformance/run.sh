@@ -25,17 +25,17 @@ c|$PC call"   # special-cased below (different flag-style CLI)
 
 if command -v node >/dev/null 2>&1; then
   CLIENTS="$CLIENTS
-node|node $ROOT/bindings/node-client/polycall_call.mjs"
+node|node $ROOT/tools/rpc-clients/node/polycall_call.mjs"
 fi
 PY=$(command -v python3 2>/dev/null || command -v python 2>/dev/null || true)
 if [ -n "$PY" ]; then
   CLIENTS="$CLIENTS
-python|$PY $ROOT/bindings/python-client/polycall_call.py"
+python|$PY $ROOT/tools/rpc-clients/python/polycall_call.py"
 fi
 GO_BIN="$ROOT/build/conformance-go/polycall-call"
 if command -v go >/dev/null 2>&1; then
   mkdir -p "$ROOT/build/conformance-go"
-  ( cd "$ROOT/bindings/go-polycall/rpcv1" && go build -o "$GO_BIN" ./cmd/polycall-call ) \
+  ( cd "$ROOT/tools/rpc-clients/go" && go build -o "$GO_BIN" ./cmd/polycall-call ) \
     >"$TMP/go_build.log" 2>&1
   if [ -x "$GO_BIN" ] || [ -x "$GO_BIN.exe" ]; then
     [ -x "$GO_BIN.exe" ] && GO_BIN="$GO_BIN.exe"
@@ -47,10 +47,10 @@ go|$GO_BIN"
 else
   skip "Go client (go not on PATH)"
 fi
-JAVA_OUT="$ROOT/bindings/java-polycall/rpcv1/out"
+JAVA_OUT="$ROOT/tools/rpc-clients/java/out"
 if command -v javac >/dev/null 2>&1 && command -v java >/dev/null 2>&1; then
   mkdir -p "$JAVA_OUT"
-  javac -d "$JAVA_OUT" $(find "$ROOT/bindings/java-polycall/rpcv1/src/main/java" -name '*.java') \
+  javac -d "$JAVA_OUT" $(find "$ROOT/tools/rpc-clients/java/src/main/java" -name '*.java') \
     >"$TMP/java_build.log" 2>&1
   if [ -f "$JAVA_OUT/org/obinexus/polycall/rpcv1/PolyCallCall.class" ]; then
     CLIENTS="$CLIENTS

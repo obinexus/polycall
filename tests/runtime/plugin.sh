@@ -17,7 +17,7 @@ skip() { SKIP=$((SKIP+1)); printf 'NOT RUN  %s\n' "$1"; }
 PLUGIN="$LIBDIR/fixture_ops_plugin.$SHEXT"
 PLUGIN_BAD="$LIBDIR/fixture_ops_plugin_bad_abi.$SHEXT"
 CPROV="$LIBDIR/example_provider.$SHEXT"   # any real lib lacking polycall_ops_register
-NODE_CLIENT="$ROOT/bindings/node-client/inventory_client.mjs"
+NODE_CLIENT="$ROOT/tools/rpc-clients/node/inventory_client.mjs"
 
 if [ ! -f "$PLUGIN" ] || [ ! -f "$PLUGIN_BAD" ]; then
   skip "plugin loader (fixture plugins not built; run 'make plugin-fixture')"

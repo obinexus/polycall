@@ -115,14 +115,6 @@ static int cfg_err(const polycall_invocation_t *inv,
 
 /* ---- provider resolution -------------------------------------------- */
 
-static const char *provider_root(const polycall_invocation_t *inv)
-{
-    const char *r = getenv("POLYCALL_PROVIDER_ROOT");
-    if (r && *r) return r;
-    if (inv->g->project_root && *inv->g->project_root) return inv->g->project_root;
-    return ".";
-}
-
 static char *read_file(const char *path, size_t *len)
 {
     FILE *f = fopen(path, "rb");
@@ -192,12 +184,20 @@ static polycall_config2_t *load_selected(const polycall_invocation_t *inv,
             return polycall_provider_load_c(arg, &o, e);
         }
         if (!strcmp(kind, "node") || !strcmp(kind, "python")) {
-            char runner[POLYCALL_CFG2_PATH_MAX];
-            const char *env = getenv(!strcmp(kind, "node")
-                                     ? "POLYCALL_NODE_PROVIDER"
-                                     : "POLYCALL_PYTHON_PROVIDER");
+            const char *env_name = !strcmp(kind, "node")
+                                   ? "POLYCALL_NODE_PROVIDER"
+                                   : "POLYCALL_PYTHON_PROVIDER";
+            const char *runner = getenv(env_name);
             const char *prog;
             const char *argv[4];
+            if (!runner || !*runner) {
+                polycall_config2_error_init(e);
+                snprintf(e->code, sizeof e->code, "provider.runner_unset");
+                snprintf(e->message, sizeof e->message,
+                         "no %s runner script configured", kind);
+                snprintf(e->field, sizeof e->field, "%s", env_name);
+                return NULL;
+            }
             if (!strcmp(kind, "node")) {
                 prog = "node";
             } else {
@@ -208,13 +208,6 @@ static polycall_config2_t *load_selected(const polycall_invocation_t *inv,
 #else
                 prog = (pe && *pe) ? pe : "python3";
 #endif
-            }
-            if (env && *env) {
-                snprintf(runner, sizeof runner, "%s", env);
-            } else {
-                snprintf(runner, sizeof runner, "%s/bindings/%s-provider/run.%s",
-                         provider_root(inv), kind,
-                         !strcmp(kind, "node") ? "mjs" : "py");
             }
             argv[0] = prog;
             argv[1] = runner;
