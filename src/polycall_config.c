@@ -666,7 +666,7 @@ static bool load_hierarchy(
             fprintf(
                 stderr,
                 "warning: Legacy .polycallrc detected. "
-                "Use Polycallrc.<language> for v1.0.1.\n"
+                "Use Polycallrc.<language> for v1.0.0.\n"
             );
             if (!parse_config_file(config, ".polycallrc", CONFIG_LAYER_LANGUAGE) ||
                 !record_source(sources, ".polycallrc")) {
@@ -793,7 +793,7 @@ static int show_rc(const char* language, bool validate_only) {
         fprintf(
             stderr,
             "warning: Legacy .polycallrc detected. "
-            "Use Polycallrc.<language> for v1.0.1.\n"
+            "Use Polycallrc.<language> for v1.0.0.\n"
         );
     }
 

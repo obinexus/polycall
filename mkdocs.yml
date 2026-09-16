@@ -1,0 +1,36 @@
+site_name: PolyCall
+site_description: Program-first cross-language runtime -- CLI, protocol, and Polycallfile reference
+site_url: https://obinexus.github.io/polycall/
+repo_url: https://github.com/obinexus/polycall
+repo_name: obinexus/polycall
+docs_dir: site-docs
+site_dir: _site
+
+theme:
+  name: mkdocs
+  favicon: img/favicon.ico
+  logo: assets/favicon.png
+
+extra_css:
+  - stylesheets/obinexus.css
+
+markdown_extensions:
+  - admonition
+  - fenced_code
+  - tables
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Getting started: getting-started.md
+  - Your first cross-language call: first-python-call.md
+  - Core concepts: core-concepts.md
+  - CLI reference: cli-reference.md
+  - Polycallfile reference: polycallfile-reference.md
+  - Language integration: language-integration.md
+  - C library and ABI: c-abi-and-linking.md
+  - Standardization (LPV1): standardization.md
+  - Troubleshooting: troubleshooting.md
+  - Historical migration guide: migration-from-trial.md
+  - Contributing and releases: contributing-and-releases.md

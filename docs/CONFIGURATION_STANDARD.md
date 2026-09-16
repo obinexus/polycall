@@ -1,4 +1,4 @@
-# LibPolyCall v1.0.1 Configuration Standard
+# LibPolyCall v1.0.0 Configuration Standard
 
 LibPolyCall configuration has three ordered layers:
 
@@ -46,7 +46,7 @@ key_file=/etc/polycall/key.pem
 ## Language Overrides
 
 `Polycallrc.<language>` is the language-specific read-only runtime override
-layer. Canonical v1.0.1 names include:
+layer. Canonical v1.0.0 names include:
 
 ```text
 Polycallrc.node

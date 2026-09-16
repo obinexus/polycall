@@ -9,6 +9,11 @@ All notable changes to LibPolyCall will be documented in this file.
 > as the historical record, immediately below, not as a claim that a 1.1.0
 > release ever shipped.
 
+## [1.0.0] - 2026-09-16 - Version reset
+
+Library/ABI version set to `1.0.0` (`include/polycall_export.h`), reverting
+the `1.0.1` used since the CLI redesign below. No functional change.
+
 ## [1.0.1] - 2026-09-11 - CLI Redesign
 
 Delivered on the `polycall-cli-redesign` branch (docs/IMPLEMENTATION.md has

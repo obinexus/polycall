@@ -1,14 +1,18 @@
 name: Deploy docs to GitHub Pages
 
-# Publishes docs/ (the CLI, RPC v1, native config, plugin and telemetry
-# reference) as a static site via GitHub's default Jekyll build -- no
-# Gemfile, no bundler, nothing beyond docs/_config.yml.
+# site-docs/ (getting-started, CLI reference, Polycallfile reference, ...) is
+# the primary site, built with MkDocs per mkdocs.yml and published at the
+# site root. docs/ (the broader reference/knowledge base) is built with
+# GitHub's default Jekyll and published alongside it under /docs/. One
+# artifact, one deployment.
 
 on:
   push:
     branches: [polycall-cli-redesign, main]
     paths:
+      - "site-docs/**"
       - "docs/**"
+      - "mkdocs.yml"
       - ".github/workflows/pages.yml"
   workflow_dispatch:
 
@@ -27,11 +31,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build with Jekyll
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install MkDocs
+        run: pip install mkdocs
+
+      - name: Build site-docs with MkDocs -> _site/ (site_dir in mkdocs.yml)
+        run: mkdocs build
+
+      - name: Build docs/ with Jekyll -> _site/docs/
         uses: actions/jekyll-build-pages@v1
         with:
           source: ./docs
-          destination: ./_site
+          destination: ./_site/docs
 
       - uses: actions/upload-pages-artifact@v3
         with:

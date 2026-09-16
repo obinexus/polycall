@@ -8,6 +8,10 @@ title: PolyCall documentation
 wire protocol (`polycall_rpc` v1), reached identically from every language
 client. Source: [github.com/obinexus/polycall](https://github.com/obinexus/polycall).
 
+This is the deeper reference set. For a guided walkthrough (getting started,
+your first cross-language call, core concepts), start at the
+[site root](../) instead.
+
 ```
 polycall [global-options] <command> [subcommand] [arguments]
 ```
