@@ -46,5 +46,5 @@ correction, not intentional.
 ## `telemetry` is new
 
 `polycall telemetry emit`/`show`/`status`, and automatic GUID + timestamp
-correlated events from `run`/`call`, did not exist in earlier revisions.
+correlated events from `start`/`call`, did not exist in earlier revisions.
 See the [CLI reference](cli-reference.md#telemetry).

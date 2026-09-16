@@ -70,10 +70,10 @@ note "clients discovered:$(printf '%s' "$CLIENTS" | grep -c '|')"
 EPF="$TMP/endpoint"
 PLUGIN="$LIBDIR/fixture_ops_plugin.$SHEXT"
 if [ -f "$PLUGIN" ]; then
-  "$PC" run --endpoint 127.0.0.1:0 --endpoint-file "$EPF" --auth-token conf-tok \
+  "$PC" start --endpoint 127.0.0.1:0 --endpoint-file "$EPF" --auth-token conf-tok \
     --load "$PLUGIN" >"$TMP/run.log" 2>&1 &
 else
-  "$PC" run --endpoint 127.0.0.1:0 --endpoint-file "$EPF" --auth-token conf-tok \
+  "$PC" start --endpoint 127.0.0.1:0 --endpoint-file "$EPF" --auth-token conf-tok \
     >"$TMP/run.log" 2>&1 &
 fi
 RUNPID=$!

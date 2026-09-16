@@ -19,7 +19,7 @@ alongside the code it describes, staged and dated:
 | [docs/CLI.md](../docs/CLI.md) | the full CLI contract: commands, exit codes, `--format json`, by delivery stage |
 | [docs/RPC.md](../docs/RPC.md) | the `polycall_rpc` v1 wire byte layout and exit-code map |
 | [docs/NATIVE_CONFIG.md](../docs/NATIVE_CONFIG.md) | the schema-v2 configuration model and provider contract |
-| [docs/PLUGINS.md](../docs/PLUGINS.md) | the operation-plugin ABI (`run --load`) |
+| [docs/PLUGINS.md](../docs/PLUGINS.md) | the operation-plugin ABI (`start --load`) |
 | [docs/CONCURRENCY.md](../docs/CONCURRENCY.md) | the one-thread-per-connection runtime model |
 | [docs/CONFORMANCE.md](../docs/CONFORMANCE.md) | the cross-language RPC v1 equivalence results, per client, per host |
 | [docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md) | the broader OBINexus project context this repository sits inside |

@@ -1,4 +1,4 @@
-# Operation plugins (`polycall run --load`)
+# Operation plugins (`polycall start --load`)
 
 Status: **implemented**. Completes the third step of the canonical binding
 workflow: write a language-specific C binding -> compile to a shared library
@@ -53,7 +53,7 @@ Return values:
 | `POLYCALL_PLUGIN_ERROR` (2) | any other registration failure |
 
 A non-zero return rejects the **whole** plugin: none of its operations are
-served, and `polycall run --load` exits 4 before binding anything.
+served, and `polycall start --load` exits 4 before binding anything.
 
 ## Duplicate `service.operation`: always refused, never "last wins"
 
@@ -71,7 +71,7 @@ does. This is a fixed policy, not configurable per invocation.
 ## Loading
 
 ```sh
-polycall run --endpoint 127.0.0.1:8080 \
+polycall start --endpoint 127.0.0.1:8080 \
   --load build/lib/fixture_ops_plugin.so \
   --load build/lib/another_plugin.so
 ```
@@ -79,7 +79,7 @@ polycall run --endpoint 127.0.0.1:8080 \
 `--load` is repeatable. Only the explicitly named path is loaded -- parent
 directories are never scanned. Loading happens before the endpoint is bound;
 an unloadable library, a missing `polycall_ops_register`, or an ABI mismatch
-each fail `run` immediately with exit 4 (`POLYCALL_EXIT_UNSUPPORTED`), with no
+each fail `start` immediately with exit 4 (`POLYCALL_EXIT_UNSUPPORTED`), with no
 socket ever opened. Loaded operations appear in `polycall status` (control
 action `describe`) exactly like built-ins, with their schema hints and
 `idempotent` flag, because `describe` reports whatever is in the shared
@@ -105,11 +105,11 @@ path from one source file). A plugin only needs to:
 
 ## Tests
 
-- `tests/cli/contract.sh`: `run --load` with a missing value (exit 2) and a
+- `tests/cli/contract.sh`: `start --load` with a missing value (exit 2) and a
   nonexistent path (exit 4) -- fast, no server needed.
 - `tests/runtime/plugin.sh`: nonexistent path, a real library lacking
   `polycall_ops_register` (reuses `example_provider`), the ABI-mismatch
-  build, then the real fixture -- loaded, `run` reports it, `demo.greet` is
+  build, then the real fixture -- loaded, `start` reports it, `demo.greet` is
   called from the C CLI and (when available) inline Node and Python clients
   with identical results, the built-in operations still work alongside it,
   `status`/`describe` lists `demo.greet` with a correctly-escaped schema hint

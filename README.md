@@ -29,7 +29,7 @@ build/linux-gcc/bin/polycall --version
 build/linux-gcc/bin/polycall doctor
 
 # start the runtime in the foreground, on an ephemeral port
-build/linux-gcc/bin/polycall run --endpoint 127.0.0.1:0 &
+build/linux-gcc/bin/polycall start --endpoint 127.0.0.1:0 &
 
 # call a registered operation through it (docs/RPC.md)
 build/linux-gcc/bin/polycall call inventory get --endpoint 127.0.0.1:<port> \

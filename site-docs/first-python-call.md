@@ -2,7 +2,7 @@
 
 !!! success "Verified this session"
     The Node.js walkthrough below was run end to end against a real
-    `polycall.exe` build on Windows this session: `run`, a live TCP
+    `polycall.exe` build on Windows this session: `start`, a live TCP
     connection from `tools/rpc-clients/node/inventory_client.mjs`, and a
     clean `stop`. The Python client takes the identical path and is
     exercised the same way by `tests/runtime/roundtrip.sh` and
@@ -24,10 +24,10 @@ that never links against `libpolycall` at all — only the
 ## Terminal 1: start the runtime
 
 ```sh
-bin/polycall run --endpoint 127.0.0.1:0 --endpoint-file /tmp/ep --auth-token demo-tok
+bin/polycall start --endpoint 127.0.0.1:0 --endpoint-file /tmp/ep --auth-token demo-tok
 ```
 ```text
-polycall run: listening on 127.0.0.1:PORT (Ctrl-C to stop)
+polycall start: listening on 127.0.0.1:PORT (Ctrl-C to stop)
 ```
 
 Port `0` picks an ephemeral port; `--endpoint-file` writes the resolved
@@ -96,7 +96,7 @@ up. Cleanup runs in normal execution, never in a signal handler.
 ## Next
 
 - Loading your own operation with no core rebuild:
-  [docs/PLUGINS.md](../docs/PLUGINS.md) (`run --load PATH`).
+  [docs/PLUGINS.md](../docs/PLUGINS.md) (`start --load PATH`).
 - The full wire byte layout: [docs/RPC.md](../docs/RPC.md).
 - Writing a config provider instead of an RPC client:
   [Polycallfile reference](polycallfile-reference.md).

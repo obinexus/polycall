@@ -316,18 +316,22 @@ static const polycall_command_t COMMANDS[] = {
     { "repl", "start an explicit interactive session (same command set)",
       "repl", NULL, polycall_repl_run, NULL, 0, false, false },
 
-    { "run", "start the runtime in the foreground (polycall_rpc v1)",
-      "run [--endpoint host:port] [--auth-token TOK] [--endpoint-file PATH]\n"
-      "    [--load PATH ...]",
-      "run serves the built-in deterministic operations until Ctrl-C or an\n"
+    { "start", "start the runtime in the foreground (polycall_rpc v1)",
+      "start [--endpoint host:port] [--auth-token TOK] [--endpoint-file PATH]\n"
+      "      [--load PATH ...] [--daemon]",
+      "start serves the built-in deterministic operations until Ctrl-C or an\n"
       "authenticated 'stop'. It binds loopback by default; port 0 = ephemeral.\n"
       "Cleanup runs in normal execution, not in the signal handler.\n"
       "\n"
       "--load PATH loads one operation plugin (a shared library exporting\n"
       "polycall_ops_register); repeat --load for more than one. Plugins are\n"
-      "loaded, and any ABI mismatch or missing symbol fails run before it\n"
-      "binds anything (exit 4). See docs/PLUGINS.md.\n",
-      polycall_cmd_run, NULL, 0, true, true },
+      "loaded, and any ABI mismatch or missing symbol fails start before it\n"
+      "binds anything (exit 4). See docs/PLUGINS.md.\n"
+      "\n"
+      "--daemon detaches into the background and returns immediately, printing\n"
+      "the detached process's PID; use --endpoint-file to learn the bound\n"
+      "address asynchronously, the same way a foreground caller would poll it.\n",
+      polycall_cmd_start, NULL, 0, true, true },
 
     { "status", "query a running instance over its control channel",
       "status --endpoint host:port", NULL, polycall_cmd_status, NULL, 0,

@@ -58,7 +58,7 @@ should print `configuration is valid` and exit 0.
 ## Start the runtime and make a call
 
 ```sh
-bin/polycall run --endpoint 127.0.0.1:0 --endpoint-file /tmp/ep &
+bin/polycall start --endpoint 127.0.0.1:0 --endpoint-file /tmp/ep &
 sleep 1
 EP=$(cat /tmp/ep)
 bin/polycall call inventory get --endpoint "$EP" --input-value '{"item_id":"widget-a"}'

@@ -96,7 +96,7 @@ static parse_status_t take_option(parsed_t *p, int argc, char *const argv[],
 
     /* removed options: fail with a pointer to the replacement -------------- */
     if (strcmp(name, "-f") == 0 || strcmp(name, "--file") == 0) {
-        *emsg = "removed option; use 'polycall run --config PATH'";
+        *emsg = "removed option; use 'polycall start --config PATH'";
         *ebadopt = "-f";
         return PARSE_ERR;
     }

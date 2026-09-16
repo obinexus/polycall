@@ -759,7 +759,7 @@ int polycall_runtime_serve(polycall_runtime_t *rt, const char *bind_host,
 
     /* cleanup here, in normal execution -- never in the signal handler.
      * Stop accepting first, then wait for every in-flight connection's
-     * thread to actually finish: the caller (polycall_cmd_run()) destroys
+     * thread to actually finish: the caller (polycall_cmd_start()) destroys
      * `rt` the instant this function returns, so a thread still touching
      * `rt` after that would be a use-after-free. See docs/CONCURRENCY.md. */
     pcr_close(ls);

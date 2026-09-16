@@ -3,24 +3,24 @@
 ## `call` exits 5 — "could not reach the runtime"
 
 Transport failure: no process is listening at `--endpoint host:port`, or
-it isn't `polycall run` (or isn't `polycall_rpc` v1). Check the runtime's
-own terminal for `polycall run: listening on host:port` — if it never
-printed that, `run` failed to bind (see below). `call` performs exactly
+it isn't `polycall start` (or isn't `polycall_rpc` v1). Check the runtime's
+own terminal for `polycall start: listening on host:port` — if it never
+printed that, `start` failed to bind (see below). `call` performs exactly
 one connect + send + receive and never retries, even here.
 
-## `run` fails to bind
+## `start` fails to bind
 
-If the port is already in use, `run` fails at startup before printing
+If the port is already in use, `start` fails at startup before printing
 `listening on`. Bind `--endpoint 127.0.0.1:0` (ephemeral port) plus
 `--endpoint-file PATH` instead of guessing a free port, and read the
 resolved endpoint back from that file — this is what every test script
 and reference client in this repository does.
 
-## `run --load PATH` exits 4
+## `start --load PATH` exits 4
 
 Three distinct causes, reported distinctly (never a generic failure):
 
-- the path doesn't exist, or the library fails to load (`polycall run: <os loader error>`)
+- the path doesn't exist, or the library fails to load (`polycall start: <os loader error>`)
 - the library has no `polycall_ops_register` symbol
 - the plugin's ABI major version doesn't match the host's (message
   mentions "ABI")
@@ -54,7 +54,7 @@ provider or Polycallfile validates.
 
 `stop --auth-token` and any `call`/`status` reaching an auth-gated action
 need the exact token the runtime was started with
-(`run --auth-token T`). A wrong or missing token is refused distinctly
+(`start --auth-token T`). A wrong or missing token is refused distinctly
 from "no runtime answered" (exit 5) — the runtime is up and responding,
 it just declined this specific request. `status` with no token still
 works; only `stop` and control actions that mutate state require one.
@@ -83,4 +83,4 @@ binary, or set an explicit loader search path
 entirely — `telemetry status` reports whether it's currently enabled and
 the resolved sink path. Emission is best-effort and silent by design: a
 sink directory that can't be created, or a disk that can't be written to,
-never fails the `run`/`call` it was trying to record.
+never fails the `start`/`call` it was trying to record.

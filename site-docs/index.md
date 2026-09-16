@@ -36,8 +36,8 @@ reimplementations.
 | --- | --- |
 | `help`, `version`, `doctor`, `--format json` | Verified |
 | `config validate`/`config show` against a legacy `Polycallfile`, or a native C/Node/Python provider | Verified |
-| `run`/`status`/`stop`/`call` over `polycall_rpc` v1, including `run --load PATH` operation plugins | Verified |
-| `telemetry emit`/`show`/`status` (GUID + timestamp correlated events, auto-emitted by `run`/`call`) | Verified |
+| `start`/`status`/`stop`/`call` over `polycall_rpc` v1, including `start --load PATH` operation plugins | Verified |
+| `telemetry emit`/`show`/`status` (GUID + timestamp correlated events, auto-emitted by `start`/`call`) | Verified |
 | Cross-language reference clients: Node.js, Python, Go, Java (`tools/rpc-clients/`) | Verified |
 | `config migrate` (legacy → native envelope) | Verified |
 | A packaged, installable per-language client SDK (npm, PyPI, Maven, ...) shipped from *this* repository | Not implemented here — published as separate packages under the `obinexus` org |

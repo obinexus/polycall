@@ -20,7 +20,7 @@ NODE_CLIENT="$ROOT/tools/rpc-clients/node/inventory_client.mjs"
 PY_CLIENT="$ROOT/tools/rpc-clients/python/inventory_client.py"
 
 RUNLOG="$TMP/run.log"
-"$PC" run --endpoint 127.0.0.1:0 --endpoint-file "$EPF" --auth-token "$TOK" \
+"$PC" start --endpoint 127.0.0.1:0 --endpoint-file "$EPF" --auth-token "$TOK" \
   >"$RUNLOG" 2>&1 &
 RUNPID=$!
 cleanup() { kill "$RUNPID" 2>/dev/null; rm -rf "$TMP"; }

@@ -43,7 +43,7 @@ trap 'rm -rf "$TMP"; [ -n "${RUNPID:-}" ] && kill "$RUNPID" 2>/dev/null' EXIT
 
 say "starting the runtime with the ledger plugin loaded (no core rebuild)"
 EPF="$TMP/endpoint"
-"$PC" run --endpoint 127.0.0.1:0 --endpoint-file "$EPF" --load "$PLUGIN" \
+"$PC" start --endpoint 127.0.0.1:0 --endpoint-file "$EPF" --load "$PLUGIN" \
   >"$TMP/run.log" 2>&1 &
 RUNPID=$!
 i=0

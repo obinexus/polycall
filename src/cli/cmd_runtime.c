@@ -1,5 +1,5 @@
 /*
- * run / status / stop / call -- the CLI face of the runtime.
+ * start / status / stop / call -- the CLI face of the runtime.
  *
  * All four talk to the SAME polycall_op_fn set through polycall_rpc v1. `call`
  * performs exactly one round trip and never retries. Errors are mapped to the
@@ -16,6 +16,14 @@
 #include "polycall_telemetry.h"
 #include "../runtime/rpc_wire.h"
 #include "../config/json.h"
+
+#if defined(_WIN32)
+#include <windows.h>
+#else
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/wait.h>
+#endif
 
 /* ---- shared: split "host:port" -------------------------------------- */
 
@@ -52,13 +60,14 @@ static int split_endpoint(const char *ep, char *host, size_t hostcap,
 
 typedef struct {
     const char *endpoint;
-    const char *endpoint_file;   /* run: write the resolved endpoint here */
+    const char *endpoint_file;   /* start: write the resolved endpoint here */
     const char *auth_token;
     const char *input_file;
     const char *input_value;
     long deadline_ms;
-    const char *load_paths[RARGS_MAX_LOAD];  /* run --load PATH, repeatable */
+    const char *load_paths[RARGS_MAX_LOAD];  /* start --load PATH, repeatable */
     int load_count;
+    bool daemon;                  /* start --daemon */
     const char *pos[8];
     int npos;
 } rargs_t;
@@ -99,6 +108,7 @@ static int scan_rargs(const polycall_invocation_t *inv, rargs_t *a, const char *
             if (a->load_count >= RARGS_MAX_LOAD) { *bad = "--load"; return -1; }
             a->load_paths[a->load_count++] = val;
         }
+        else if (!strcmp(name, "--daemon")) { a->daemon = true; }
         else { *bad = t; return -1; }
         #undef NEEDV
     }
@@ -119,10 +129,145 @@ static int rusage(const polycall_invocation_t *inv, const char *m, const char *b
 }
 
 /* ================================================================== */
-/* run                                                                */
+/* start                                                              */
 /* ================================================================== */
 
 static void on_signal(int sig) { (void)sig; polycall_runtime_request_stop(); }
+
+#if defined(_WIN32)
+
+/* No fork() on Windows: re-exec this same binary, detached from any
+ * console, with the already-validated/already-resolved options carried
+ * over explicitly (never the raw --daemon flag, so the child runs
+ * in the foreground of its own detached session instead of re-daemonizing).
+ * Returns 0 and the new process's PID on success. */
+static int win_daemonize(const char *project_root, const char *host,
+                         uint16_t port, const char *auth_token,
+                         const char *endpoint_file,
+                         const char *const *load_paths, int load_count,
+                         unsigned long *out_pid)
+{
+    char self[MAX_PATH];
+    char cmdline[4096];
+    int n, i;
+    STARTUPINFOA si;
+    PROCESS_INFORMATION pi;
+
+    if (!GetModuleFileNameA(NULL, self, sizeof self)) {
+        return -1;
+    }
+    n = snprintf(cmdline, sizeof cmdline, "\"%s\"", self);
+    if (project_root && *project_root) {
+        n += snprintf(cmdline + n, sizeof cmdline - (size_t)n,
+                       " --project-root \"%s\"", project_root);
+    }
+    n += snprintf(cmdline + n, sizeof cmdline - (size_t)n,
+                  " start --endpoint %s:%u", host, (unsigned)port);
+    if (auth_token && *auth_token) {
+        n += snprintf(cmdline + n, sizeof cmdline - (size_t)n,
+                      " --auth-token \"%s\"", auth_token);
+    }
+    if (endpoint_file && *endpoint_file) {
+        n += snprintf(cmdline + n, sizeof cmdline - (size_t)n,
+                      " --endpoint-file \"%s\"", endpoint_file);
+    }
+    for (i = 0; i < load_count; ++i) {
+        n += snprintf(cmdline + n, sizeof cmdline - (size_t)n,
+                      " --load \"%s\"", load_paths[i]);
+    }
+    if (n < 0 || (size_t)n >= sizeof cmdline) {
+        return -1;
+    }
+
+    memset(&si, 0, sizeof si);
+    si.cb = sizeof si;
+    memset(&pi, 0, sizeof pi);
+    if (!CreateProcessA(NULL, cmdline, NULL, NULL, FALSE,
+                        DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP,
+                        NULL, NULL, &si, &pi)) {
+        return -1;
+    }
+    *out_pid = pi.dwProcessId;
+    CloseHandle(pi.hProcess);
+    CloseHandle(pi.hThread);
+    return 0;
+}
+
+#else
+
+/* Standard double-fork daemonize (setsid + a second fork so the daemon can
+ * never reacquire a controlling terminal), with a pipe carrying the final
+ * daemon's pid back to the original process. Deliberately does not
+ * chdir("/") -- --project-root-relative paths (Polycallfile, the telemetry
+ * sink, --endpoint-file, --load) must keep resolving exactly as they did
+ * in the foreground invocation.
+ *
+ * Returns 1 in the original calling process (caller should print *out_pid
+ * and return without serving), 0 in the detached daemon itself (caller
+ * should fall through and serve normally, with stdout/stderr now
+ * discarded), or -1 on failure. */
+static int posix_daemonize(pid_t *out_pid)
+{
+    int pfd[2];
+    pid_t p1;
+
+    if (pipe(pfd) != 0) {
+        return -1;
+    }
+    p1 = fork();
+    if (p1 < 0) {
+        close(pfd[0]); close(pfd[1]);
+        return -1;
+    }
+
+    if (p1 > 0) {
+        pid_t daemon_pid = -1;
+        ssize_t n;
+        close(pfd[1]);
+        n = read(pfd[0], &daemon_pid, sizeof daemon_pid);
+        close(pfd[0]);
+        waitpid(p1, NULL, 0);
+        if (n != (ssize_t)sizeof daemon_pid || daemon_pid <= 0) {
+            return -1;
+        }
+        *out_pid = daemon_pid;
+        return 1;
+    }
+
+    /* first child: detach from the controlling terminal's session, then
+     * fork once more so the actual daemon is never a session leader */
+    close(pfd[0]);
+    if (setsid() < 0) {
+        _exit(1);
+    }
+    {
+        pid_t p2 = fork();
+        if (p2 < 0) {
+            _exit(1);
+        }
+        if (p2 > 0) {
+            ssize_t written = write(pfd[1], &p2, sizeof p2);
+            (void)written;
+            close(pfd[1]);
+            _exit(0);
+        }
+    }
+
+    /* second child: this is the daemon */
+    close(pfd[1]);
+    {
+        int devnull = open("/dev/null", O_RDWR);
+        if (devnull >= 0) {
+            dup2(devnull, 0);
+            dup2(devnull, 1);
+            dup2(devnull, 2);
+            if (devnull > 2) close(devnull);
+        }
+    }
+    return 0;
+}
+
+#endif
 
 typedef struct {
     const polycall_invocation_t *inv;
@@ -140,7 +285,7 @@ static void POLYCALL_CALL on_bound(const char *endpoint, void *user)
         if (f) { fprintf(f, "%s\n", endpoint); fclose(f); }
     }
     memset(&tev, 0, sizeof tev);
-    tev.event = "run.bound";
+    tev.event = "start.bound";
     tev.detail = endpoint;
     tev.duration_ns = -1;
     polycall_telemetry_emit(bc->inv->g->project_root, &tev);
@@ -148,13 +293,13 @@ static void POLYCALL_CALL on_bound(const char *endpoint, void *user)
         fprintf(bc->inv->out,
                 "{\"event\":\"listening\",\"endpoint\":\"%s\"}\n", endpoint);
     } else {
-        fprintf(bc->inv->out, "polycall run: listening on %s (Ctrl-C to stop)\n",
+        fprintf(bc->inv->out, "polycall start: listening on %s (Ctrl-C to stop)\n",
                 endpoint);
     }
     fflush(bc->inv->out);
 }
 
-int polycall_cmd_run(const polycall_invocation_t *inv)
+int polycall_cmd_start(const polycall_invocation_t *inv)
 {
     rargs_t a;
     const char *bad = NULL;
@@ -170,14 +315,68 @@ int polycall_cmd_run(const polycall_invocation_t *inv)
         return rusage(inv, "invalid --endpoint (expected host:port)", a.endpoint);
     }
 
+    if (a.daemon) {
+#if defined(_WIN32)
+        unsigned long dpid = 0;
+        if (win_daemonize(inv->g->project_root, host, port, a.auth_token,
+                          a.endpoint_file, a.load_paths, a.load_count,
+                          &dpid) != 0) {
+            if (inv->g->format == POLYCALL_FMT_JSON) {
+                polycall_json_result(inv->out, "start", false, NULL,
+                                     "daemon.spawn_failed",
+                                     "could not spawn the detached process", NULL);
+            } else {
+                fprintf(inv->err, "polycall start: could not daemonize\n");
+            }
+            return POLYCALL_EXIT_RUNTIME;
+        }
+        if (inv->g->format == POLYCALL_FMT_JSON) {
+            char body[64];
+            snprintf(body, sizeof body, "{\"pid\":%lu}", dpid);
+            polycall_json_result(inv->out, "start", true, body, NULL, NULL, NULL);
+        } else {
+            fprintf(inv->out, "polycall start: daemonized (pid %lu)\n", dpid);
+        }
+        return POLYCALL_EXIT_OK;
+#else
+        pid_t dpid = 0;
+        int dr = posix_daemonize(&dpid);
+        if (dr < 0) {
+            if (inv->g->format == POLYCALL_FMT_JSON) {
+                polycall_json_result(inv->out, "start", false, NULL,
+                                     "daemon.spawn_failed",
+                                     "could not fork/detach", NULL);
+            } else {
+                fprintf(inv->err, "polycall start: could not daemonize\n");
+            }
+            return POLYCALL_EXIT_RUNTIME;
+        }
+        if (dr == 1) {
+            /* original process: the daemon continues independently */
+            if (inv->g->format == POLYCALL_FMT_JSON) {
+                char body[64];
+                snprintf(body, sizeof body, "{\"pid\":%d}", (int)dpid);
+                polycall_json_result(inv->out, "start", true, body, NULL, NULL, NULL);
+            } else {
+                fprintf(inv->out, "polycall start: daemonized (pid %d)\n", (int)dpid);
+            }
+            return POLYCALL_EXIT_OK;
+        }
+        /* dr == 0: this process IS the daemon now (stdout/stderr already
+         * redirected to the null device) -- fall through and serve. Plugin
+         * load and bind failures from here on are reported only via
+         * telemetry, since there is no terminal left to print to. */
+#endif
+    }
+
     rt = polycall_runtime_create();
     if (!rt) {
-        fprintf(inv->err, "polycall run: out of memory\n");
+        fprintf(inv->err, "polycall start: out of memory\n");
         return POLYCALL_EXIT_RUNTIME;
     }
 
     /* Load plugins before binding anything: an unloadable library, a
-     * missing polycall_ops_register, or an ABI mismatch fails run fast,
+     * missing polycall_ops_register, or an ABI mismatch fails start fast,
      * with no socket ever opened. */
     {
         int i;
@@ -186,20 +385,26 @@ int polycall_cmd_run(const polycall_invocation_t *inv)
             int prc = polycall_runtime_load_plugin(rt, a.load_paths[i],
                                                     err, sizeof err);
             if (prc != POLYCALL_PLUGIN_OK) {
+                polycall_telemetry_event_t tev;
                 polycall_runtime_destroy(rt);
+                memset(&tev, 0, sizeof tev);
+                tev.event = "start.plugin_failed";
+                tev.detail = err;
+                tev.duration_ns = -1;
+                polycall_telemetry_emit(inv->g->project_root, &tev);
                 if (inv->g->format == POLYCALL_FMT_JSON) {
-                    polycall_json_result(inv->out, "run", false, NULL,
+                    polycall_json_result(inv->out, "start", false, NULL,
                         prc == POLYCALL_PLUGIN_ABI_MISMATCH
                             ? "plugin.abi_mismatch" : "plugin.load_failed",
                         err, "check the plugin was built against this "
                              "runtime's ABI major version");
                 } else {
-                    fprintf(inv->err, "polycall run: %s\n", err);
+                    fprintf(inv->err, "polycall start: %s\n", err);
                 }
                 return POLYCALL_EXIT_UNSUPPORTED;
             }
             if (inv->g->format != POLYCALL_FMT_JSON) {
-                fprintf(inv->out, "polycall run: loaded plugin %s\n",
+                fprintf(inv->out, "polycall start: loaded plugin %s\n",
                         a.load_paths[i]);
             }
         }
@@ -218,18 +423,24 @@ int polycall_cmd_run(const polycall_invocation_t *inv)
     polycall_runtime_destroy(rt);
 
     if (rc != 0) {
+        polycall_telemetry_event_t tev;
+        memset(&tev, 0, sizeof tev);
+        tev.event = "start.bind_failed";
+        tev.detail = host;
+        tev.duration_ns = -1;
+        polycall_telemetry_emit(inv->g->project_root, &tev);
         if (inv->g->format == POLYCALL_FMT_JSON) {
-            polycall_json_result(inv->out, "run", false, NULL, "bind",
+            polycall_json_result(inv->out, "start", false, NULL, "bind",
                                  "could not bind the runtime endpoint", host);
         } else {
-            fprintf(inv->err, "polycall run: could not bind %s\n", host);
+            fprintf(inv->err, "polycall start: could not bind %s\n", host);
         }
         return POLYCALL_EXIT_TRANSPORT;
     }
     {
         polycall_telemetry_event_t tev;
         memset(&tev, 0, sizeof tev);
-        tev.event = "run.stopped";
+        tev.event = "start.stopped";
         tev.detail = bc.endpoint;
         tev.duration_ns = -1;
         polycall_telemetry_emit(inv->g->project_root, &tev);
@@ -238,7 +449,7 @@ int polycall_cmd_run(const polycall_invocation_t *inv)
         fprintf(inv->out, "{\"event\":\"stopped\",\"endpoint\":\"%s\"}\n",
                 bc.endpoint);
     } else {
-        fprintf(inv->out, "polycall run: %s stopped cleanly\n", bc.endpoint);
+        fprintf(inv->out, "polycall start: %s stopped cleanly\n", bc.endpoint);
     }
     return POLYCALL_EXIT_OK;
 }

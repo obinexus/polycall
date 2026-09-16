@@ -14,7 +14,7 @@ are SHA-256-hashed and compared across languages -- a stronger claim than
 | `input.invalid` (missing `item_id`) | 3 | malformed/missing input fails predictably |
 | `operation.unknown` | 4 | an unregistered `service.operation` fails predictably |
 | `deadline.exceeded` (`debug.sleep`) | 6 | a deadline is enforced, not just accepted |
-| loaded-plugin op (`demo.greet`) | 0 | a `run --load`-ed operation (P1) is reachable identically, not just built-ins |
+| loaded-plugin op (`demo.greet`) | 0 | a `start --load`-ed operation (P1) is reachable identically, not just built-ins |
 | no runtime (`127.0.0.1:1`) | 5 | a missing runtime is a failure, never treated as a pass |
 | `auth.denied` (control channel, wrong `stop` token) | 7 | authenticated control actions reject a bad token |
 | non-idempotent, called twice independently | -- | structural: every client performs exactly one connect+send+receive per call (verified by reading `CallRaw` / `call` / `client.call` in each language -- no retry loop exists to trigger) |

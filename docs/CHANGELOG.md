@@ -9,6 +9,23 @@ All notable changes to LibPolyCall will be documented in this file.
 > as the historical record, immediately below, not as a claim that a 1.1.0
 > release ever shipped.
 
+## [Unreleased]
+
+### Changed
+- The `run` command is renamed to `start` (registry, help text, JSON
+  `command` field, telemetry event names `start.bound`/`start.stopped`/
+  `start.plugin_failed`/`start.bind_failed`). The removed `-f` flag's
+  error message now points at `polycall start --config PATH`.
+
+### Added
+- `start --daemon`: detaches into the background and returns immediately,
+  printing the detached process's PID. POSIX: a standard double-fork
+  (`setsid` + a second `fork`) with stdout/stderr redirected to the null
+  device. Windows: re-execs the same binary with `DETACHED_PROCESS`
+  (there is no `fork()`). Plugin-load and bind failures in a daemonized
+  process are reported via `telemetry` only, since there is no terminal
+  left to print to.
+
 ## [1.0.0] - 2026-09-16 - Version reset
 
 Library/ABI version set to `1.0.0` (`include/polycall_export.h`), reverting

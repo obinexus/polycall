@@ -40,7 +40,7 @@ exist for Node and Python:
   a validated configuration envelope. It never touches the network. See
   [Polycallfile reference](polycallfile-reference.md).
 - An **RPC client** (`tools/rpc-clients/`) speaks `polycall_rpc` v1 to a
-  running `polycall run` instance. It never touches configuration files.
+  running `polycall start` instance. It never touches configuration files.
 
 A `[service.ID].language` value in the legacy `Polycallfile` (or a
 service's `language` field in the native envelope) is informational
@@ -51,6 +51,6 @@ allowed to register or call an operation.
 
 The C CLI links `libpolycall` directly — see
 [C library and ABI](c-abi-and-linking.md) for the public headers, the
-provider API, and the operation-plugin ABI (`run --load`) that lets a
+provider API, and the operation-plugin ABI (`start --load`) that lets a
 compiled C shared library add operations to the runtime with no core
 rebuild.

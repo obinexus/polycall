@@ -6,10 +6,10 @@ argv parser, exit-code mapping and `--format json` are in place
 schema-v2 selector (`--provider c:LIB | node:MOD | python:MOD`, or
 `--envelope FILE`) and validate through the typed C model; with no selector they
 fall back to the unchanged legacy loader. `config migrate --from-legacy` writes
-a native envelope from the legacy effective model. `run` / `status` / `stop` / `call`
+a native envelope from the legacy effective model. `start` / `status` / `stop` / `call`
 drive a real foreground runtime over `polycall_rpc` v1 -- the C CLI and the Node
 / Python clients all reach the same registered C operation; a missing runtime is
-a failure, not a stub, and `call` never retries. `run` and `call` each emit
+a failure, not a stub, and `call` never retries. `start` and `call` each emit
 GUID + timestamp correlated `telemetry` events automatically; `telemetry
 emit`/`show`/`status` read and write the same sink directly. See
 `docs/NATIVE_CONFIG.md` and `docs/RPC.md`.
@@ -32,7 +32,7 @@ polycall [global-options] <command> [subcommand] [arguments]
 * `--` ends option parsing; every following token is positional. argv is never
   re-tokenised (no second `strtok` pass); quoted paths from the OS survive
   intact.
-* The removed `-f PATH` flag reports exit 2 and points at `polycall run
+* The removed `-f PATH` flag reports exit 2 and points at `polycall start
   --config PATH`.
 
 ## Global options
@@ -70,14 +70,14 @@ Globals are accepted before or after the command tokens, but never after `--`.
 | `telemetry show [--limit N]` | -- | print the most recent recorded events (default 20, newest last) |
 | `telemetry status` | -- | whether telemetry is enabled and where it writes; never starts the runtime |
 | `repl` | 1 | explicit interactive session over this registry |
-| `run --endpoint host:port [--auth-token T] [--endpoint-file F] [--load PATH ...]` | 3 | foreground runtime; port 0 = ephemeral; SIGINT stops it, cleanup in normal code; `--load` (repeatable) adds operations from a plugin shared library before binding -- see `docs/PLUGINS.md` |
+| `start --endpoint host:port [--auth-token T] [--endpoint-file F] [--load PATH ...] [--daemon]` | 3 | foreground runtime; port 0 = ephemeral; SIGINT stops it, cleanup in normal code; `--load` (repeatable) adds operations from a plugin shared library before binding -- see `docs/PLUGINS.md`; `--daemon` detaches into the background and returns immediately, printing the detached process's PID |
 | `status --endpoint host:port` | 3 | describe registered operations over the control channel; never infers health from a file |
 | `stop --endpoint host:port [--auth-token T]` | 3 | authenticated shutdown; exit 7 on token mismatch, 5 on no runtime |
 | `call SERVICE OPERATION --endpoint host:port [--input F\|- \| --input-value JSON]` | 3 | one round trip, no retry; see `docs/RPC.md` for the exit-code map |
 
 ## Telemetry
 
-Every `run` bind and clean stop, and every `call` round trip, appends one
+Every `start` bind and clean stop, and every `call` round trip, appends one
 compact JSON line (JSONL) to a sink file:
 
 ```json

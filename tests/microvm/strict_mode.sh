@@ -36,7 +36,7 @@ printf '%s' "$out" | grep -q '"_demo_fallback":true' \
 
 # 3. strict mode WITH a real runtime -> real value from the real C operation
 EPF="$TMP/ep"
-"$PC" run --endpoint 127.0.0.1:0 --endpoint-file "$EPF" >"$TMP/run.log" 2>&1 &
+"$PC" start --endpoint 127.0.0.1:0 --endpoint-file "$EPF" >"$TMP/run.log" 2>&1 &
 RUNPID=$!
 i=0; while [ ! -s "$EPF" ] && [ $i -lt 100 ]; do sleep 0.1; i=$((i+1)); done
 EP=$(cat "$EPF" 2>/dev/null)

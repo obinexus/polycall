@@ -1,5 +1,5 @@
 #!/bin/sh
-# P1 gate: `polycall run --load PATH` (repeatable). The fixture plugin's
+# P1 gate: `polycall start --load PATH` (repeatable). The fixture plugin's
 # demo.greet is callable from the C CLI and the Node and Python clients with
 # no core rebuild, on whatever platform this runs on. Also covers: ABI
 # mismatch, a library missing polycall_ops_register, and that loaded
@@ -31,11 +31,11 @@ trap 'rm -rf "$TMP"; [ -n "${RUNPID:-}" ] && kill "$RUNPID" 2>/dev/null' EXIT
 echo "=== fail fast: no socket bound on a bad plugin ==="
 
 t0=$(date +%s 2>/dev/null || echo 0)
-"$PC" run --load "$TMP/does-not-exist.$SHEXT" >/dev/null 2>&1
+"$PC" start --load "$TMP/does-not-exist.$SHEXT" >/dev/null 2>&1
 [ $? -eq 4 ] && ok "nonexistent plugin path -> exit 4" || bad "nonexistent plugin path exit"
 
 if [ -f "$CPROV" ]; then
-  "$PC" run --load "$CPROV" >"$TMP/missing_sym.out" 2>&1
+  "$PC" start --load "$CPROV" >"$TMP/missing_sym.out" 2>&1
   rc=$?
   { [ $rc -eq 4 ] && grep -qi "polycall_ops_register" "$TMP/missing_sym.out"; } \
     && ok "library missing polycall_ops_register -> exit 4" \
@@ -44,7 +44,7 @@ else
   skip "missing-symbol case (example_provider not built)"
 fi
 
-"$PC" run --load "$PLUGIN_BAD" >"$TMP/abi.out" 2>&1
+"$PC" start --load "$PLUGIN_BAD" >"$TMP/abi.out" 2>&1
 rc=$?
 { [ $rc -eq 4 ] && grep -qi "abi" "$TMP/abi.out"; } \
   && ok "ABI-mismatched plugin -> exit 4, reported distinctly" \
@@ -52,7 +52,7 @@ rc=$?
 
 echo "=== load the real fixture, call it from three entry points ==="
 EPF="$TMP/endpoint"
-"$PC" run --endpoint 127.0.0.1:0 --endpoint-file "$EPF" --load "$PLUGIN" \
+"$PC" start --endpoint 127.0.0.1:0 --endpoint-file "$EPF" --load "$PLUGIN" \
   >"$TMP/run.log" 2>&1 &
 RUNPID=$!
 i=0
@@ -64,8 +64,8 @@ if [ ! -s "$EPF" ]; then
 fi
 EP=$(cat "$EPF")
 
-grep -q "loaded plugin" "$TMP/run.log" && ok "run reports the loaded plugin" \
-  || bad "run did not report loading the plugin: $(cat "$TMP/run.log")"
+grep -q "loaded plugin" "$TMP/run.log" && ok "start reports the loaded plugin" \
+  || bad "start did not report loading the plugin: $(cat "$TMP/run.log")"
 
 C_OUT=$("$PC" call demo greet --endpoint "$EP" --input-value '{"name":"world"}'); c_rc=$?
 { [ $c_rc -eq 0 ] && [ "$C_OUT" = '{"ok":true,"output":{"message":"hello, world"}}' ]; } \

@@ -45,7 +45,7 @@ one-line input/output schema hints, `idempotent`). `shutdown` requires the
 
 ## Runtime
 
-`polycall run` binds loopback by default (`--endpoint host:port`, port 0 =
+`polycall start` binds loopback by default (`--endpoint host:port`, port 0 =
 ephemeral; the resolved endpoint is printed and, with `--endpoint-file`,
 written to a file). It serves each connection on its own thread, bounded to
 64 simultaneous connections (`docs/CONCURRENCY.md` has the full threading

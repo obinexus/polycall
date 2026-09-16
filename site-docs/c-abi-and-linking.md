@@ -26,7 +26,7 @@ Everything under `include/`, `polycall_`/`POLYCALL_` prefixed:
 | `polycall.h` | version query, `polycall_init_with_config`/`polycall_cleanup` |
 | `polycall_export.h` | `POLYCALL_API`/`POLYCALL_CALL` linkage macros, the ABI version triplet |
 | `polycall_cli.h` | `polycall_cli_main`, the process exit-code enum |
-| `polycall_runtime.h` | the `polycall_rpc` v1 runtime: create/destroy/register, `run --load` plugin ABI, `polycall_runtime_serve` |
+| `polycall_runtime.h` | the `polycall_rpc` v1 runtime: create/destroy/register, `start --load` plugin ABI, `polycall_runtime_serve` |
 | `polycall_config2.h` | the native schema-v2 config model |
 | `polycall_provider.h` | the C/Node/Python config provider contract |
 | `polycall_telemetry.h` | GUID/timestamp generation and the JSONL event sink |
@@ -39,7 +39,7 @@ symbol — define `POLYCALL_BUILD_SHARED` to build the DLL,
 
 ## The plugin ABI
 
-`run --load PATH` loads a shared library exporting exactly one symbol:
+`start --load PATH` loads a shared library exporting exactly one symbol:
 
 ```c
 int polycall_ops_register(polycall_runtime_t *rt, uint32_t abi_major);
@@ -50,7 +50,7 @@ compare it against its own and refuse to register on a mismatch
 (`POLYCALL_PLUGIN_ABI_MISMATCH`), which the loader reports distinctly
 from any other load failure. Only the exact path given is loaded — no
 directory scan — and an unloadable library, missing symbol, or ABI
-mismatch fails `run` before it binds anything (exit 4). See
+mismatch fails `start` before it binds anything (exit 4). See
 [docs/PLUGINS.md](../docs/PLUGINS.md) for the full contract, and
 `tests/fixtures/providers/c-provider/example_provider.c` /
 `examples/ledger/ledger_plugin.c` for two real, built, tested examples.

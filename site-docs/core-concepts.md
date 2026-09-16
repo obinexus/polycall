@@ -13,7 +13,7 @@ translates parsed command-line options into calls against `libpolycall`
 and renders the result as human text or `--format json`. See the
 [CLI reference](cli-reference.md).
 
-**The runtime** (`polycall_runtime_t`) — created by `polycall run` (or an
+**The runtime** (`polycall_runtime_t`) — created by `polycall start` (or an
 embedding application calling `polycall_runtime_create`/
 `polycall_runtime_serve`). It binds `--endpoint host:port`, accepts
 connections (one thread per connection), authenticates control actions
@@ -24,7 +24,7 @@ registered operation matches its `service.operation`.
 pair with a handler function, an input/output schema hint, and an
 `idempotent` flag clients use to decide whether to retry. Two are
 built in: `inventory.get` and `debug.sleep`. More can be added at runtime
-with no core rebuild via `run --load PATH` (a shared library exporting
+with no core rebuild via `start --load PATH` (a shared library exporting
 `polycall_ops_register`) — see [docs/PLUGINS.md](../docs/PLUGINS.md).
 Registering the same `service.operation` twice — from two plugins, or a
 plugin and a built-in — is always refused, never "last one wins".
@@ -77,7 +77,7 @@ platform, ABI, and core-capability facts.
 
 ## Telemetry is a side channel, not part of the protocol
 
-`run`/`call` automatically emit GUID + timestamp correlated events to a
+`start`/`call` automatically emit GUID + timestamp correlated events to a
 JSONL sink (`.polycall/telemetry.jsonl` by default) — this is separate
 from the `polycall_rpc` v1 wire and never affects a call's outcome or
 timing budget. See the [CLI reference](cli-reference.md#telemetry).

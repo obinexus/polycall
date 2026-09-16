@@ -78,10 +78,10 @@ _run --bogus
 { [ "$RC" -eq 2 ] && echo "$STDERR" | grep -q "unknown option"; } \
   && ok "unknown option -> exit 2" || bad "unknown option -> exit 2 (rc=$RC)"
 
-# 9. removed -f option -> 2 with pointer to 'run'
+# 9. removed -f option -> 2 with pointer to 'start'
 _run -f whatever.cfg
-{ [ "$RC" -eq 2 ] && echo "$STDERR" | grep -q "run --config"; } \
-  && ok "-f removed -> exit 2 (points at run)" || bad "-f removed -> exit 2 (rc=$RC)"
+{ [ "$RC" -eq 2 ] && echo "$STDERR" | grep -q "start --config"; } \
+  && ok "-f removed -> exit 2 (points at start)" || bad "-f removed -> exit 2 (rc=$RC)"
 
 # 10. duplicate scalar option -> 2
 _run --format json --format text doctor
@@ -150,13 +150,13 @@ _run call
 _run call inventory get
 [ "$RC" -eq 2 ] && ok "call without --endpoint -> exit 2" || bad "call without --endpoint (rc=$RC)"
 
-# 20a. run --load: argument handling and fast-fail paths (P1). These never
+# 20a. start --load: argument handling and fast-fail paths (P1). These never
 # bind a socket, so they return promptly without backgrounding anything --
 # see tests/runtime/plugin.sh for the full load/call/status flow.
-_run run --load
-[ "$RC" -eq 2 ] && ok "run --load with no value -> exit 2" || bad "run --load no value (rc=$RC)"
-_run run --load this/path/does/not/exist.so
-[ "$RC" -eq 4 ] && ok "run --load nonexistent path -> exit 4" || bad "run --load nonexistent (rc=$RC)"
+_run start --load
+[ "$RC" -eq 2 ] && ok "start --load with no value -> exit 2" || bad "start --load no value (rc=$RC)"
+_run start --load this/path/does/not/exist.so
+[ "$RC" -eq 4 ] && ok "start --load nonexistent path -> exit 4" || bad "start --load nonexistent (rc=$RC)"
 
 # 20b. bindings command was removed (language bindings are published
 # separately, not vendored/reported by this CLI) -> unknown command, exit 2

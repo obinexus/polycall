@@ -42,7 +42,7 @@ path with spaces survives intact.
 | `telemetry show [--limit N]` | print the most recent recorded events (default 20) |
 | `telemetry status` | whether telemetry is enabled and where it writes |
 | `repl` | explicit interactive session over this same command registry |
-| `run --endpoint host:port [--auth-token T] [--endpoint-file F] [--load PATH ...]` | foreground runtime; port `0` = ephemeral; `--load` (repeatable) adds operations from a plugin shared library before binding |
+| `start --endpoint host:port [--auth-token T] [--endpoint-file F] [--load PATH ...] [--daemon]` | foreground runtime; port `0` = ephemeral; `--load` (repeatable) adds operations from a plugin shared library before binding; `--daemon` detaches into the background and returns immediately, printing the detached process's PID |
 | `status --endpoint host:port` | describe registered operations over the control channel |
 | `stop --endpoint host:port [--auth-token T]` | authenticated shutdown |
 | `call SERVICE OPERATION --endpoint host:port [--input F\|- \| --input-value JSON]` | one round trip, no retry |
@@ -103,7 +103,7 @@ enum values are never used as the shell contract.
 
 ## Telemetry
 
-Every `run` bind/stop and every `call` round trip appends one JSONL event
+Every `start` bind/stop and every `call` round trip appends one JSONL event
 to `<project-root>/.polycall/telemetry.jsonl` (override with
 `POLYCALL_TELEMETRY_LOG`, disable with `POLYCALL_TELEMETRY=off`) — a
 random RFC 4122 v4 GUID `correlation_id`, a millisecond UTC timestamp, and
