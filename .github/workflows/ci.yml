@@ -1,95 +1,260 @@
 name: CI
 
-# Build + test matrix (docs/TODO.md P0). Independent Make and CMake paths are
-# both exercised on every PR, with Make built in parallel (-j) so a repeat of
-# the toolchain-fingerprint object-directory race
-# (see Makefile: "toolchain fingerprint changed - clearing $(OBJ_DIR)")
-# fails the build instead of only reproducing locally.
+# Supported platforms (docs/PLATFORM_REPORT.md): Linux (GCC, Clang),
+# Windows MSVC, Windows MSYS2 UCRT64. macOS is not a supported platform in
+# this release and has no job here.
+#
+# No job can pass with a suite that did not run: the CMake jobs fail on
+# "tests did not run" in the ctest summary (skipped or disabled suites), the
+# Make jobs run tests/run_all.sh, which fails on skips unless ALLOW_SKIP=1.
 
 on:
   push:
-    branches: [main, polycall-cli-redesign]
+    branches: [main, polycall-cli-redesign, "qa/**"]
   pull_request:
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  POLYCALL_TELEMETRY: "off"
+
 jobs:
-  linux-make:
-    name: Linux / GNU Make (-j, GCC + Clang)
-    runs-on: ubuntu-latest
+  linux:
+    name: Linux / ${{ matrix.cc }} / ${{ matrix.build }}
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
         cc: [gcc, clang]
+        build: [cmake, make]
+    env:
+      CC: ${{ matrix.cc }}
+      CXX: ${{ matrix.cc == 'clang' && 'clang++' || 'g++' }}
     steps:
       - uses: actions/checkout@v4
-      - name: Toolchain
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+      - uses: actions/setup-go@v5
+        with: { go-version: "1.22", cache: false }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: "21" }
+      - name: CMake + ctest (every suite must run)
+        if: matrix.build == 'cmake'
         run: |
-          ${{ matrix.cc }} --version
-          make --version
-      - name: make all (parallel)
-        run: make BUILD_DIR=build/linux-${{ matrix.cc }} CC=${{ matrix.cc }} -j"$(nproc)" all
-      - name: make test
-        run: make BUILD_DIR=build/linux-${{ matrix.cc }} CC=${{ matrix.cc }} test
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTING=ON
+          cmake --build build --parallel
+          ctest --test-dir build --output-on-failure 2>&1 | tee ctest.log
+          ! grep -q 'tests did not run' ctest.log
+      - name: GNU Make all + test
+        if: matrix.build == 'make'
+        run: |
+          make BUILD_DIR=build/make CC="$CC" -j"$(nproc)" all
+          make BUILD_DIR=build/make CC="$CC" test
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: logs-linux-${{ matrix.cc }}-${{ matrix.build }}
+          path: |
+            ctest.log
+            build/**/tests/section-*.log*
+          if-no-files-found: ignore
 
-  linux-cmake:
-    name: Linux / CMake + ctest
-    runs-on: ubuntu-latest
+  sanitizers:
+    name: Linux / ${{ matrix.name }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: "ASan+UBSan", san: "address;undefined" }
+          - { name: "TSan", san: "thread" }
+    env:
+      CC: gcc
+      CXX: g++
+      ASAN_OPTIONS: detect_leaks=1:abort_on_error=1
+      UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
+      TSAN_OPTIONS: halt_on_error=1:second_deadlock_stack=1
     steps:
       - uses: actions/checkout@v4
-      - name: Configure
-        run: cmake -S . -B build/linux-cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON
-      - name: Build (parallel)
-        run: cmake --build build/linux-cmake --parallel
-      - name: ctest
-        run: ctest --test-dir build/linux-cmake --output-on-failure
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+      - uses: actions/setup-go@v5
+        with: { go-version: "1.22", cache: false }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: "21" }
+      # ASan/TSan runtimes cannot map their shadow memory with the 32-bit
+      # mmap randomisation of current runner kernels (this runner VM only).
+      - name: Sanitizer-compatible ASLR entropy
+        run: sudo sysctl -w vm.mmap_rnd_bits=28
+      - name: Build + ctest under ${{ matrix.name }}
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTING=ON "-DPOLYCALL_SANITIZERS=${{ matrix.san }}"
+          cmake --build build --parallel
+          ctest --test-dir build --output-on-failure 2>&1 | tee ctest.log
+          ! grep -q 'tests did not run' ctest.log
+          ! grep -qE 'ERROR: (Address|Leak|Thread)Sanitizer|runtime error:|WARNING: ThreadSanitizer' ctest.log
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: logs-sanitizer-${{ matrix.san == 'thread' && 'tsan' || 'asan' }}
+          path: |
+            ctest.log
+            build/tests/section-*.log*
+          if-no-files-found: ignore
 
   windows-msvc:
-    name: Windows / MSVC (CMake, via build-windows.ps1)
-    runs-on: windows-latest
+    name: Windows / MSVC x64
+    runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
-      - name: build-windows.ps1 (configure + build + ctest)
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+      - uses: actions/setup-go@v5
+        with: { go-version: "1.22", cache: false }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: "21" }
+      # cgo (the Go node of the NSIGII test) needs a current MinGW-w64 GCC
+      - uses: msys2/setup-msys2@v2
+        id: msys2
+        with:
+          msystem: UCRT64
+          update: false
+          install: mingw-w64-ucrt-x86_64-gcc
+      - name: CMake (Visual Studio 2022) + ctest (every suite must run)
         shell: pwsh
-        run: ./build-windows.ps1 -Generator "Visual Studio 17 2022" -BuildType Release -Test
+        env:
+          NSIGII_CGO_CC: ${{ steps.msys2.outputs.msys2-location }}\ucrt64\bin\gcc.exe
+        run: |
+          cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -DBUILD_TESTING=ON
+          if ($LASTEXITCODE) { exit 1 }
+          cmake --build build --config Release --parallel
+          if ($LASTEXITCODE) { exit 1 }
+          ctest --test-dir build -C Release --output-on-failure 2>&1 | Tee-Object -FilePath ctest.log
+          if ($LASTEXITCODE) { exit 1 }
+          if (Select-String -Quiet -Path ctest.log -Pattern 'tests did not run') { exit 1 }
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: logs-windows-msvc
+          path: |
+            ctest.log
+            build/tests/section-*.log*
+          if-no-files-found: ignore
 
-  windows-msys2-make:
-    name: Windows / MSYS2 Make (MINGW64 GCC)
-    runs-on: windows-latest
+  windows-msys2:
+    name: Windows / MSYS2 UCRT64 / ${{ matrix.build }}
+    runs-on: windows-2022
+    strategy:
+      fail-fast: false
+      matrix:
+        build: [cmake, make]
     defaults:
       run:
         shell: msys2 {0}
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: "21" }
       - uses: msys2/setup-msys2@v2
         with:
-          msystem: MINGW64
+          msystem: UCRT64
           update: true
+          path-type: inherit   # Java from setup-java
           install: >-
-            mingw-w64-x86_64-gcc
             make
-      - name: Toolchain
+            mingw-w64-ucrt-x86_64-gcc
+            mingw-w64-ucrt-x86_64-cmake
+            mingw-w64-ucrt-x86_64-ninja
+            mingw-w64-ucrt-x86_64-python
+            mingw-w64-ucrt-x86_64-nodejs
+            mingw-w64-ucrt-x86_64-go
+      - name: CMake (Ninja) + ctest (every suite must run)
+        if: matrix.build == 'cmake'
         run: |
-          gcc --version
-          gcc -dumpmachine
-      - name: make all (parallel)
-        run: make BUILD_DIR=build/win-msys2 CC=gcc -j$(nproc) all
-      - name: make test
-        run: make BUILD_DIR=build/win-msys2 CC=gcc test
+          cmake -G Ninja -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON
+          cmake --build build
+          ctest --test-dir build --output-on-failure 2>&1 | tee ctest.log
+          ! grep -q 'tests did not run' ctest.log
+      - name: GNU Make all + test
+        if: matrix.build == 'make'
+        run: |
+          make BUILD_DIR=build/make CC=gcc -j"$(nproc)" all
+          make BUILD_DIR=build/make CC=gcc test
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: logs-windows-msys2-${{ matrix.build }}
+          path: |
+            ctest.log
+            build/**/tests/section-*.log*
+          if-no-files-found: ignore
 
-  macos-make:
-    name: macOS / Make (Apple Clang)
-    runs-on: macos-latest
+  packaging-linux:
+    name: Packaging / ${{ matrix.kind }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        kind: [apt, pacman]
     steps:
       - uses: actions/checkout@v4
-      - name: Toolchain
+      - name: ${{ matrix.kind }} end-to-end (build, sign, clean-room install/upgrade/remove)
+        run: sh tests/packaging/${{ matrix.kind }}-e2e.sh "$RUNNER_TEMP/pkg"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: packaging-${{ matrix.kind }}
+          path: |
+            ${{ runner.temp }}/pkg/*.log
+            ${{ runner.temp }}/pkg/*.tar.gz
+            ${{ runner.temp }}/pkg/debs-1/*.deb
+            ${{ runner.temp }}/pkg/arch-repo-v1/*.pkg.tar.zst
+          if-no-files-found: ignore
+
+  packaging-msys2:
+    name: Packaging / MSYS2 UCRT64
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - name: Source tarball (git archive of HEAD)
+        shell: bash
+        run: sh packaging/make-source-tarball.sh HEAD "$RUNNER_TEMP/src"
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: >-
+            base-devel
+            gnupg
+            pacman-contrib
+            mingw-w64-ucrt-x86_64-cc
+            mingw-w64-ucrt-x86_64-cmake
+            mingw-w64-ucrt-x86_64-ninja
+            mingw-w64-ucrt-x86_64-pkgconf
+            mingw-w64-ucrt-x86_64-python
+            mingw-w64-ucrt-x86_64-nodejs
+      - name: makepkg-mingw (with check()), sign, isolated-root install/upgrade/remove
+        shell: msys2 {0}
         run: |
-          cc --version
-          make --version
-      - name: make all (parallel)
-        run: make BUILD_DIR=build/macos CC=cc -j"$(sysctl -n hw.ncpu)" all
-      - name: make test
-        run: make BUILD_DIR=build/macos CC=cc test
+          T=$(cygpath -u "$RUNNER_TEMP")
+          bash tests/packaging/msys2-e2e.sh "$T"/src/polycall-*.tar.gz "$T/msys2"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: packaging-msys2
+          path: |
+            ${{ runner.temp }}/msys2/*.log
+            ${{ runner.temp }}/msys2/repo-v1/*.pkg.tar.zst
+          if-no-files-found: ignore

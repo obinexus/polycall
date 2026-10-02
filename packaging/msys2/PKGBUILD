@@ -49,7 +49,7 @@ check() {
     cat "$log"; return 1
   fi
   cat "$log"
-  if grep -q 'Skipped' "$log"; then echo "check(): a test suite was skipped" >&2; return 1; fi
+  if grep -q 'tests did not run' "$log"; then echo "check(): a test suite did not run" >&2; return 1; fi
 }
 
 package() {

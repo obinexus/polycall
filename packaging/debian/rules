@@ -23,7 +23,7 @@ ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
 	      -E '^polycall_(conformance_go|conformance_java|nsigii_two_process)$$' \
 	      > ../ctest.log 2>&1 || { cat ../ctest.log; exit 1; }; } && \
 	  cat ../ctest.log && \
-	  if grep -q 'Skipped' ../ctest.log; then echo "a test suite was skipped" >&2; exit 1; fi
+	  if grep -q 'tests did not run' ../ctest.log; then echo "a test suite did not run" >&2; exit 1; fi
 endif
 
 override_dh_installsystemd:
