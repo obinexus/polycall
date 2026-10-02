@@ -13,13 +13,17 @@ override_dh_auto_configure:
 	  -DPOLYCALL_INSTALL_SYSTEMD_UNIT=ON \
 	  -DBUILD_TESTING=$(if $(filter nocheck,$(DEB_BUILD_OPTIONS)),OFF,ON)
 
-# The suites that need other language toolchains (Go, Java, Node, and the
-# Go+Python NSIGII test) are run by CI and tests/run_all.sh, not here; they
-# are excluded by name, not silently skipped.
+# The suites that need the Go or Java toolchains (and the Go+Python NSIGII
+# test) run in CI and tests/run_all.sh, not here: excluded by name. Every
+# other suite must run; a skipped one (missing Build-Depends) fails the build.
 override_dh_auto_test:
 ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
-	cd obj-$(DEB_HOST_GNU_TYPE) && ctest --output-on-failure \
-	  -E '^polycall_(conformance_c_node_python|conformance_go|conformance_java|nsigii_two_process)$$'
+	cd obj-$(DEB_HOST_GNU_TYPE) && \
+	  { ctest --output-on-failure \
+	      -E '^polycall_(conformance_go|conformance_java|nsigii_two_process)$$' \
+	      > ../ctest.log 2>&1 || { cat ../ctest.log; exit 1; }; } && \
+	  cat ../ctest.log && \
+	  if grep -q 'Skipped' ../ctest.log; then echo "a test suite was skipped" >&2; exit 1; fi
 endif
 
 override_dh_installsystemd:

@@ -32,7 +32,7 @@ MSYS_NO_PATHCONV=1 docker run --rm -v "$(hostpath "$OUT"):/out" "$BUILDER" sh -c
   set -eu
   export DEBIAN_FRONTEND=noninteractive
   apt-get update -qq
-  apt-get install -y -qq build-essential debhelper cmake python3 pkg-config file apt-utils gnupg >/dev/null
+  apt-get install -y -qq build-essential debhelper cmake python3 nodejs pkg-config file apt-utils gnupg >/dev/null
   useradd -m builder
   mkdir /home/builder/w && tar -xzf /out/'"$TARNAME"' -C /home/builder/w
   chown -R builder /home/builder/w

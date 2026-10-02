@@ -25,7 +25,8 @@ license=('LicenseRef-OBINexus-NT-Open-Access')
 makedepends=("${MINGW_PACKAGE_PREFIX}-cc"
              "${MINGW_PACKAGE_PREFIX}-cmake"
              "${MINGW_PACKAGE_PREFIX}-ninja")
-checkdepends=("${MINGW_PACKAGE_PREFIX}-python")
+checkdepends=("${MINGW_PACKAGE_PREFIX}-python"
+              "${MINGW_PACKAGE_PREFIX}-nodejs")
 source=("polycall-$pkgver.tar.gz::https://github.com/obinexus/polycall/releases/download/v$pkgver/polycall-$pkgver.tar.gz")
 sha256sums=('SKIP')
 
@@ -39,10 +40,16 @@ build() {
 }
 
 check() {
-  # Suites that need other language toolchains (Go, Java, Node; the Go+Python
-  # NSIGII test) run in CI, not here; excluded by name, not skipped silently.
-  POLYCALL_TELEMETRY=off ctest --test-dir "build-${MSYSTEM}" --output-on-failure \
-    -E '^polycall_(conformance_c_node_python|conformance_go|conformance_java|nsigii_two_process)$'
+  # Suites that need the Go or Java toolchains (and the Go+Python NSIGII test)
+  # run in CI, not here: excluded by name. Every other suite must run; a
+  # skipped one (missing checkdepends) fails the build.
+  local log="${srcdir}/ctest-${MSYSTEM}.log"
+  if ! POLYCALL_TELEMETRY=off ctest --test-dir "build-${MSYSTEM}" --output-on-failure \
+      -E '^polycall_(conformance_go|conformance_java|nsigii_two_process)$' >"$log" 2>&1; then
+    cat "$log"; return 1
+  fi
+  cat "$log"
+  if grep -q 'Skipped' "$log"; then echo "check(): a test suite was skipped" >&2; return 1; fi
 }
 
 package() {

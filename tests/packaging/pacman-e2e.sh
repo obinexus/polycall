@@ -25,7 +25,7 @@ echo "== source: $TARNAME ($SUM)"
 MSYS_NO_PATHCONV=1 docker run --rm -v "$(hostpath "$OUT"):/out" "$IMAGE" sh -c '
   set -eu
   pacman-key --init >/dev/null 2>&1; pacman-key --populate archlinux >/dev/null 2>&1
-  pacman -Syu --noconfirm --needed cmake python >/dev/null
+  pacman -Syu --noconfirm --needed cmake python nodejs >/dev/null
   useradd -m builder
   for rel in 1 2; do
     d=/home/builder/p$rel; mkdir -p $d
