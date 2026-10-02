@@ -41,3 +41,6 @@ tests/fixtures/crlf/**  -text
 PKGBUILD        text eol=lf
 *.install       text eol=lf
 packaging/**    text eol=lf
+
+# NSIGII reference: preserved byte-for-byte (see examples/nsigii-p2p/reference/SHA256SUMS)
+examples/nsigii-p2p/reference/** -text

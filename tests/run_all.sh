@@ -34,7 +34,7 @@ case "$(uname -s 2>/dev/null)" in
   MINGW*|MSYS*|CYGWIN*) ROOT=$(cygpath -m "$ROOT"); BUILD_DIR=$(cygpath -m "$BUILD_DIR") ;;
 esac
 case "$ONLY" in
-  ""|ffi_unit|fuzz|cli|model|equivalence|roundtrip|plugins|conformance:core|conformance:go|  conformance:java|microvm|consumers|daemon|peer) ;;
+  ""|ffi_unit|fuzz|cli|model|equivalence|roundtrip|plugins|conformance:core|conformance:go|  conformance:java|microvm|consumers|daemon|peer|nsigii) ;;
   *) printf 'FAIL  run_all: unknown section "%s"
 ' "$ONLY"; exit 1 ;;
 esac
@@ -84,8 +84,10 @@ section() {
   cat "$_log"
   if [ "$_rc" -ne 0 ] && [ "$_rc" -ne 77 ]; then
     FAILED="$FAILED $_name"
+    cp "$_log" "$_log.failed-$(date +%Y%m%dT%H%M%S)" 2>/dev/null   # kept: a rerun overwrites $_log
   elif grep -qE '^(FAIL|  FAIL) ' "$_log"; then
     FAILED="$FAILED $_name"
+    cp "$_log" "$_log.failed-$(date +%Y%m%dT%H%M%S)" 2>/dev/null
   elif [ "$_rc" -eq 77 ] || grep -qE '^(NOT RUN|SKIP) ' "$_log"; then
     SKIPPED="$SKIPPED $_name"
   fi
@@ -206,6 +208,15 @@ section microvm      sh "$ROOT/tests/microvm/strict_mode.sh" "$BIN" "$ROOT"
 section consumers    run_consumers
 section daemon       sh "$ROOT/tests/daemon/daemon.sh" "$BIN" "$ROOT"
 section peer         sh "$ROOT/tests/peer/p2p.sh" "$BIN" "$ROOT" "$BUILD_DIR/bin/polycall_fault_proxy$EXE_EXT"
+
+run_nsigii() { # Go Alpha (cgo) + Python Beta (ctypes / HTTP fallback), two processes
+  _py=$(command -v python3 2>/dev/null || command -v python 2>/dev/null || true)
+  if [ -z "$_py" ]; then note "NOT RUN  NSIGII two-process test (python3 not on PATH)"; return 77; fi
+  set -- --root "$ROOT" --include "$ROOT/include" --libdir "$LIBDIR" --shared-lib "$SHARED_LIB"          --proxy "$BUILD_DIR/bin/polycall_fault_proxy$EXE_EXT"
+  [ "$IS_WINDOWS" = 1 ] && [ -n "$IMPLIB" ] && set -- "$@" --import-lib "$IMPLIB"
+  "$_py" "$ROOT/tests/peer/nsigii_test.py" "$@"
+}
+section nsigii       run_nsigii
 
 note ""
 if [ -n "$FAILED" ]; then

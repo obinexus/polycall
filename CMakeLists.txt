@@ -469,7 +469,8 @@ if(BUILD_TESTING)
       "microvm|tests/run_all.sh|microvm"
       "consumers_build_tree|tests/run_all.sh|consumers"
       "daemon|tests/run_all.sh|daemon"
-      "peer_p2p|tests/run_all.sh|peer")
+      "peer_p2p|tests/run_all.sh|peer"
+      "nsigii_two_process|tests/run_all.sh|nsigii")
     foreach(_s IN LISTS _suites)
       string(REPLACE "|" ";" _parts "${_s}")
       list(GET _parts 0 _name)
