@@ -93,7 +93,9 @@ int main(void) {
 EOF
 ( cd /tmp/c && gcc -Wall -Werror consumer.c $(pkg-config --cflags --libs polycall) -o shared && ./shared ) >/tmp/c/o1 2>&1
 check '[ "$(cat /tmp/c/o1)" = "$UPV" ]' "pkg-config shared consumer builds and runs"
-check 'ldd /tmp/c/shared | grep -q "libpolycall.so.1 => /usr/lib/"' "consumer resolves the packaged libpolycall.so.1"
+LIBP=$(ldd /tmp/c/shared | awk '$1 == "libpolycall.so.1" {print $3}')
+check '[ -n "$LIBP" ] && dpkg -S "$(readlink -f "$LIBP")" 2>/dev/null | grep -q "^libpolycall1:"' \
+  "consumer resolves libpolycall.so.1 to the file owned by libpolycall1 ($LIBP)"
 ( cd /tmp/c && gcc -Wall -Werror consumer.c -static-libgcc $(pkg-config --static --cflags polycall) \
     /usr/lib/*/libpolycall.a $(pkg-config --static --libs-only-l polycall | sed 's/-lpolycall//') -o static && ./static ) >/tmp/c/o2 2>&1
 check '[ "$(cat /tmp/c/o2)" = "$UPV" ] && ! ldd /tmp/c/static | grep -q libpolycall' "static consumer (libpolycall.a)"

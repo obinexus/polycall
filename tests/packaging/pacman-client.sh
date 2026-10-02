@@ -78,7 +78,7 @@ check '[ "$(cat /tmp/cm/o)" = "$UPV" ]' "CMake find_package(polycall) consumer"
 # ---- upgrade with a locally modified backup file ----------------------------
 echo "# local admin change" >> /etc/polycall/Polycallfile
 use_repo /repo-v2
-pacman -Syu --noconfirm >/tmp/u1 2>&1; rc=$?
+pacman -Syyu --noconfirm >/tmp/u1 2>&1; rc=$?   # -yy: the server changed
 V=$(pacman -Q polycall 2>/dev/null | awk '{print $2}')
 check '[ $rc -eq 0 ] && [ "$V" = "$UPV-2" ]' "pacman -Syu upgrades to $V"
 check 'grep -q "local admin change" /etc/polycall/Polycallfile' "the admin's backup-file change survives the upgrade"

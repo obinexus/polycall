@@ -135,7 +135,7 @@ mkdir -p "$W/d" && printf 'network start\ndaemon_endpoint=127.0.0.1:0\nauth_toke
 check '[ $rc -eq 0 ] && grep -q "\"status\":\"ok\"" "$W/d.log"' "daemon start / status (health ok) / stop from the package"
 
 use_repo "$OUT/repo-v2"
-P -Syu --noconfirm >"$OUT/u1.log" 2>&1
+P -Syyu --noconfirm >"$OUT/u1.log" 2>&1   # -yy: the server changed
 V=$(P -Q $PKG 2>/dev/null | awk '{print $2}')
 check '[ "$V" = "$UPV-2" ]' "pacman -Syu upgrades to $V"
 check '[ "$(PATH="$B/bin:$PATH" "$W/shared.exe" | tr -d "\r")" = "$UPV" ]' "existing consumer runs against the upgraded DLL"

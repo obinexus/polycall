@@ -18,6 +18,8 @@ depends=('glibc')
 makedepends=('cmake')
 checkdepends=('python' 'nodejs')
 backup=('etc/polycall/Polycallfile')
+# libpolycall.a ships (the installed CMake package exports the static target)
+options=('staticlibs')
 source=("polycall-$pkgver.tar.gz::https://github.com/obinexus/polycall/releases/download/v$pkgver/polycall-$pkgver.tar.gz")
 sha256sums=('SKIP')
 
@@ -41,7 +43,7 @@ check() {
     cat "$log"; return 1
   fi
   cat "$log"
-  if grep -q 'Skipped' "$log"; then echo "check(): a test suite was skipped" >&2; return 1; fi
+  if grep -q 'tests did not run' "$log"; then echo "check(): a test suite did not run" >&2; return 1; fi
 }
 
 package() {
