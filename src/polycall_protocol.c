@@ -163,6 +163,13 @@ bool polycall_protocol_send(
     if (!ctx || !ctx->endpoint || !payload || payload_length == 0) {
         return false;
     }
+    // Bound before any arithmetic: header + payload must fit the buffer
+    // (and sizeof(header) + payload_length must not wrap).
+    if (payload_length > PROTOCOL_BUFFER_SIZE - sizeof(polycall_message_header_t)) {
+        snprintf(protocol_error_buffer, MAX_ERROR_LENGTH,
+                "Message too large: %zu payload bytes", payload_length);
+        return false;
+    }
     
     // Create message header
     polycall_message_header_t header = {
@@ -170,7 +177,7 @@ bool polycall_protocol_send(
         .type = type,
         .flags = flags,
         .sequence = ctx->next_sequence++,
-        .payload_length = payload_length,
+        .payload_length = (uint32_t)payload_length,  // bounded above
         .checksum = 0
     };
     
@@ -438,7 +445,7 @@ polycall_message_header_t polycall_protocol_create_header(
         .type = type,
         .flags = flags,
         .sequence = 0,  // Will be set by send function
-        .payload_length = payload_length,
+        .payload_length = (uint32_t)payload_length,
         .checksum = 0   // Will be calculated by send function
     };
     

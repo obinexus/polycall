@@ -235,7 +235,11 @@ static int join_path(char *out, size_t cap, const char *base, const char *rel)
     need = lb + (size_t)sep + lr;
     if (need >= cap) return -1;
     if (lb) memmove(out, base, lb);
+#if defined(_WIN32)
+    if (sep) out[lb] = '\\';
+#else
     if (sep) out[lb] = '/';
+#endif
     memmove(out + lb + (size_t)sep, rel, lr);
     out[need] = '\0';
     return 0;

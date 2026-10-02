@@ -37,6 +37,16 @@
 #endif
 
 
+/* A socket handle. On Win64 a SOCKET is a 64-bit UINT_PTR: storing it in an
+ * int truncates it, and "< 0" never detects INVALID_SOCKET. */
+#ifdef _WIN32
+    typedef SOCKET net_socket_t;
+    #define NET_INVALID_SOCKET INVALID_SOCKET
+#else
+    typedef int net_socket_t;
+    #define NET_INVALID_SOCKET (-1)
+#endif
+
 // Network Constants
 #define NET_MAX_CLIENTS 10
 #define NET_BUFFER_SIZE 1024
@@ -80,7 +90,7 @@ typedef struct PhantomDaemon PhantomDaemon;
 typedef struct {
     pthread_mutex_t lock;           // State mutex
     bool is_active;                 // Active flag
-    int socket_fd;                  // Socket descriptor
+    net_socket_t socket_fd;         // Socket descriptor (NET_INVALID_SOCKET if none)
     struct sockaddr_in addr;        // Client address
 } ClientState;
 
@@ -91,7 +101,7 @@ typedef struct {
     uint16_t port;                  // Port number
     NetworkProtocol protocol;       // Protocol type
     NetworkRole role;               // Endpoint role
-    int socket_fd;                  // Socket descriptor
+    net_socket_t socket_fd;         // Socket descriptor (NET_INVALID_SOCKET if none)
     struct sockaddr_in addr;        // Socket address
     PhantomDaemon* phantom;         // Phantom daemon reference
     void* user_data;               // Added user data field

@@ -40,9 +40,13 @@ PolycallMicroStatus polycall_micro_init(
     }
     
     // Initialize protocol context with network endpoint
-    NetworkEndpoint endpoint = {0};
-    endpoint.protocol = NET_TCP;
-    endpoint.role = NET_SERVER;
+    // The protocol context keeps this pointer, so the endpoint must live as
+    // long as ctx (it used to be a local of this function).
+    NetworkEndpoint* endpoint = &ctx->protocol_endpoint;
+    memset(endpoint, 0, sizeof *endpoint);
+    endpoint->socket_fd = NET_INVALID_SOCKET;
+    endpoint->protocol = NET_TCP;
+    endpoint->role = NET_SERVER;
     
     polycall_protocol_config_t proto_config = {
         .flags = 0,
@@ -51,7 +55,7 @@ PolycallMicroStatus polycall_micro_init(
         .user_data = config->user_data
     };
     
-    if (!polycall_protocol_init(&ctx->protocol_ctx, config->user_data, &endpoint, &proto_config)) {
+    if (!polycall_protocol_init(&ctx->protocol_ctx, config->user_data, endpoint, &proto_config)) {
         polycall_sm_destroy(ctx->state_machine);
         return POLYCALL_MICRO_ERROR_PROTOCOL;
     }

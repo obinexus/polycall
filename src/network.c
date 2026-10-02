@@ -1,4 +1,5 @@
 #include "network.h"
+#include <limits.h>
 #ifdef _WIN32
     #include <winsock2.h>
     #include <ws2tcpip.h>
@@ -16,7 +17,7 @@
 #endif
 
 // Set socket non-blocking mode
-static int set_nonblocking(int sockfd) {
+static int set_nonblocking(net_socket_t sockfd) {
 #ifdef _WIN32
     u_long mode = 1;  // 1 for non-blocking, 0 for blocking
     return ioctlsocket(sockfd, FIONBIO, &mode);
@@ -31,7 +32,7 @@ static int set_nonblocking(int sockfd) {
 void net_init_client_state(ClientState* state) {
     pthread_mutex_init(&state->lock, NULL);
     state->is_active = false;
-    state->socket_fd = 0;
+    state->socket_fd = NET_INVALID_SOCKET;
     memset(&state->addr, 0, sizeof(state->addr));
 }
 
@@ -47,9 +48,9 @@ static uint16_t find_available_port(uint16_t start_port, uint16_t end_port) {
 // Clean up client state
 void net_cleanup_client_state(ClientState* state) {
     pthread_mutex_lock(&state->lock);
-    if (state->socket_fd > 0) {
+    if (state->socket_fd != NET_INVALID_SOCKET) {
         close(state->socket_fd);
-        state->socket_fd = 0;
+        state->socket_fd = NET_INVALID_SOCKET;
     }
     state->is_active = false;
     pthread_mutex_unlock(&state->lock);
@@ -57,8 +58,8 @@ void net_cleanup_client_state(ClientState* state) {
 }
 
 bool net_is_port_in_use(uint16_t port) {
-    int sock = socket(AF_INET, SOCK_STREAM, 0);
-    if (sock < 0) return true;  // Error on the safe side
+    net_socket_t sock = socket(AF_INET, SOCK_STREAM, 0);
+    if (sock == NET_INVALID_SOCKET) return true;  // Error on the safe side
     
     struct sockaddr_in addr = {
         .sin_family = AF_INET,
@@ -74,8 +75,8 @@ bool net_is_port_in_use(uint16_t port) {
 
 // Attempt to release port
 bool net_release_port(uint16_t port) {
-    int sock = socket(AF_INET, SOCK_STREAM, 0);
-    if (sock < 0) return false;
+    net_socket_t sock = socket(AF_INET, SOCK_STREAM, 0);
+    if (sock == NET_INVALID_SOCKET) return false;
     
     struct sockaddr_in addr = {
         .sin_family = AF_INET,
@@ -122,7 +123,7 @@ bool net_init(NetworkEndpoint* endpoint) {
         endpoint->protocol == NET_TCP ? SOCK_STREAM : SOCK_DGRAM, 
         0);
     
-    if (endpoint->socket_fd < 0) {
+    if (endpoint->socket_fd == NET_INVALID_SOCKET) {
         perror("Socket creation failed");
         pthread_mutex_unlock(&endpoint->lock);
         pthread_mutex_destroy(&endpoint->lock);
@@ -135,6 +136,7 @@ bool net_init(NetworkEndpoint* endpoint) {
                    (sock_opt_type)&opt, sizeof(opt)) < 0) {
         perror("setsockopt failed");
         close(endpoint->socket_fd);
+        endpoint->socket_fd = NET_INVALID_SOCKET;
         pthread_mutex_unlock(&endpoint->lock);
         pthread_mutex_destroy(&endpoint->lock);
         return false;
@@ -151,6 +153,7 @@ bool net_init(NetworkEndpoint* endpoint) {
                 sizeof(endpoint->addr)) < 0) {
             perror("Bind failed");
             close(endpoint->socket_fd);
+            endpoint->socket_fd = NET_INVALID_SOCKET;
             pthread_mutex_unlock(&endpoint->lock);
             pthread_mutex_destroy(&endpoint->lock);
             return false;
@@ -160,6 +163,7 @@ bool net_init(NetworkEndpoint* endpoint) {
             if (listen(endpoint->socket_fd, NET_MAX_CLIENTS) < 0) {
                 perror("Listen failed");
                 close(endpoint->socket_fd);
+                endpoint->socket_fd = NET_INVALID_SOCKET;
                 pthread_mutex_unlock(&endpoint->lock);
                 pthread_mutex_destroy(&endpoint->lock);
                 return false;
@@ -176,7 +180,7 @@ void net_close(NetworkEndpoint* endpoint) {
     
     pthread_mutex_lock(&endpoint->lock);
     
-    if (endpoint->socket_fd > 0) {
+    if (endpoint->socket_fd != NET_INVALID_SOCKET) {
         // Set linger to ensure complete socket shutdown
         struct linger ling = {1, 0};  // Immediate shutdown
         setsockopt(endpoint->socket_fd, SOL_SOCKET, SO_LINGER, 
@@ -184,7 +188,7 @@ void net_close(NetworkEndpoint* endpoint) {
         
         shutdown(endpoint->socket_fd, SHUT_RDWR);  // Shutdown both directions
         close(endpoint->socket_fd);
-        endpoint->socket_fd = 0;
+        endpoint->socket_fd = NET_INVALID_SOCKET;
     }
     
     pthread_mutex_unlock(&endpoint->lock);
@@ -197,7 +201,12 @@ ssize_t net_send(NetworkEndpoint* endpoint, NetworkPacket* packet) {
     
     ssize_t result;
     pthread_mutex_lock(&endpoint->lock);
-    result = send(endpoint->socket_fd, packet->data, packet->size, packet->flags);
+#ifdef _WIN32
+    result = send(endpoint->socket_fd, (const char*)packet->data,
+                  packet->size > INT_MAX ? INT_MAX : (int)packet->size, (int)packet->flags);
+#else
+    result = send(endpoint->socket_fd, packet->data, packet->size, (int)packet->flags);
+#endif
     pthread_mutex_unlock(&endpoint->lock);
     return result;
 }
@@ -208,13 +217,18 @@ ssize_t net_receive(NetworkEndpoint* endpoint, NetworkPacket* packet) {
     
     ssize_t result;
     pthread_mutex_lock(&endpoint->lock);
-    result = recv(endpoint->socket_fd, packet->data, packet->size, packet->flags);
+#ifdef _WIN32
+    result = recv(endpoint->socket_fd, (char*)packet->data,
+                  packet->size > INT_MAX ? INT_MAX : (int)packet->size, (int)packet->flags);
+#else
+    result = recv(endpoint->socket_fd, packet->data, packet->size, (int)packet->flags);
+#endif
     pthread_mutex_unlock(&endpoint->lock);
     return result;
 }
 
 // Add client to program
-bool net_add_client(NetworkProgram* program, int socket_fd, struct sockaddr_in addr) {
+static bool net_add_client(NetworkProgram* program, net_socket_t socket_fd, struct sockaddr_in addr) {
     if (!program) return false;
     
     bool added = false;
@@ -237,24 +251,6 @@ bool net_add_client(NetworkProgram* program, int socket_fd, struct sockaddr_in a
     return added;
 }
 
-// Remove client from program
-void net_remove_client(NetworkProgram* program, int socket_fd) {
-    if (!program) return;
-    
-    pthread_mutex_lock(&program->clients_lock);
-    
-    for (int i = 0; i < NET_MAX_CLIENTS; i++) {
-        pthread_mutex_lock(&program->clients[i].lock);
-        if (program->clients[i].is_active && program->clients[i].socket_fd == socket_fd) {
-            close(program->clients[i].socket_fd);
-            program->clients[i].is_active = false;
-            program->clients[i].socket_fd = 0;
-        }
-        pthread_mutex_unlock(&program->clients[i].lock);
-    }
-    
-    pthread_mutex_unlock(&program->clients_lock);
-}
 void net_init_program(NetworkProgram* program) {
     if (!program) return;
     
@@ -262,7 +258,12 @@ void net_init_program(NetworkProgram* program) {
     memset(program, 0, sizeof(NetworkProgram));
     pthread_mutex_init(&program->clients_lock, NULL);
     program->running = true;
-    
+    // Client states must be valid on every return path: net_cleanup_program
+    // destroys them unconditionally.
+    for (int i = 0; i < NET_MAX_CLIENTS; i++) {
+        net_init_client_state(&program->clients[i]);
+    }
+
     // Allocate endpoints
     program->endpoints = calloc(1, sizeof(NetworkEndpoint));
     if (!program->endpoints) {
@@ -300,11 +301,6 @@ void net_init_program(NetworkProgram* program) {
         return;
     }
     
-    // Initialize client states
-    for (int i = 0; i < NET_MAX_CLIENTS; i++) {
-        net_init_client_state(&program->clients[i]);
-    }
-    
     fprintf(stderr, "Network program initialized successfully on port %d\n", port);
 }
 
@@ -334,18 +330,7 @@ void net_cleanup_program(NetworkProgram* program) {
 }
 
 void net_run(NetworkProgram* program) {
-    if (!program) {
-        fprintf(stderr, "DEBUG: net_run called with NULL program\n");
-        return;
-    }
-    
-    if (!program->running) {
-        fprintf(stderr, "DEBUG: Program not running\n");
-        return;
-    }
-    
-    if (!program->endpoints || program->count == 0) {
-        fprintf(stderr, "DEBUG: No endpoints initialized\n");
+    if (!program || !program->running || !program->endpoints || program->count == 0) {
         return;
     }
 
@@ -355,58 +340,66 @@ void net_run(NetworkProgram* program) {
         .tv_usec = 0
     };
 
-    // Setup file descriptors
+    // Setup file descriptors. select() ignores nfds on Windows; on POSIX a
+    // descriptor at or above FD_SETSIZE cannot be put in an fd_set.
     FD_ZERO(&readfds);
-    fprintf(stderr, "DEBUG: Setting up file descriptors for socket %d\n", 
-            program->endpoints[0].socket_fd);
-            
-    int max_fd = program->endpoints[0].socket_fd;
-    if (max_fd <= 0) {
-        fprintf(stderr, "DEBUG: Invalid socket descriptor\n");
+    net_socket_t listen_fd = program->endpoints[0].socket_fd;
+    if (listen_fd == NET_INVALID_SOCKET) {
         return;
     }
-    
-    FD_SET(max_fd, &readfds);
+#ifndef _WIN32
+    if (listen_fd >= FD_SETSIZE) {
+        return;
+    }
+    int max_fd = listen_fd;
+#endif
+    FD_SET(listen_fd, &readfds);
 
     // Add active clients
     pthread_mutex_lock(&program->clients_lock);
     for (int i = 0; i < NET_MAX_CLIENTS; i++) {
         pthread_mutex_lock(&program->clients[i].lock);
         if (program->clients[i].is_active) {
-            int fd = program->clients[i].socket_fd;
-            if (fd > 0) {
+            net_socket_t fd = program->clients[i].socket_fd;
+#ifdef _WIN32
+            if (fd != NET_INVALID_SOCKET) {
+                FD_SET(fd, &readfds);
+            }
+#else
+            if (fd != NET_INVALID_SOCKET && fd < FD_SETSIZE) {
                 FD_SET(fd, &readfds);
                 if (fd > max_fd) max_fd = fd;
             }
+#endif
         }
         pthread_mutex_unlock(&program->clients[i].lock);
     }
     pthread_mutex_unlock(&program->clients_lock);
 
-    fprintf(stderr, "DEBUG: Calling select with max_fd=%d\n", max_fd);
-    
     // Wait for activity with timeout
+#ifdef _WIN32
+    int activity = select(0, &readfds, NULL, NULL, &tv);
+#else
     int activity = select(max_fd + 1, &readfds, NULL, NULL, &tv);
+#endif
     
     if (activity < 0) {
         if (errno != EINTR) {
-            perror("DEBUG: select error");
+            perror("select");
         }
         return;
     }
 
-    fprintf(stderr, "DEBUG: Select returned %d\n", activity);
-
     // Handle new connections
-    if (FD_ISSET(program->endpoints[0].socket_fd, &readfds)) {
+    if (FD_ISSET(listen_fd, &readfds)) {
         struct sockaddr_in client_addr;
         socklen_t addr_len = sizeof(client_addr);
         
-        int new_socket = accept(program->endpoints[0].socket_fd,
-                              (struct sockaddr*)&client_addr,
-                              &addr_len);
+        net_socket_t new_socket = accept(listen_fd,
+                                         (struct sockaddr*)&client_addr,
+                                         &addr_len);
 
-        if (new_socket >= 0) {
+        if (new_socket != NET_INVALID_SOCKET) {
             // Set socket to non-blocking mode
             if (set_nonblocking(new_socket) < 0) {
                 close(new_socket);
@@ -436,6 +429,7 @@ void net_run(NetworkProgram* program) {
     for (int i = 0; i < NET_MAX_CLIENTS; i++) {
         pthread_mutex_lock(&program->clients[i].lock);
         if (program->clients[i].is_active &&
+            program->clients[i].socket_fd != NET_INVALID_SOCKET &&
             FD_ISSET(program->clients[i].socket_fd, &readfds)) {
             
             char buffer[NET_BUFFER_SIZE];
@@ -456,7 +450,10 @@ void net_run(NetworkProgram* program) {
                     program->handlers.on_disconnect(&client_endpoint);
                 }
                 
-                net_remove_client(program, program->clients[i].socket_fd);
+                // Both locks are already held: close in place.
+                close(program->clients[i].socket_fd);
+                program->clients[i].socket_fd = NET_INVALID_SOCKET;
+                program->clients[i].is_active = false;
             } else {
                 // Handle received data
                 NetworkEndpoint client_endpoint = {
@@ -467,7 +464,7 @@ void net_run(NetworkProgram* program) {
 
                 NetworkPacket packet = {
                     .data = buffer,
-                    .size = bytes_read,
+                    .size = (size_t)bytes_read,
                     .flags = 0
                 };
 

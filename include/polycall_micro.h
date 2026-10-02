@@ -58,6 +58,7 @@ typedef struct {
     PolycallServiceArray service_array;
     PolyCall_StateMachine* state_machine;
     polycall_protocol_context_t protocol_ctx;
+    NetworkEndpoint protocol_endpoint;   // owned here: protocol_ctx points at it
     uint32_t flags;
     uint64_t startup_time;
 } PolycallMicroContext;
