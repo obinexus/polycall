@@ -31,3 +31,13 @@ tests/fixtures/crlf/**  -text
 # here and the affected paths are build artifacts / binaries that do not
 # belong in the repo (see .gitignore). Re-enable LFS deliberately with
 # `git lfs track` + a real `git lfs` setup if large binaries are ever needed.
+
+# packaging / build inputs consumed on Linux must keep LF on any checkout
+*.in            text eol=lf
+*.symbols       text eol=lf
+*.cpp           text eol=lf
+*.hpp           text eol=lf
+*.service       text eol=lf
+PKGBUILD        text eol=lf
+*.install       text eol=lf
+packaging/**    text eol=lf
