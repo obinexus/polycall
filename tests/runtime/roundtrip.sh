@@ -34,7 +34,22 @@ EP=$(cat "$EPF")
 echo "=== runtime up at $EP (pid $RUNPID) ==="
 
 # helper: extract the compact "output" object from a {"ok":true,"output":...} reply
-out_field() { node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{const o=JSON.parse(s);process.stdout.write(JSON.stringify(o.output??o.error))}catch(e){process.exit(7)}})'; }
+# (node or python: the C checks must not depend on which one is installed)
+if command -v node >/dev/null 2>&1; then
+  out_field() { node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{const o=JSON.parse(s);process.stdout.write(JSON.stringify(o.output??o.error))}catch(e){process.exit(7)}})'; }
+elif _JPY=$(command -v python3 2>/dev/null || command -v python 2>/dev/null); then
+  out_field() { "$_JPY" -c 'import sys, json
+try:
+    o = json.loads(sys.stdin.read())
+except ValueError:
+    sys.exit(7)
+v = o.get("output")
+sys.stdout.write(json.dumps(o.get("error") if v is None else v, separators=(",", ":"), ensure_ascii=False))'; }
+else
+  echo "NOT RUN  runtime roundtrip (needs node or python3 to read JSON replies)"
+  echo "--- roundtrip: 0 passed, 0 failed, 1 not run ---"
+  exit 77
+fi
 
 echo "=== same C operation, three entry points ==="
 

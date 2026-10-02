@@ -23,6 +23,12 @@ trap cleanup EXIT
 
 wait_file() { _i=0; while [ ! -s "$1" ] && [ $_i -lt 100 ]; do sleep 0.1; _i=$((_i+1)); done; [ -s "$1" ]; }
 b64() { printf '%s' "$1" | base64 | tr -d '\n'; }
+# byte-exact file comparison; od (POSIX, always present) where cmp is not
+# installed (a stock MSYS2 has no diffutils)
+same_bytes() {
+  if command -v cmp >/dev/null 2>&1; then cmp -s "$1" "$2"; return; fi
+  [ -f "$1" ] && [ -f "$2" ] && [ "$(od -An -v -tx1 <"$1")" = "$(od -An -v -tx1 <"$2")" ]
+}
 json_field() { sed -n "s/.*\"$1\":\"\{0,1\}\([^\",}]*\)\"\{0,1\}.*/\1/p" | head -1; }
 
 start_node() { # start_node ID ENDPOINT -> sets NODE_PID, NODE_EP
@@ -75,7 +81,7 @@ recv_check "$EP_B" alpha m-utf8 "$(b64 "$U")" "UTF-8 payload byte-identical"
 i=0; : >"$TMP/bin.in"; while [ $i -lt 256 ]; do printf "\\$(printf '%03o' $i)" >>"$TMP/bin.in"; i=$((i+1)); done
 "$PC" peer send --from alpha --to "$EP_B" --id m-bin --payload-file "$TMP/bin.in" >/dev/null 2>&1 && ok "binary (incl. NUL) sent from a file" || bad "binary send"
 "$PC" peer recv --to "$EP_B" -t 3000 --raw >"$TMP/bin.out" 2>/dev/null
-cmp -s "$TMP/bin.in" "$TMP/bin.out" && ok "256-byte binary payload identical at beta" || bad "binary payload differs"
+same_bytes "$TMP/bin.in" "$TMP/bin.out" && ok "256-byte binary payload identical at beta" || bad "binary payload differs"
 "$PC" peer send --from alpha --to "$EP_B" --id m-empty --payload "" >/dev/null 2>&1
 recv_check "$EP_B" alpha m-empty "" "empty payload delivered"
 
@@ -100,7 +106,7 @@ head -c 1048577 /dev/zero >"$TMP/big" 2>/dev/null || dd if=/dev/zero of="$TMP/bi
 head -c 1048576 /dev/zero >"$TMP/max" 2>/dev/null || dd if=/dev/zero of="$TMP/max" bs=1048576 count=1 2>/dev/null
 "$PC" peer send --from alpha --to "$EP_B" --id m-max --payload-file "$TMP/max" -t 10000 >/dev/null 2>&1 && ok "exactly 1 MiB delivered" || bad "1 MiB send"
 "$PC" peer recv --to "$EP_B" -t 5000 --raw >"$TMP/max.out" 2>/dev/null
-cmp -s "$TMP/max" "$TMP/max.out" && ok "1 MiB payload identical" || bad "1 MiB payload differs"
+same_bytes "$TMP/max" "$TMP/max.out" && ok "1 MiB payload identical" || bad "1 MiB payload differs"
 "$PC" peer send --from alpha --to "$EP_B" --id 'bad id!' --payload x >/dev/null 2>&1; RC=$?
 [ $RC -eq 2 ] && ok "invalid message id -> exit 2" || bad "invalid id (rc=$RC)"
 "$PC" peer send --from alpha --to nobody --payload x >/dev/null 2>&1; RC=$?
