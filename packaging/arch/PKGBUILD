@@ -1,0 +1,45 @@
+# Maintainer: Nnamdi Michael Okpala <obinexusmk2@proton.me>
+#
+# Arch Linux package: library (libpolycall.so.1 + libpolycall.a), headers,
+# pkg-config and CMake files, the polycall CLI and the systemd unit.
+#
+# The source is the release tarball made by packaging/make-source-tarball.sh
+# and attached to the GitHub release v$pkgver. This in-tree file is the
+# template: the release step (and tests/packaging/pacman-e2e.sh) replace
+# 'SKIP' with the tarball's real checksum (updpkgsums) before building.
+pkgname=polycall
+pkgver=1.1.0
+pkgrel=1
+pkgdesc="Polycall polyglot interoperability core: C library (Binding ABI v1), CLI and daemon"
+arch=('x86_64' 'aarch64')
+url="https://github.com/obinexus/polycall"
+license=('LicenseRef-OBINexus-NT-Open-Access')
+depends=('glibc')
+makedepends=('cmake')
+checkdepends=('python')
+backup=('etc/polycall/Polycallfile')
+source=("polycall-$pkgver.tar.gz::https://github.com/obinexus/polycall/releases/download/v$pkgver/polycall-$pkgver.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+  cmake -S "polycall-$pkgver" -B build \
+    -DCMAKE_BUILD_TYPE=None \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_INSTALL_LIBDIR=lib \
+    -DPOLYCALL_INSTALL_SYSTEMD_UNIT=ON \
+    -DBUILD_TESTING=ON
+  cmake --build build
+}
+
+check() {
+  # Suites that need other language toolchains (Go, Java, Node; the Go+Python
+  # NSIGII test) run in CI, not here; excluded by name, not skipped silently.
+  POLYCALL_TELEMETRY=off ctest --test-dir build --output-on-failure \
+    -E '^polycall_(conformance_c_node_python|conformance_go|conformance_java|nsigii_two_process)$'
+}
+
+package() {
+  DESTDIR="$pkgdir" cmake --install build
+  install -Dm644 "polycall-$pkgver/packaging/etc/Polycallfile" "$pkgdir/etc/polycall/Polycallfile"
+  install -Dm644 "polycall-$pkgver/LICENSE.md" "$pkgdir/usr/share/licenses/$pkgname/LICENSE.md"
+}

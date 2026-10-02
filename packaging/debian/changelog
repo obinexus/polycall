@@ -1,0 +1,6 @@
+polycall (1.1.0-1) unstable; urgency=medium
+
+  * Binding ABI v1, polycall daemon, peer transport (polycall-peer/1).
+  * Packaged: libpolycall1, libpolycall-dev, polycall (with systemd unit).
+
+ -- Nnamdi Michael Okpala <obinexusmk2@proton.me>  Fri, 02 Oct 2026 21:00:00 +0100

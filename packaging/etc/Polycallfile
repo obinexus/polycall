@@ -1,0 +1,11 @@
+# /etc/polycall/Polycallfile -- configuration of the system polycall daemon
+# (polycall.service). See docs/DAEMON.md.
+#
+# The daemon serves polycall_rpc v1 on daemon_endpoint. It listens on
+# loopback only by default. A non-loopback endpoint requires a shared token:
+# auth_token_env names the environment variable that holds it. Provide that
+# variable through a root-only EnvironmentFile (`systemctl edit polycall`),
+# never in this file.
+network start
+daemon_endpoint=127.0.0.1:8084
+auth_token_env=POLYCALL_DEV_TOKEN

@@ -1,0 +1,51 @@
+Source: polycall
+Section: libs
+Priority: optional
+Maintainer: Nnamdi Michael Okpala <obinexusmk2@proton.me>
+Build-Depends: debhelper-compat (= 13),
+               cmake (>= 3.20),
+               python3,
+               pkg-config,
+               file
+Standards-Version: 4.6.2
+Homepage: https://github.com/obinexus/polycall
+Vcs-Browser: https://github.com/obinexus/polycall
+Vcs-Git: https://github.com/obinexus/polycall.git
+Rules-Requires-Root: no
+
+Package: libpolycall1
+Architecture: any
+Multi-Arch: same
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Polycall polyglot interoperability core (shared library)
+ Polycall is a small C core that language bindings load over a stable C
+ ABI (Binding ABI v1: plain scalars, UTF-8 strings, caller-owned buffers,
+ validated handles). It provides configuration parsing, a deadline-bounded
+ RPC runtime and an authenticated peer-to-peer message transport.
+ .
+ This package contains the shared library libpolycall.so.1.
+
+Package: libpolycall-dev
+Section: libdevel
+Architecture: any
+Multi-Arch: same
+Depends: libpolycall1 (= ${binary:Version}), ${misc:Depends}
+Description: Polycall polyglot interoperability core (development files)
+ Polycall is a small C core that language bindings load over a stable C
+ ABI.
+ .
+ This package contains the headers (include/polycall), the static library,
+ the pkg-config file (polycall.pc) and the CMake package
+ (find_package(polycall) -> polycall::polycall).
+
+Package: polycall
+Section: net
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Polycall command line interface and daemon
+ The polycall executable: configuration checks, RPC calls, the peer
+ transport, and `polycall daemon` with a hardened systemd unit
+ (polycall.service, DynamicUser, Type=notify).
+ .
+ The unit is installed but neither enabled nor started; configure
+ /etc/polycall/Polycallfile and run `systemctl enable --now polycall`.

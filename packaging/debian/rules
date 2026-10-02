@@ -1,0 +1,29 @@
+#!/usr/bin/make -f
+# Debian packaging for polycall. Built by packaging/build-deb.sh, which
+# copies this directory to debian/ in a clean export of the source tree.
+
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+export POLYCALL_TELEMETRY = off
+
+%:
+	dh $@ --buildsystem=cmake
+
+override_dh_auto_configure:
+	dh_auto_configure -- \
+	  -DPOLYCALL_INSTALL_SYSTEMD_UNIT=ON \
+	  -DBUILD_TESTING=$(if $(filter nocheck,$(DEB_BUILD_OPTIONS)),OFF,ON)
+
+# The suites that need other language toolchains (Go, Java, Node, and the
+# Go+Python NSIGII test) are run by CI and tests/run_all.sh, not here; they
+# are excluded by name, not silently skipped.
+override_dh_auto_test:
+ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
+	cd obj-$(DEB_HOST_GNU_TYPE) && ctest --output-on-failure \
+	  -E '^polycall_(conformance_c_node_python|conformance_go|conformance_java|nsigii_two_process)$$'
+endif
+
+override_dh_installsystemd:
+	dh_installsystemd --no-enable --no-start
+
+override_dh_makeshlibs:
+	dh_makeshlibs -V 'libpolycall1 (>= 1.1.0)'
