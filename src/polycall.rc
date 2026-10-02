@@ -1,0 +1,3 @@
+/* MinGW / windres: embed the application manifest (RT_MANIFEST = 24).
+ * MSVC builds embed src/polycall.manifest through the linker instead. */
+1 24 "polycall.manifest"

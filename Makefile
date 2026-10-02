@@ -72,22 +72,26 @@ ifeq ($(IS_WINDOWS),1)
   EXE_EXT     := .exe
   SHARED_LDFLAGS := -shared
   PLATFORM_LDLIBS := -lws2_32
-  DEFINE_OS   := -D_WIN32 -D__USE_MINGW_ANSI_STDIO=1
+  DEFINE_OS   := -D_WIN32 -D_WIN32_WINNT=0x0601 -DWINVER=0x0601 -D__USE_MINGW_ANSI_STDIO=1
 else ifeq ($(UNAME_S),Darwin)
   PLATFORM    := macos
   SHARED_EXT  := dylib
   EXE_EXT     :=
   SHARED_LDFLAGS := -dynamiclib
-  PLATFORM_LDLIBS := -lpthread
+  PLATFORM_LDLIBS := -lpthread -lm
   DEFINE_OS   :=
 else
   PLATFORM    := $(shell echo $(UNAME_S) | tr A-Z a-z)
   SHARED_EXT  := so
   EXE_EXT     :=
   SHARED_LDFLAGS := -shared
-  PLATFORM_LDLIBS := -lpthread -ldl
+  PLATFORM_LDLIBS := -lpthread -ldl -lm
   DEFINE_OS   :=
 endif
+
+# ---- version (single source: include/polycall_export.h) ------------------
+VERSION   := $(shell sed -n 's/^.define POLYCALL_ABI_VERSION_STRING "\(.*\)"/\1/p' include/polycall_export.h)
+SOVERSION := $(firstword $(subst ., ,$(VERSION)))
 
 # ---- layout -----------------------------------------------------------
 SRC_DIR   := src
@@ -101,13 +105,25 @@ BIN_DIR   := $(BUILD_DIR)/bin
 LIB_NAME    := libpolycall
 STATIC_LIB  := $(LIB_DIR)/$(LIB_NAME).a
 SHARED_LIB  := $(LIB_DIR)/$(LIB_NAME).$(SHARED_EXT)
+# ELF: real file libpolycall.so.X.Y.Z, SONAME libpolycall.so.X, dev link .so
+ifeq ($(IS_WINDOWS),1)
+  SHARED_REAL := $(SHARED_LIB)
+else ifeq ($(PLATFORM),macos)
+  SHARED_REAL := $(SHARED_LIB)
+else
+  SHARED_REAL := $(SHARED_LIB).$(VERSION)
+  SHARED_SONAME := $(LIB_NAME).$(SHARED_EXT).$(SOVERSION)
+endif
 IMPLIB      := $(LIB_DIR)/$(LIB_NAME).dll.a
 EXECUTABLE  := $(BIN_DIR)/polycall$(EXE_EXT)
 
-# core library sources: src/*.c (minus main) + src/config/*.c + src/runtime/*.c
+# core library sources: src/*.c (minus main) + config/ core/ peer/ runtime/
 CORE_SRCS := $(filter-out $(SRC_DIR)/main.c,$(wildcard $(SRC_DIR)/*.c)) \
              $(wildcard $(SRC_DIR)/config/*.c) \
+             $(wildcard $(SRC_DIR)/core/*.c) \
+             $(wildcard $(SRC_DIR)/peer/*.c) \
              $(wildcard $(SRC_DIR)/runtime/*.c)
+SUBDIRS   := config core peer runtime
 CLI_SRCS  := $(wildcard $(CLI_DIR)/*.c)
 MAIN_SRC  := $(SRC_DIR)/main.c
 
@@ -128,7 +144,13 @@ BUILD_DEFS := \
   -DPOLYCALL_BUILD_TARGET=\"$(CC_TARGET)\" \
   -DPOLYCALL_BUILD_CFLAGS=\"$(BUILD_TYPE)\ $(CC_TARGET)\"
 
-ALL_CPPFLAGS := -I$(INC_DIR) $(DEFINE_OS) $(CPPFLAGS)
+ALL_CPPFLAGS := -I$(INC_DIR) -I$(SRC_DIR) $(DEFINE_OS) $(CPPFLAGS)
+# the shared library exports exactly the POLYCALL_API symbols
+ifeq ($(IS_WINDOWS),1)
+  SHARED_CFLAGS := -DPOLYCALL_BUILD_SHARED
+else
+  SHARED_CFLAGS := -DPOLYCALL_BUILD_SHARED -fvisibility=hidden
+endif
 ALL_CFLAGS   := $(STD_FLAGS) $(WARN_FLAGS) $(OPT_FLAGS) $(PIC_FLAGS) $(CFLAGS)
 ALL_LDLIBS   := $(LDLIBS) $(PLATFORM_LDLIBS)
 
@@ -138,6 +160,7 @@ DESTDIR ?=
 bindir  := $(PREFIX)/bin
 libdir  := $(PREFIX)/lib
 incdir  := $(PREFIX)/include/polycall
+pcdir   := $(libdir)/pkgconfig
 
 # ---- top-level targets -------------------------------------------------
 .PHONY: all
@@ -189,9 +212,8 @@ $(LEDGER_PLUGIN): examples/ledger/ledger_plugin.c $(STATIC_LIB) | $(LIB_DIR)
 .DEFAULT_GOAL := all
 
 # ---- directories (order-only) ----------------------------------------
-$(OBJ_DIR) $(OBJ_DIR)/config $(OBJ_DIR)/runtime \
-$(OBJ_DIR)/shared $(OBJ_DIR)/shared/config $(OBJ_DIR)/shared/runtime \
-$(OBJ_DIR)/cli $(LIB_DIR) $(BIN_DIR):
+OBJ_SUBDIRS := $(addprefix $(OBJ_DIR)/,$(SUBDIRS)) $(addprefix $(OBJ_DIR)/shared/,$(SUBDIRS))
+$(OBJ_DIR) $(OBJ_SUBDIRS) $(OBJ_DIR)/shared $(OBJ_DIR)/cli $(LIB_DIR) $(BIN_DIR):
 	@mkdir -p $@
 
 # ---- toolchain fingerprint -----------------------------------------
@@ -207,9 +229,7 @@ $(STAMP): FORCE | $(OBJ_DIR)
 	@if [ ! -f $@ ] || ! cmp -s $@ $@.tmp; then \
 	  echo "toolchain fingerprint changed - clearing $(OBJ_DIR)"; \
 	  rm -rf $(OBJ_DIR); \
-	  mkdir -p $(OBJ_DIR) $(OBJ_DIR)/config $(OBJ_DIR)/runtime \
-	           $(OBJ_DIR)/shared $(OBJ_DIR)/shared/config $(OBJ_DIR)/shared/runtime \
-	           $(OBJ_DIR)/cli; \
+	  mkdir -p $(OBJ_DIR) $(OBJ_SUBDIRS) $(OBJ_DIR)/shared $(OBJ_DIR)/cli; \
 	  mv $@.tmp $@; \
 	else rm -f $@.tmp; fi
 
@@ -218,7 +238,7 @@ $(STAMP): FORCE | $(OBJ_DIR)
 # one another: obj/cli/foo.o must not be captured by an obj/%.o pattern.
 
 # core objects for the static library and the executable
-$(CORE_OBJS): $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c $(STAMP) | $(OBJ_DIR) $(OBJ_DIR)/config $(OBJ_DIR)/runtime
+$(CORE_OBJS): $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c $(STAMP) | $(OBJ_DIR) $(OBJ_SUBDIRS)
 	$(CC) $(ALL_CPPFLAGS) $(ALL_CFLAGS) -MMD -MP -c $< -o $@
 
 # the process entry point
@@ -230,8 +250,8 @@ $(CLI_OBJS): $(OBJ_DIR)/cli/%.o: $(CLI_DIR)/%.c $(STAMP) | $(OBJ_DIR)/cli
 	$(CC) $(ALL_CPPFLAGS) $(BUILD_DEFS) $(ALL_CFLAGS) -MMD -MP -c $< -o $@
 
 # shared-library objects: same core sources, DLL export macro on
-$(CORE_SHOBJS): $(OBJ_DIR)/shared/%.o: $(SRC_DIR)/%.c $(STAMP) | $(OBJ_DIR)/shared $(OBJ_DIR)/shared/config $(OBJ_DIR)/shared/runtime
-	$(CC) $(ALL_CPPFLAGS) -DPOLYCALL_BUILD_SHARED $(ALL_CFLAGS) -MMD -MP -c $< -o $@
+$(CORE_SHOBJS): $(OBJ_DIR)/shared/%.o: $(SRC_DIR)/%.c $(STAMP) | $(OBJ_DIR)/shared $(OBJ_SUBDIRS)
+	$(CC) $(ALL_CPPFLAGS) $(SHARED_CFLAGS) $(ALL_CFLAGS) -MMD -MP -c $< -o $@
 
 # ---- library / executable link -----------------------------------
 $(STATIC_LIB): $(CORE_OBJS) | $(LIB_DIR)
@@ -245,19 +265,61 @@ else ifeq ($(PLATFORM),macos)
 	$(CC) $(SHARED_LDFLAGS) -install_name @rpath/$(notdir $@) \
 	  -o $@ $(CORE_SHOBJS) $(LDFLAGS) $(ALL_LDLIBS)
 else
-	$(CC) $(SHARED_LDFLAGS) -Wl,-soname,$(notdir $@) \
-	  -o $@ $(CORE_SHOBJS) $(LDFLAGS) $(ALL_LDLIBS)
+	$(CC) $(SHARED_LDFLAGS) -Wl,-soname,$(SHARED_SONAME) -Wl,--no-undefined \
+	  -o $(SHARED_REAL) $(CORE_SHOBJS) $(LDFLAGS) $(ALL_LDLIBS)
+	ln -sf $(notdir $(SHARED_REAL)) $(LIB_DIR)/$(SHARED_SONAME)
+	ln -sf $(SHARED_SONAME) $@
 endif
 
-# The CLI links the core statically for a self-contained tool.
-$(EXECUTABLE): $(MAIN_OBJ) $(CLI_OBJS) $(STATIC_LIB) | $(BIN_DIR)
-	$(CC) $(MAIN_OBJ) $(CLI_OBJS) $(STATIC_LIB) -o $@ $(LDFLAGS) $(ALL_LDLIBS)
+# The CLI links the core statically for a self-contained tool. On Windows it
+# also embeds src/polycall.manifest (UTF-8 code page) and uses shell32 for a
+# UTF-8 argv (src/main.c).
+ifeq ($(IS_WINDOWS),1)
+WINDRES ?= windres
+CLI_RES := $(OBJ_DIR)/polycall_res.o
+CLI_WINLIBS := -lshell32
+$(CLI_RES): $(SRC_DIR)/polycall.rc $(SRC_DIR)/polycall.manifest | $(OBJ_DIR)
+	$(WINDRES) -I$(SRC_DIR) -O coff -i $< -o $@
+else
+CLI_RES :=
+CLI_WINLIBS :=
+endif
+
+$(EXECUTABLE): $(MAIN_OBJ) $(CLI_OBJS) $(CLI_RES) $(STATIC_LIB) | $(BIN_DIR)
+	$(CC) $(MAIN_OBJ) $(CLI_OBJS) $(CLI_RES) $(STATIC_LIB) -o $@ $(LDFLAGS) $(ALL_LDLIBS) $(CLI_WINLIBS)
+
+# ---- test helpers -------------------------------------------------
+FFI_UNIT    := $(BIN_DIR)/polycall_ffi_unit$(EXE_EXT)
+FUZZ        := $(BIN_DIR)/polycall_fuzz$(EXE_EXT)
+FAULT_PROXY := $(BIN_DIR)/polycall_fault_proxy$(EXE_EXT)
+ifeq ($(IS_WINDOWS),1)
+  SHLINK := $(IMPLIB)
+else
+  SHLINK := -L$(LIB_DIR) -lpolycall -Wl,-rpath,'$$ORIGIN/../lib'
+endif
+
+$(FFI_UNIT): tests/unit/ffi_unit.c $(SHARED_LIB) | $(BIN_DIR)
+	$(CC) -I$(INC_DIR) $(DEFINE_OS) -DPOLYCALL_USE_SHARED $(ALL_CFLAGS) -o $@ $< $(SHLINK) $(LDFLAGS) $(ALL_LDLIBS)
+ifeq ($(IS_WINDOWS),1)
+	cp -f $(SHARED_LIB) $(BIN_DIR)/
+endif
+
+$(FUZZ): tests/unit/fuzz_parsers.c $(STATIC_LIB) | $(BIN_DIR)
+	$(CC) $(ALL_CPPFLAGS) $(ALL_CFLAGS) -o $@ $< $(STATIC_LIB) $(LDFLAGS) $(ALL_LDLIBS)
+
+$(FAULT_PROXY): tests/peer/fault_proxy.c $(STATIC_LIB) | $(BIN_DIR)
+	$(CC) $(ALL_CPPFLAGS) $(ALL_CFLAGS) -o $@ $< $(STATIC_LIB) $(LDFLAGS) $(ALL_LDLIBS)
+
+.PHONY: test-helpers
+test-helpers: $(FFI_UNIT) $(FUZZ) $(FAULT_PROXY)
 
 # ---- tests --------------------------------------------------------
+# A check that could not run (missing interpreter/toolchain) fails `make
+# test` (exit 77) unless ALLOW_SKIP=1; the summary always names it.
 .PHONY: test
-test: cli shared static provider-c plugin-fixture
+test: cli shared static provider-c plugin-fixture test-helpers
 	@BUILD_DIR="$(BUILD_DIR)" CC="$(CC)" EXE_EXT="$(EXE_EXT)" \
-	  SHARED_EXT="$(SHARED_EXT)" IS_WINDOWS="$(IS_WINDOWS)" \
+	  SHARED_EXT="$(SHARED_EXT)" IS_WINDOWS="$(IS_WINDOWS)" ALLOW_SKIP="$(ALLOW_SKIP)" \
 	  sh tests/run_all.sh
 
 # ---- install (honours PREFIX and DESTDIR; no ldconfig) ------------
@@ -267,12 +329,25 @@ install: all
 	$(INSTALL) -m 0644 $(INC_DIR)/polycall.h $(INC_DIR)/polycall_export.h \
 	  $(INC_DIR)/polycall_cli.h $(INC_DIR)/polycall_config2.h \
 	  $(INC_DIR)/polycall_provider.h $(INC_DIR)/polycall_runtime.h \
+	  $(INC_DIR)/polycall_telemetry.h $(INC_DIR)/libpolycall.h \
 	  "$(DESTDIR)$(incdir)/"
 	$(INSTALL) -m 0644 $(STATIC_LIB) "$(DESTDIR)$(libdir)/"
-	$(INSTALL) -m 0755 $(SHARED_LIB) "$(DESTDIR)$(libdir)/"
 ifeq ($(IS_WINDOWS),1)
+	$(INSTALL) -m 0755 $(SHARED_LIB) "$(DESTDIR)$(bindir)/"
 	$(INSTALL) -m 0644 $(IMPLIB) "$(DESTDIR)$(libdir)/"
+else ifeq ($(PLATFORM),macos)
+	$(INSTALL) -m 0755 $(SHARED_LIB) "$(DESTDIR)$(libdir)/"
+else
+	$(INSTALL) -m 0755 $(SHARED_REAL) "$(DESTDIR)$(libdir)/"
+	ln -sf $(notdir $(SHARED_REAL)) "$(DESTDIR)$(libdir)/$(SHARED_SONAME)"
+	ln -sf $(SHARED_SONAME) "$(DESTDIR)$(libdir)/$(LIB_NAME).$(SHARED_EXT)"
 endif
+	@mkdir -p "$(DESTDIR)$(pcdir)"
+	sed -e 's|@PC_REL_PREFIX@|../..|' -e 's|@CMAKE_INSTALL_LIBDIR@|lib|' \
+	    -e 's|@CMAKE_INSTALL_INCLUDEDIR@|include|' -e 's|@PROJECT_VERSION@|$(VERSION)|' \
+	    -e 's|@PC_LIB_NAME@|polycall|' \
+	    -e 's|@PC_LIBS_PRIVATE@|$(PLATFORM_LDLIBS)|' cmake/polycall.pc.in \
+	    > "$(DESTDIR)$(pcdir)/polycall.pc"
 	$(INSTALL) -m 0755 $(EXECUTABLE) "$(DESTDIR)$(bindir)/"
 	@echo "installed to $(DESTDIR)$(PREFIX)"
 
@@ -280,8 +355,10 @@ endif
 uninstall:
 	rm -f "$(DESTDIR)$(bindir)/polycall$(EXE_EXT)"
 	rm -f "$(DESTDIR)$(libdir)/$(LIB_NAME).a" \
-	      "$(DESTDIR)$(libdir)/$(LIB_NAME).$(SHARED_EXT)" \
-	      "$(DESTDIR)$(libdir)/$(LIB_NAME).dll.a"
+	      "$(DESTDIR)$(libdir)/$(LIB_NAME).$(SHARED_EXT)"* \
+	      "$(DESTDIR)$(bindir)/$(LIB_NAME).$(SHARED_EXT)" \
+	      "$(DESTDIR)$(libdir)/$(LIB_NAME).dll.a" \
+	      "$(DESTDIR)$(pcdir)/polycall.pc"
 	rm -rf "$(DESTDIR)$(incdir)"
 
 # ---- housekeeping ----------------------------------------------

@@ -137,13 +137,26 @@ typedef void (POLYCALL_CALL *polycall_on_bound_fn)(const char *endpoint,
 
 /* Serve polycall_rpc v1 on a bound TCP socket until a signal is observed or an
  * authenticated shutdown arrives. Foreground / blocking. `bind_host` defaults
- * to 127.0.0.1; pass port 0 for an ephemeral port. `on_bound` (may be NULL) is
- * invoked with the resolved endpoint before the first accept. `auth_token`
- * (may be NULL) gates the shutdown control action. Cleanup happens here, in
- * normal execution, not in a handler.
+ * to 127.0.0.1 ("localhost" resolves; an unresolvable host is an error, never
+ * a silent loopback fallback); pass port 0 for an ephemeral port. `on_bound`
+ * (may be NULL) is invoked with the resolved endpoint before the first
+ * accept. `auth_token` (may be NULL) gates the shutdown control action.
+ * Cleanup happens here, in normal execution, not in a handler.
  *
- * Returns 0 on a clean shutdown, non-zero on a bind/listen failure.
+ * On stop: accepting ends at once; in-flight requests get up to the drain
+ * timeout to finish; connections still blocked on I/O after that are shut
+ * down. A handler that is still running keeps the runtime alive until it
+ * returns (polycall_runtime_destroy() defers the free), so no thread ever
+ * touches freed memory.
+ *
+ * Returns 0 on a clean shutdown, or a POLYCALL_RUNTIME_SERVE_* failure.
  */
+#define POLYCALL_RUNTIME_SERVE_OK              0
+#define POLYCALL_RUNTIME_SERVE_ERROR         (-1)  /* socket/listen/other  */
+#define POLYCALL_RUNTIME_SERVE_ADDRESS_IN_USE (-2)
+#define POLYCALL_RUNTIME_SERVE_PERMISSION    (-3)
+#define POLYCALL_RUNTIME_SERVE_BAD_ADDRESS   (-4)  /* unresolvable/not local */
+
 POLYCALL_API int POLYCALL_CALL
 polycall_runtime_serve(polycall_runtime_t *rt, const char *bind_host,
                        uint16_t port, const char *auth_token,
@@ -153,6 +166,20 @@ polycall_runtime_serve(polycall_runtime_t *rt, const char *bind_host,
  * only sets a flag). Wired to SIGINT/SIGTERM by the CLI. */
 POLYCALL_API void POLYCALL_CALL
 polycall_runtime_request_stop(void);
+
+/* Ask this runtime to stop (thread-safe; returns immediately). */
+POLYCALL_API void POLYCALL_CALL
+polycall_runtime_stop(polycall_runtime_t *rt);
+
+/* Bounds used by polycall_runtime_serve(); call before serving. Zero keeps
+ * a value's default. Defaults: 64 concurrent connections (1..1024; excess
+ * connections receive a "server.busy" reply and are closed), 10000 ms to
+ * receive a frame once its first byte arrived and to write a reply
+ * (1..600000), 5000 ms drain on shutdown (1..600000). Returns 0, or -1 on
+ * an out-of-range value (nothing changed). */
+POLYCALL_API int POLYCALL_CALL
+polycall_runtime_set_limits(polycall_runtime_t *rt, uint32_t max_connections,
+                            uint32_t io_timeout_ms, uint32_t drain_timeout_ms);
 
 POLYCALL_END_DECLS
 

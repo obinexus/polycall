@@ -4,7 +4,9 @@
  * Windows and default-visibility elsewhere. Linked against the import lib
  * (libpolycall.dll.a) on Windows or -lpolycall on ELF/Mach-O.
  */
+#ifndef POLYCALL_USE_SHARED
 #define POLYCALL_USE_SHARED
+#endif
 #include <stdio.h>
 #include "polycall.h"
 

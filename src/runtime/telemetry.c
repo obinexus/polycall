@@ -99,8 +99,9 @@ void POLYCALL_CALL polycall_telemetry_timestamp(char out[POLYCALL_TELEMETRY_TS_L
     GetSystemTime(&st); /* already UTC */
     snprintf(out, POLYCALL_TELEMETRY_TS_LEN,
              "%04d-%02d-%02dT%02d:%02d:%02d.%03dZ",
-             st.wYear, st.wMonth, st.wDay,
-             st.wHour, st.wMinute, st.wSecond, st.wMilliseconds);
+             st.wYear % 10000, st.wMonth % 100, st.wDay % 100,
+             st.wHour % 100, st.wMinute % 100, st.wSecond % 100,
+             st.wMilliseconds % 1000);
 #else
     struct timespec ts;
     struct tm tm_utc;
@@ -108,10 +109,15 @@ void POLYCALL_CALL polycall_telemetry_timestamp(char out[POLYCALL_TELEMETRY_TS_L
     clock_gettime(CLOCK_REALTIME, &ts);
     ms = ts.tv_nsec / 1000000;
     gmtime_r(&ts.tv_sec, &tm_utc);
-    snprintf(out, POLYCALL_TELEMETRY_TS_LEN,
-             "%04d-%02d-%02dT%02d:%02d:%02d.%03ldZ",
-             tm_utc.tm_year + 1900, tm_utc.tm_mon + 1, tm_utc.tm_mday,
-             tm_utc.tm_hour, tm_utc.tm_min, tm_utc.tm_sec, ms);
+    {
+        /* format into a roomy buffer, then copy the fixed-width result */
+        char tmp[64];
+        snprintf(tmp, sizeof tmp, "%04d-%02d-%02dT%02d:%02d:%02d.%03ldZ",
+                 tm_utc.tm_year + 1900, tm_utc.tm_mon + 1, tm_utc.tm_mday,
+                 tm_utc.tm_hour, tm_utc.tm_min, tm_utc.tm_sec, ms);
+        memcpy(out, tmp, POLYCALL_TELEMETRY_TS_LEN - 1);
+        out[POLYCALL_TELEMETRY_TS_LEN - 1] = '\0';
+    }
 #endif
 }
 

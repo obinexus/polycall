@@ -116,6 +116,44 @@ int polycall_cmd_telemetry_emit(const polycall_invocation_t *inv);
 int polycall_cmd_telemetry_show(const polycall_invocation_t *inv);
 int polycall_cmd_telemetry_status(const polycall_invocation_t *inv);
 
+/* daemon management: run/start/stop/status/restart (src/cli/cmd_daemon.c) */
+int polycall_cmd_daemon_run(const polycall_invocation_t *inv);
+int polycall_cmd_daemon_start(const polycall_invocation_t *inv);
+int polycall_cmd_daemon_stop(const polycall_invocation_t *inv);
+int polycall_cmd_daemon_status(const polycall_invocation_t *inv);
+int polycall_cmd_daemon_restart(const polycall_invocation_t *inv);
+
+/* peer node: serve/send/recv/health/peers/register (src/cli/cmd_peer.c) */
+int polycall_cmd_peer_serve(const polycall_invocation_t *inv);
+int polycall_cmd_peer_send(const polycall_invocation_t *inv);
+int polycall_cmd_peer_recv(const polycall_invocation_t *inv);
+int polycall_cmd_peer_health(const polycall_invocation_t *inv);
+int polycall_cmd_peer_peers(const polycall_invocation_t *inv);
+int polycall_cmd_peer_register(const polycall_invocation_t *inv);
+
+/* shared-token resolution: explicit value, else $env_name, else
+ * $POLYCALL_DEV_TOKEN; NULL when none (src/cli/cmd_runtime.c) */
+const char *polycall_cli_auth_token(const char *explicit_token, const char *env_name);
+
+/* map a binding-ABI status (POLYCALL_E_*) onto the exit-code contract */
+int polycall_cli_exit_for_status(int status);
+
+/* ---- process helpers (src/cli/cli_proc.c) ---------------------------- */
+/* absolute path of the running executable */
+int  polycall_cli_self_path(char *buf, size_t cap);
+/* Start argv[0] with argv as a detached background process (own session /
+ * process group, no console, stdin from the null device, stdout+stderr
+ * appended to log_path or discarded). Arguments are passed exactly
+ * (POSIX: execv; Windows: CommandLineToArgvW-correct quoting). */
+int  polycall_cli_spawn_detached(const char *const *argv, const char *log_path,
+                                 long *pid_out, char *err, size_t errcap);
+long polycall_cli_getpid(void);
+int  polycall_cli_pid_alive(long pid);                 /* 1 alive, 0 not  */
+int  polycall_cli_kill(long pid);                      /* forceful; 0 ok  */
+/* reap a child we spawned if it already exited: 1 exited (*code set),
+ * 0 still running */
+int  polycall_cli_child_exited(long pid, int *code);
+
 /* generic exit-4 handler for staged-but-unavailable commands */
 int polycall_cmd_unsupported(const polycall_invocation_t *inv);
 

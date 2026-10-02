@@ -170,6 +170,15 @@ static char *parse_string_raw(parser *ps)
                     ps->p += 6;
                     utf8_emit(&w, 0x10000UL + (((unsigned long)cp - 0xD800) << 10)
                                             + ((unsigned long)lo - 0xDC00));
+                } else if (cp >= 0xDC00 && cp <= 0xDFFF) {
+                    /* a lone low surrogate has no UTF-8 encoding */
+                    free(out); fail(ps, "unpaired low surrogate"); return NULL;
+                } else if (cp == 0) {
+                    /* Strings are NUL-terminated C strings internally; a
+                     * U+0000 would silently truncate the value. Refuse it
+                     * explicitly -- binary data travels base64-encoded
+                     * (e.g. payload_b64 in polycall-peer/1). */
+                    free(out); fail(ps, "U+0000 in a string is not supported"); return NULL;
                 } else {
                     utf8_emit(&w, cp);
                 }

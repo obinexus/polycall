@@ -1,5 +1,17 @@
 @PACKAGE_INIT@
 
+# find_package(polycall [1.1] [COMPONENTS shared static cli])
+#
+# Imported targets (all relocatable; no absolute build-machine paths):
+#   polycall::polycall_shared   polycall.dll + polycall.lib (MSVC),
+#                               libpolycall.dll + libpolycall.dll.a (MinGW),
+#                               libpolycall.so.1 (Linux)
+#   polycall::polycall_static   polycall_static.lib (MSVC) / libpolycall.a
+#   polycall::polycall_cli      the polycall program
+#   polycall::polycall          the shared library when installed, else the
+#                               static one -- what most consumers want
+# Consumers include <polycall.h>.
+
 include(CMakeFindDependencyMacro)
 if(NOT WIN32)
   set(THREADS_PREFER_PTHREAD_FLAG ON)
@@ -7,5 +19,29 @@ if(NOT WIN32)
 endif()
 
 include("${CMAKE_CURRENT_LIST_DIR}/polycallTargets.cmake")
+
+set(polycall_shared_FOUND FALSE)
+set(polycall_static_FOUND FALSE)
+set(polycall_cli_FOUND FALSE)
+if(TARGET polycall::polycall_shared)
+  set(polycall_shared_FOUND TRUE)
+endif()
+if(TARGET polycall::polycall_static)
+  set(polycall_static_FOUND TRUE)
+endif()
+if(TARGET polycall::polycall_cli)
+  set(polycall_cli_FOUND TRUE)
+endif()
+
+if(NOT TARGET polycall::polycall)
+  add_library(polycall::polycall INTERFACE IMPORTED)
+  if(polycall_shared_FOUND)
+    set_target_properties(polycall::polycall PROPERTIES
+      INTERFACE_LINK_LIBRARIES polycall::polycall_shared)
+  elseif(polycall_static_FOUND)
+    set_target_properties(polycall::polycall PROPERTIES
+      INTERFACE_LINK_LIBRARIES polycall::polycall_static)
+  endif()
+endif()
 
 check_required_components(polycall)

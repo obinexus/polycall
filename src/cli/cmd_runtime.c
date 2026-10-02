@@ -16,6 +16,9 @@
 #include "polycall_telemetry.h"
 #include "../runtime/rpc_wire.h"
 #include "../config/json.h"
+#include "../config/cfgfile.h"
+#include "../core/pc_buf.h"
+#include "../core/pc_sys.h"
 
 #if defined(_WIN32)
 #include <windows.h>
@@ -25,33 +28,34 @@
 #include <sys/wait.h>
 #endif
 
-/* ---- shared: split "host:port" -------------------------------------- */
+/* ---- shared: split "host:port" (strict; port 0 only where allowed) ---- */
 
 static int split_endpoint(const char *ep, char *host, size_t hostcap,
                           uint16_t *port)
 {
-    const char *colon;
-    long p;
     if (!ep || !*ep) {
         snprintf(host, hostcap, "127.0.0.1");
         *port = 0;
         return 0;
     }
-    colon = strrchr(ep, ':');
-    if (!colon || colon == ep) {
-        return -1;
+    return pc_split_endpoint(ep, host, hostcap, port, 1) == POLYCALL_OK ? 0 : -1;
+}
+
+/* ---- shared: the shared-token secret ---------------------------------
+ * Precedence: --auth-token TOK (kept for compatibility; visible in process
+ * listings, so prefer the environment), then the variable named by
+ * --auth-token-env NAME, then POLYCALL_DEV_TOKEN. The secret is never
+ * printed or logged. Returns NULL when none is configured. */
+const char *polycall_cli_auth_token(const char *explicit_token, const char *env_name)
+{
+    const char *v;
+    if (explicit_token && *explicit_token) return explicit_token;
+    if (env_name && *env_name) {
+        v = getenv(env_name);
+        return (v && *v) ? v : NULL;
     }
-    if ((size_t)(colon - ep) >= hostcap) {
-        return -1;
-    }
-    memcpy(host, ep, (size_t)(colon - ep));
-    host[colon - ep] = '\0';
-    p = strtol(colon + 1, NULL, 10);
-    if (p < 0 || p > 65535) {
-        return -1;
-    }
-    *port = (uint16_t)p;
-    return 0;
+    v = getenv("POLYCALL_DEV_TOKEN");
+    return (v && *v) ? v : NULL;
 }
 
 /* ---- local option scan -------------------------------------------- */
@@ -62,6 +66,7 @@ typedef struct {
     const char *endpoint;
     const char *endpoint_file;   /* start: write the resolved endpoint here */
     const char *auth_token;
+    const char *auth_token_env;  /* NAME of the env var holding the token */
     const char *input_file;
     const char *input_value;
     long deadline_ms;
@@ -100,9 +105,24 @@ static int scan_rargs(const polycall_invocation_t *inv, rargs_t *a, const char *
         if (!strcmp(name, "--endpoint"))       { NEEDV("--endpoint");    a->endpoint = val; }
         else if (!strcmp(name, "--endpoint-file")) { NEEDV("--endpoint-file"); a->endpoint_file = val; }
         else if (!strcmp(name, "--auth-token")) { NEEDV("--auth-token"); a->auth_token = val; }
+        else if (!strcmp(name, "--auth-token-env")) {
+            NEEDV("--auth-token-env");
+            if (!polycall_cfg_valid_env_name(val)) { *bad = "--auth-token-env"; return -1; }
+            a->auth_token_env = val;
+        }
         else if (!strcmp(name, "--input"))      { NEEDV("--input");      a->input_file = val; }
         else if (!strcmp(name, "--input-value")) { NEEDV("--input-value"); a->input_value = val; }
-        else if (!strcmp(name, "--deadline-ms")) { NEEDV("--deadline-ms"); a->deadline_ms = strtol(val, NULL, 10); }
+        else if (!strcmp(name, "--deadline-ms")) {
+            char *end = NULL;
+            long v;
+            NEEDV("--deadline-ms");
+            v = strtol(val, &end, 10);
+            if (end == val || *end != '\0' || v < 0 || v > 600000) {
+                *bad = "--deadline-ms (expected 0..600000)";
+                return -1;
+            }
+            a->deadline_ms = v;
+        }
         else if (!strcmp(name, "--load")) {
             NEEDV("--load");
             if (a->load_count >= RARGS_MAX_LOAD) { *bad = "--load"; return -1; }
@@ -147,49 +167,43 @@ static int win_daemonize(const char *project_root, const char *host,
                          const char *const *load_paths, int load_count,
                          unsigned long *out_pid)
 {
-    char self[MAX_PATH];
-    char cmdline[4096];
-    int n, i;
-    STARTUPINFOA si;
-    PROCESS_INFORMATION pi;
+    char self[1024];
+    char ep[160];
+    const char *argv[16 + 2 * RARGS_MAX_LOAD];
+    int n = 0, i;
+    long pid = 0;
+    char err[200];
 
-    if (!GetModuleFileNameA(NULL, self, sizeof self)) {
+    if (polycall_cli_self_path(self, sizeof self) != 0) {
         return -1;
     }
-    n = snprintf(cmdline, sizeof cmdline, "\"%s\"", self);
+    snprintf(ep, sizeof ep, "%s:%u", host, (unsigned)port);
+    argv[n++] = self;
     if (project_root && *project_root) {
-        n += snprintf(cmdline + n, sizeof cmdline - (size_t)n,
-                       " --project-root \"%s\"", project_root);
+        argv[n++] = "--project-root";
+        argv[n++] = project_root;
     }
-    n += snprintf(cmdline + n, sizeof cmdline - (size_t)n,
-                  " start --endpoint %s:%u", host, (unsigned)port);
-    if (auth_token && *auth_token) {
-        n += snprintf(cmdline + n, sizeof cmdline - (size_t)n,
-                      " --auth-token \"%s\"", auth_token);
-    }
+    argv[n++] = "start";
+    argv[n++] = "--endpoint";
+    argv[n++] = ep;
     if (endpoint_file && *endpoint_file) {
-        n += snprintf(cmdline + n, sizeof cmdline - (size_t)n,
-                      " --endpoint-file \"%s\"", endpoint_file);
+        argv[n++] = "--endpoint-file";
+        argv[n++] = endpoint_file;
     }
     for (i = 0; i < load_count; ++i) {
-        n += snprintf(cmdline + n, sizeof cmdline - (size_t)n,
-                      " --load \"%s\"", load_paths[i]);
+        argv[n++] = "--load";
+        argv[n++] = load_paths[i];
     }
-    if (n < 0 || (size_t)n >= sizeof cmdline) {
+    argv[n] = NULL;
+    /* The secret travels in the child's environment, never on its command
+     * line (which any local user can read from the process table). */
+    if (auth_token && *auth_token) {
+        SetEnvironmentVariableA("POLYCALL_DEV_TOKEN", auth_token);
+    }
+    if (polycall_cli_spawn_detached(argv, NULL, &pid, err, sizeof err) != 0) {
         return -1;
     }
-
-    memset(&si, 0, sizeof si);
-    si.cb = sizeof si;
-    memset(&pi, 0, sizeof pi);
-    if (!CreateProcessA(NULL, cmdline, NULL, NULL, FALSE,
-                        DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP,
-                        NULL, NULL, &si, &pi)) {
-        return -1;
-    }
-    *out_pid = pi.dwProcessId;
-    CloseHandle(pi.hProcess);
-    CloseHandle(pi.hThread);
+    *out_pid = (unsigned long)pid;
     return 0;
 }
 
@@ -308,17 +322,19 @@ int polycall_cmd_start(const polycall_invocation_t *inv)
     polycall_runtime_t *rt;
     bound_ctx_t bc;
     int rc;
+    const char *token;
 
     if (scan_rargs(inv, &a, &bad) != 0) return rusage(inv, "bad option", bad);
     if (split_endpoint(a.endpoint ? a.endpoint : "127.0.0.1:0",
                        host, sizeof host, &port) != 0) {
         return rusage(inv, "invalid --endpoint (expected host:port)", a.endpoint);
     }
+    token = polycall_cli_auth_token(a.auth_token, a.auth_token_env);
 
     if (a.daemon) {
 #if defined(_WIN32)
         unsigned long dpid = 0;
-        if (win_daemonize(inv->g->project_root, host, port, a.auth_token,
+        if (win_daemonize(inv->g->project_root, host, port, token,
                           a.endpoint_file, a.load_paths, a.load_count,
                           &dpid) != 0) {
             if (inv->g->format == POLYCALL_FMT_JSON) {
@@ -419,23 +435,38 @@ int polycall_cmd_start(const polycall_invocation_t *inv)
     bc.inv = inv;
     bc.endpoint_file = a.endpoint_file;
 
-    rc = polycall_runtime_serve(rt, host, port, a.auth_token, on_bound, &bc);
+    rc = polycall_runtime_serve(rt, host, port, token, on_bound, &bc);
     polycall_runtime_destroy(rt);
 
     if (rc != 0) {
         polycall_telemetry_event_t tev;
+        const char *code = "bind";
+        const char *why = "could not bind the runtime endpoint";
+        int ex = POLYCALL_EXIT_TRANSPORT;
+        if (rc == POLYCALL_RUNTIME_SERVE_ADDRESS_IN_USE) {
+            code = "bind.address_in_use";
+            why = "address already in use";
+        } else if (rc == POLYCALL_RUNTIME_SERVE_PERMISSION) {
+            code = "bind.permission";
+            why = "permission denied binding the endpoint";
+            ex = POLYCALL_EXIT_RUNTIME;
+        } else if (rc == POLYCALL_RUNTIME_SERVE_BAD_ADDRESS) {
+            code = "bind.address";
+            why = "the endpoint host is not a local, resolvable address";
+            ex = POLYCALL_EXIT_CONFIG;
+        }
         memset(&tev, 0, sizeof tev);
         tev.event = "start.bind_failed";
-        tev.detail = host;
+        tev.detail = code;
         tev.duration_ns = -1;
         polycall_telemetry_emit(inv->g->project_root, &tev);
         if (inv->g->format == POLYCALL_FMT_JSON) {
-            polycall_json_result(inv->out, "start", false, NULL, "bind",
-                                 "could not bind the runtime endpoint", host);
+            polycall_json_result(inv->out, "start", false, NULL, code, why, host);
         } else {
-            fprintf(inv->err, "polycall start: could not bind %s\n", host);
+            fprintf(inv->err, "polycall start: could not bind %s:%u: %s\n",
+                    host, (unsigned)port, why);
         }
-        return POLYCALL_EXIT_TRANSPORT;
+        return ex;
     }
     {
         polycall_telemetry_event_t tev;
@@ -543,7 +574,8 @@ int polycall_cmd_stop(const polycall_invocation_t *inv)
     const char *bad = NULL;
     char host[128];
     uint16_t port;
-    char body[256], q[160];
+    pc_buf_t body;
+    const char *token;
     pcr_frame_t rep;
     int rc, exit_code = POLYCALL_EXIT_OK;
 
@@ -553,15 +585,22 @@ int polycall_cmd_stop(const polycall_invocation_t *inv)
         return rusage(inv, "invalid --endpoint", a.endpoint);
     }
 
-    if (a.auth_token) {
-        snprintf(body, sizeof body, "{\"action\":\"shutdown\",\"auth_token\":%s}",
-                 polycall_json_quote(q, sizeof q, a.auth_token));
-    } else {
-        snprintf(body, sizeof body, "{\"action\":\"shutdown\"}");
+    token = polycall_cli_auth_token(a.auth_token, a.auth_token_env);
+    pc_buf_init(&body, 0);
+    pc_buf_append(&body, "{\"action\":\"shutdown\"");
+    if (token) {
+        pc_buf_append(&body, ",\"auth_token\":");
+        pc_buf_json_string(&body, token);
+    }
+    pc_buf_append(&body, "}");
+    if (pc_buf_failed(&body)) {
+        pc_buf_free(&body);
+        return POLYCALL_EXIT_RUNTIME;
     }
 
-    rc = pcr_roundtrip(host, port, PCR_T_CONTROL, body, (uint32_t)strlen(body),
+    rc = pcr_roundtrip(host, port, PCR_T_CONTROL, body.data, (uint32_t)body.len,
                        &rep, 3000);
+    pc_buf_free(&body);
     if (rc != 0) {
         if (inv->g->format == POLYCALL_FMT_JSON) {
             polycall_json_result(inv->out, "stop", false, NULL, "transport",
@@ -639,6 +678,9 @@ static int err_code_to_exit(const char *code)
     if (!strcmp(code, "item.unknown"))      return POLYCALL_EXIT_UNSUPPORTED;
     if (!strcmp(code, "deadline.exceeded")) return POLYCALL_EXIT_DEADLINE;
     if (!strcmp(code, "auth.denied"))       return POLYCALL_EXIT_AUTH;
+    /* backpressure / framing: the endpoint is (temporarily) unavailable */
+    if (!strcmp(code, "server.busy") || !strcmp(code, "frame.invalid"))
+        return POLYCALL_EXIT_TRANSPORT;
     return POLYCALL_EXIT_RUNTIME;
 }
 
@@ -697,16 +739,48 @@ int polycall_cmd_call(const polycall_invocation_t *inv)
              : inv->g->timeout_ms >= 0 ? (uint32_t)inv->g->timeout_ms
              : 5000;
 
-    reqcap = input_len + 256;
-    req = malloc(reqcap);
-    if (!req) { free(input); return POLYCALL_EXIT_RUNTIME; }
-    snprintf(req, reqcap,
-             "{\"service\":\"%s\",\"operation\":\"%s\",\"deadline_ms\":%u,\"input\":%s}",
-             service, operation, deadline,
-             (input_len && input[0]) ? input : "null");
-    free(input);
+    if (deadline > 600000u) deadline = 600000u;
 
-    rc = pcr_roundtrip(host, port, PCR_T_REQUEST, req, (uint32_t)strlen(req),
+    /* Validate the input locally and re-serialise it exactly, so the request
+     * is always one well-formed JSON object (an input such as
+     * `1,"operation":"x"` can no longer splice extra members in). */
+    {
+        char jerr[64];
+        json_value *jv = NULL;
+        pc_buf_t rb;
+        int empty = (input_len == 0 || !input[0]);
+        if (!empty) {
+            jv = json_parse(input, input_len, jerr, sizeof jerr);
+            if (!jv) {
+                free(input);
+                if (inv->g->format == POLYCALL_FMT_JSON) {
+                    polycall_json_result(inv->out, "call", false, NULL, "request.malformed",
+                                         "invalid input: not valid JSON", jerr);
+                } else {
+                    fprintf(inv->err, "polycall call: invalid input: not valid JSON (%s)\n", jerr);
+                }
+                return POLYCALL_EXIT_CONFIG;
+            }
+        }
+        free(input);
+        pc_buf_init(&rb, PCR_MAX_PAYLOAD);
+        pc_buf_append(&rb, "{\"service\":");
+        pc_buf_json_string(&rb, service);
+        pc_buf_append(&rb, ",\"operation\":");
+        pc_buf_json_string(&rb, operation);
+        pc_buf_appendf(&rb, ",\"deadline_ms\":%u,\"input\":", deadline);
+        pc_buf_json_value(&rb, jv);
+        pc_buf_append(&rb, "}");
+        json_free(jv);
+        if (pc_buf_failed(&rb)) {
+            pc_buf_free(&rb);
+            return rusage(inv, "request exceeds the 1 MiB frame limit", NULL);
+        }
+        reqcap = rb.len;
+        req = pc_buf_take(&rb, NULL);
+    }
+
+    rc = pcr_roundtrip(host, port, PCR_T_REQUEST, req, (uint32_t)reqcap,
                        &rep, deadline + 1000);
     free(req);
     if (rc != 0) {

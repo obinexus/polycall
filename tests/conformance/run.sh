@@ -18,50 +18,74 @@ TMP=$(mktemp -d 2>/dev/null || echo "${TMPDIR:-/tmp}/pc_conf.$$"); mkdir -p "$TM
 trap 'rm -rf "$TMP"; [ -n "${RUNPID:-}" ] && kill "$RUNPID" 2>/dev/null' EXIT
 
 # ---- discover available clients -------------------------------------
+# CONFORMANCE_ONLY selects one ctest entry's client set:
+#   core -> C + Node + Python;  go -> C + Go;  java -> C + Java
+# (the C CLI is always present as the reference every hash is compared to).
+# A requested client that cannot run makes the run exit 77 ("skipped").
+ONLY=${CONFORMANCE_ONLY:-all}
+want() { [ "$ONLY" = all ] || [ "$ONLY" = "$1" ]; }
+OUTDIR=${BUILD_DIR:-$ROOT/build}/conformance
+mkdir -p "$OUTDIR"
+
 # Each entry: "label|invoke prefix". invoke prefix + "$EP $svc $op $input [$dl]"
 CLIENTS=""
 CLIENTS="$CLIENTS
 c|$PC call"   # special-cased below (different flag-style CLI)
 
-if command -v node >/dev/null 2>&1; then
-  CLIENTS="$CLIENTS
+if want core; then
+  if command -v node >/dev/null 2>&1; then
+    CLIENTS="$CLIENTS
 node|node $ROOT/tools/rpc-clients/node/polycall_call.mjs"
-fi
-PY=$(command -v python3 2>/dev/null || command -v python 2>/dev/null || true)
-if [ -n "$PY" ]; then
-  CLIENTS="$CLIENTS
+  else
+    skip "Node client (node not on PATH)"
+  fi
+  PY=$(command -v python3 2>/dev/null || command -v python 2>/dev/null || true)
+  if [ -n "$PY" ]; then
+    CLIENTS="$CLIENTS
 python|$PY $ROOT/tools/rpc-clients/python/polycall_call.py"
+  else
+    skip "Python client (python3 not on PATH)"
+  fi
 fi
-GO_BIN="$ROOT/build/conformance-go/polycall-call"
-if command -v go >/dev/null 2>&1; then
-  mkdir -p "$ROOT/build/conformance-go"
-  ( cd "$ROOT/tools/rpc-clients/go" && go build -o "$GO_BIN" ./cmd/polycall-call ) \
-    >"$TMP/go_build.log" 2>&1
-  if [ -x "$GO_BIN" ] || [ -x "$GO_BIN.exe" ]; then
+GO_BIN="$OUTDIR/polycall-call"
+if want go; then
+  if command -v go >/dev/null 2>&1; then
+    ( cd "$ROOT/tools/rpc-clients/go" && go build -o "$GO_BIN" ./cmd/polycall-call ) \
+      >"$TMP/go_build.log" 2>&1
     [ -x "$GO_BIN.exe" ] && GO_BIN="$GO_BIN.exe"
-    CLIENTS="$CLIENTS
+    if [ -x "$GO_BIN" ]; then
+      CLIENTS="$CLIENTS
 go|$GO_BIN"
+    else
+      bad "Go client build failed: $(cat "$TMP/go_build.log")"
+    fi
   else
-    skip "Go client (build failed, see $TMP/go_build.log)"
+    skip "Go client (go not on PATH)"
   fi
-else
-  skip "Go client (go not on PATH)"
 fi
-JAVA_OUT="$ROOT/tools/rpc-clients/java/out"
-if command -v javac >/dev/null 2>&1 && command -v java >/dev/null 2>&1; then
-  mkdir -p "$JAVA_OUT"
-  javac -d "$JAVA_OUT" $(find "$ROOT/tools/rpc-clients/java/src/main/java" -name '*.java') \
-    >"$TMP/java_build.log" 2>&1
-  if [ -f "$JAVA_OUT/org/obinexus/polycall/rpcv1/PolyCallCall.class" ]; then
-    CLIENTS="$CLIENTS
-java|java -cp $JAVA_OUT org.obinexus.polycall.rpcv1.PolyCallCall"
+JAVA_OUT="$OUTDIR/java"
+if want java; then
+  if command -v javac >/dev/null 2>&1 && command -v java >/dev/null 2>&1; then
+    mkdir -p "$JAVA_OUT"
+    javac -d "$JAVA_OUT" $(find "$ROOT/tools/rpc-clients/java/src/main/java" -name '*.java') \
+      >"$TMP/java_build.log" 2>&1
+    if [ -f "$JAVA_OUT/org/obinexus/polycall/rpcv1/PolyCallCall.class" ]; then
+      _jcp=$JAVA_OUT
+      case "$(uname -s 2>/dev/null)" in MINGW*|MSYS*|CYGWIN*) _jcp=$(cygpath -m "$JAVA_OUT") ;; esac
+      CLIENTS="$CLIENTS
+java|java -cp $_jcp org.obinexus.polycall.rpcv1.PolyCallCall"
+    else
+      bad "Java client build failed: $(cat "$TMP/java_build.log")"
+    fi
   else
-    skip "Java client (javac failed, see $TMP/java_build.log)"
+    skip "Java client (java/javac not on PATH)"
   fi
-else
-  skip "Java client (java/javac not on PATH)"
 fi
-skip "Lua client (no LuaSocket in this environment; wire framing is unit-verified separately -- see docs/backward_compatibility.md)"
+if [ "$ONLY" != all ] && [ "$ONLY" != core ] && [ "$SKIP" -gt 0 ]; then
+  printf '%s\n' "--- conformance ($ONLY): 0 passed, $FAIL failed, $SKIP not run ---"
+  [ "$FAIL" -eq 0 ] && exit 77
+  exit 1
+fi
 
 note() { printf '%s\n' "$*"; }
 note "clients discovered:$(printf '%s' "$CLIENTS" | grep -c '|')"
@@ -168,5 +192,7 @@ j=0
 while kill -0 "$RUNPID" 2>/dev/null && [ $j -lt 40 ]; do sleep 0.1; j=$((j+1)); done
 
 note ""
-note "--- conformance: $PASS passed, $FAIL failed, $SKIP not run ---"
-[ "$FAIL" -eq 0 ]
+note "--- conformance ($ONLY): $PASS passed, $FAIL failed, $SKIP not run ---"
+[ "$FAIL" -eq 0 ] || exit 1
+[ "$SKIP" -eq 0 ] || exit 77
+exit 0

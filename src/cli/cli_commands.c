@@ -277,6 +277,45 @@ static const polycall_subcommand_t TELEMETRY_SUBS[] = {
       "telemetry status", polycall_cmd_telemetry_status },
 };
 
+static const polycall_subcommand_t DAEMON_SUBS[] = {
+    { "run", "run the daemon in the foreground (systemd / containers)",
+      "daemon run [--endpoint H:P] [--state-dir DIR] [--log-file F] [--log-format json|text]\n"
+      "                [--auth-token-env NAME] [--load PLUGIN ...] [--max-connections N]\n"
+      "                [--drain-timeout-ms N] [--io-timeout-ms N] [Polycallfile]",
+      polycall_cmd_daemon_run },
+    { "start", "start in the background; returns once it answers health",
+      "daemon start [run options] [-t|--timeout-ms N] [Polycallfile]",
+      polycall_cmd_daemon_start },
+    { "stop", "graceful authenticated shutdown, bounded wait",
+      "daemon stop [-t|--timeout-ms N] [-f|--force] [Polycallfile]",
+      polycall_cmd_daemon_stop },
+    { "status", "pid, endpoint and health (exit 0 healthy, 5 not running)",
+      "daemon status [Polycallfile]", polycall_cmd_daemon_status },
+    { "restart", "stop (if running), then start",
+      "daemon restart [run options] [Polycallfile]", polycall_cmd_daemon_restart },
+};
+
+static const polycall_subcommand_t PEER_SUBS[] = {
+    { "serve", "run a peer node in the foreground (polycall-peer/1)",
+      "peer serve [-n|--node-id ID] [-e|--endpoint H:P] [--peer ID=H:P ...]\n"
+      "                [--endpoint-file F] [--print-messages] [--auth-token-env NAME] [Polycallfile]",
+      polycall_cmd_peer_serve },
+    { "send", "deliver one payload to a peer (one attempt, acknowledged)",
+      "peer send --to ID|H:P (-p|--payload TEXT | --payload-file F|-) [--from ID]\n"
+      "                [--id MSG_ID] [-t|--timeout-ms N] [Polycallfile]",
+      polycall_cmd_peer_send },
+    { "recv", "take the next message from a running node's inbox",
+      "peer recv --to H:P [-t|--timeout-ms N<=30000] [--raw] [Polycallfile]",
+      polycall_cmd_peer_recv },
+    { "health", "GET /health of a peer node",
+      "peer health --to ID|H:P [Polycallfile]", polycall_cmd_peer_health },
+    { "peers", "a node's own registry (authenticated)",
+      "peer peers --to H:P [Polycallfile]", polycall_cmd_peer_peers },
+    { "register", "add ID -> H:P to a running node's registry (authenticated)",
+      "peer register --to H:P --id ID --peer-endpoint H:P [Polycallfile]",
+      polycall_cmd_peer_register },
+};
+
 static const polycall_command_t COMMANDS[] = {
     /* name, summary, usage, help_body, run, subs, sub_count,
        starts_runtime, takes_local_opts */
@@ -346,6 +385,28 @@ static const polycall_command_t COMMANDS[] = {
       "call performs exactly one round trip and never retries. Distinct exit\n"
       "codes: 5 transport, 6 deadline, 7 auth, 4 unknown operation/item.\n",
       polycall_cmd_call, NULL, 0, true, true },
+
+    { "daemon", "manage the long-running runtime for a Polycallfile",
+      "daemon <run|start|stop|status|restart> [options] [Polycallfile]",
+      "One daemon per Polycallfile. Settings come from that file (daemon_endpoint,\n"
+      "daemon_state_dir, daemon_log_file, daemon_max_connections,\n"
+      "daemon_drain_timeout_ms, daemon_io_timeout_ms, auth_token_env); flags\n"
+      "override them. The shared token is read from the environment variable\n"
+      "named by auth_token_env (default POLYCALL_DEV_TOKEN) -- never from argv.\n"
+      "Logs are JSON lines. On Windows `start` creates a detached background\n"
+      "process; it is not a Windows Service. See docs/DAEMON.md.\n",
+      NULL, DAEMON_SUBS, (int)(sizeof DAEMON_SUBS / sizeof DAEMON_SUBS[0]),
+      true, true },
+
+    { "peer", "peer-to-peer nodes (NSIGII-style, no central broker)",
+      "peer <serve|send|recv|health|peers|register> [options] [Polycallfile]",
+      "Each node owns its registry and inbox; nodes exchange payloads directly\n"
+      "over polycall-peer/1 (HTTP/1.1 + JSON, docs/PEER_PROTOCOL.md). `send`\n"
+      "makes exactly one delivery attempt and succeeds only on the receiver's\n"
+      "acknowledgement; retry with the same --id and the receiver drops the\n"
+      "duplicate. Exit codes: 5 transport, 6 deadline, 7 auth, 4 unknown peer.\n",
+      NULL, PEER_SUBS, (int)(sizeof PEER_SUBS / sizeof PEER_SUBS[0]),
+      true, true },
 };
 
 const polycall_command_t *polycall_cli_registry(int *count)
@@ -396,7 +457,7 @@ void polycall_cli_print_root_help(FILE *out)
 
     fprintf(out,
         "polycall %s - program-first cross-language runtime\n\n"
-        "usage: polycall [global-options] <command> [subcommand] [arguments]\n\n"
+        "usage: polycall [command] [subcommand] [-shorthand] [--flags] [Polycallfile]\n\n"
         "commands:\n",
         polycall_get_version());
 

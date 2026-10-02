@@ -75,8 +75,8 @@
  *   - wire protocol version          -> see polycall_protocol.h  (Stage 3)
  */
 #define POLYCALL_ABI_VERSION_MAJOR 1
-#define POLYCALL_ABI_VERSION_MINOR 0
+#define POLYCALL_ABI_VERSION_MINOR 1
 #define POLYCALL_ABI_VERSION_PATCH 0
-#define POLYCALL_ABI_VERSION_STRING "1.0.0"
+#define POLYCALL_ABI_VERSION_STRING "1.1.0"
 
 #endif /* POLYCALL_EXPORT_H */

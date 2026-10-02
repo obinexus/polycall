@@ -1,0 +1,59 @@
+# polycall daemon -- systemd unit
+#
+# Runs `polycall daemon run` in the foreground as an unprivileged, dynamic
+# service user (no root, no capabilities). Configuration is the single
+# project file /etc/polycall/Polycallfile. The shared token (if any) is read
+# from the environment variable named by its auth_token_env key (default
+# POLYCALL_DEV_TOKEN); provide it with `systemctl edit polycall` ->
+#   [Service]
+#   EnvironmentFile=/etc/polycall/polycall.env      (mode 0600, root:root)
+# and never put the secret in this unit or on the command line.
+
+[Unit]
+Description=Polycall daemon (polycall_rpc v1 runtime)
+Documentation=https://github.com/obinexus/polycall/blob/polycall-cli-redesign/docs/DAEMON.md
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=notify
+NotifyAccess=main
+ExecStart=@CMAKE_INSTALL_PREFIX@/@CMAKE_INSTALL_BINDIR@/polycall daemon run --log-format json --state-dir /run/polycall /etc/polycall/Polycallfile
+Restart=on-failure
+RestartSec=2s
+TimeoutStartSec=30s
+TimeoutStopSec=30s
+KillMode=mixed
+
+DynamicUser=yes
+RuntimeDirectory=polycall
+RuntimeDirectoryMode=0750
+StateDirectory=polycall
+ConfigurationDirectory=polycall
+UMask=0077
+
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+RestrictAddressFamilies=AF_INET AF_UNIX
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallFilter=~@privileged @resources
+
+[Install]
+WantedBy=multi-user.target
