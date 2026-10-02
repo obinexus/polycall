@@ -30,7 +30,12 @@ UPV=${TARNAME#polycall-}; UPV=${UPV%.tar.gz}
 SUM=$(sha256sum < "$TARBALL"); SUM=${SUM%% *}
 BEFORE=$(pacman -Q | sha256sum)
 [ -n "${POLYCALL_E2E_MAKEPKG_FLAGS:-}" ] && echo "NOTE  makepkg-mingw extra flags: $POLYCALL_E2E_MAKEPKG_FLAGS (node: $(command -v node || echo none))"
-rm -rf "$OUT/build" "$OUT/repo-v1" "$OUT/repo-v2" "$OUT/root" "$OUT/gnupg-signer"
+rm -rf "$OUT/build" "$OUT/repo-v1" "$OUT/repo-v2" "$OUT/root"
+# gpg homes must be short paths: gpg-agent socket paths have a small length limit
+GPGTMP=$(mktemp -d /tmp/pcgpg.XXXXXX)
+KR="$GPGTMP/p"   # the isolated root's pacman keyring
+cleanup() { gpgconf --homedir "$GPGTMP/s" --kill gpg-agent 2>/dev/null; gpgconf --homedir "$KR" --kill gpg-agent 2>/dev/null; rm -rf "$GPGTMP"; }
+trap cleanup EXIT
 
 # ---- build ---------------------------------------------------------------------
 for rel in 1 2; do
@@ -44,15 +49,20 @@ for rel in 1 2; do
   # POLYCALL_E2E_MAKEPKG_FLAGS=--nodeps: for a local MSYS2 without the
   # checkdepends packages, with those tools provided on PATH instead (reported)
   ( cd "$d" && MINGW_ARCH=$ENVN makepkg-mingw --noconfirm --cleanbuild $nc ${POLYCALL_E2E_MAKEPKG_FLAGS:-} ) > "$OUT/makepkg-$rel.log" 2>&1
-  check '[ $? -eq 0 ] && ls "$d"/$PKG-$UPV-$rel-any.pkg.tar.zst >/dev/null 2>&1' \
-    "makepkg-mingw pkgrel=$rel$( [ $rel = 1 ] && echo ' (with check())')"
+  rc=$?
+  what="makepkg-mingw pkgrel=$rel"; [ $rel = 1 ] && what="$what (with check())"
+  check '[ $rc -eq 0 ] && [ -f "$d/$PKG-$UPV-$rel-any.pkg.tar.zst" ]' "$what"
 done
 grep -q "100% tests passed" "$OUT/makepkg-1.log" && ok "check(): ctest 100% passed" || bad "check(): ctest did not pass"
+# nothing after this point means anything without both packages
+[ -f "$OUT/build/r1/$PKG-$UPV-1-any.pkg.tar.zst" ] && [ -f "$OUT/build/r2/$PKG-$UPV-2-any.pkg.tar.zst" ] ||
+  { echo "== MSYS2 $ENVN: build failed, stopping ($PASS passed, $FAIL failed)"; exit 1; }
 
 # ---- sign (throwaway key, kept under OUTDIR, deleted at the end) ----------------
-export GNUPGHOME="$OUT/gnupg-signer"; mkdir -p "$GNUPGHOME"; chmod 700 "$GNUPGHOME"
+export GNUPGHOME="$GPGTMP/s"; mkdir -p "$GNUPGHOME"; chmod 700 "$GNUPGHOME"
 gpg --batch --passphrase "" --quick-gen-key "polycall test archive (throwaway) <noreply@invalid>" ed25519 sign 1d 2>/dev/null
 FPR=$(gpg --list-keys --with-colons | awk -F: '/^fpr/{print $10; exit}')
+[ -n "$FPR" ] || { echo "== MSYS2 $ENVN: throwaway signing key could not be created, stopping"; exit 1; }
 for v in 1 2; do
   r="$OUT/repo-v$v"; mkdir -p "$r"
   cp "$OUT/build/r$v"/$PKG-$UPV-$v-any.pkg.tar.zst "$r/"
@@ -63,30 +73,30 @@ done
 unset GNUPGHOME
 
 # ---- isolated pacman root ----------------------------------------------------------
-R="$OUT/root"; mkdir -p "$R/var/lib/pacman" "$R/cache" "$R/gnupg" "$R/hooks"
-P() { pacman --root "$R" --dbpath "$R/var/lib/pacman" --gpgdir "$R/gnupg" --cachedir "$R/cache" \
+R="$OUT/root"; mkdir -p "$R/var/lib/pacman" "$R/cache" "$KR" "$R/hooks"
+P() { pacman --root "$R" --dbpath "$R/var/lib/pacman" --gpgdir "$KR" --cachedir "$R/cache" \
              --hookdir "$R/hooks" --logfile "$R/pacman.log" --config "$R/pacman.conf" "$@"; }
 use_repo() {
   printf '[options]\nArchitecture = auto\nSigLevel = Required DatabaseRequired\n\n[polycall]\nServer = file://%s\n' \
     "$(cygpath -m "$1")" > "$R/pacman.conf"
 }
-pacman-key --gpgdir "$R/gnupg" --init >/dev/null 2>&1
+pacman-key --gpgdir "$KR" --init >/dev/null 2>&1
 
 use_repo "$OUT/repo-v1"
-P -Sy --noconfirm >"$OUT/s1.log" 2>&1
-check '[ $? -ne 0 ]' "the repository is refused before its key is trusted"
-pacman-key --gpgdir "$R/gnupg" --add "$OUT/repo-v1/polycall-archive.asc" >/dev/null 2>&1
-pacman-key --gpgdir "$R/gnupg" --lsign-key "$FPR" >/dev/null 2>&1
+P -Sy --noconfirm >"$OUT/s1.log" 2>&1; rc=$?
+check '[ $rc -ne 0 ]' "the repository is refused before its key is trusted"
+pacman-key --gpgdir "$KR" --add "$OUT/repo-v1/polycall-archive.asc" >/dev/null 2>&1
+pacman-key --gpgdir "$KR" --lsign-key "$FPR" >/dev/null 2>&1
 cp -r "$OUT/repo-v1" "$OUT/repo-tampered"
 for f in "$OUT/repo-tampered"/*.pkg.tar.zst; do printf x >> "$f"; done
 use_repo "$OUT/repo-tampered"
-P -Sy --noconfirm $PKG >"$OUT/s2.log" 2>&1
-check '[ $? -ne 0 ] && [ ! -e "$R$MINGW_PREFIX/bin/polycall.exe" ]' "a package altered after signing is refused"
+P -Sy --noconfirm $PKG >"$OUT/s2.log" 2>&1; rc=$?
+check '[ $rc -ne 0 ] && [ ! -e "$R$MINGW_PREFIX/bin/polycall.exe" ]' "a package altered after signing is refused"
 rm -rf "$OUT/repo-tampered" "$R/cache"/*
 
 use_repo "$OUT/repo-v1"
-P -Sy --noconfirm $PKG >"$OUT/i1.log" 2>&1
-check '[ $? -eq 0 ]' "pacman -S $PKG (isolated root)"
+P -Sy --noconfirm $PKG >"$OUT/i1.log" 2>&1; rc=$?
+check '[ $rc -eq 0 ]' "pacman -S $PKG (isolated root)"
 B="$R$MINGW_PREFIX"
 check '[ "$("$B/bin/polycall.exe" --version)" = "polycall $UPV" ]' "installed polycall.exe --version = $UPV"
 check '[ -f "$B/bin/libpolycall.dll" ] && [ -f "$B/lib/libpolycall.dll.a" ] && [ -f "$B/lib/libpolycall.a" ] && [ -f "$B/include/polycall/polycall.h" ]' \
@@ -121,21 +131,21 @@ check '[ "$(tr -d "\r" < "$W/o2")" = "$UPV" ]' "CMake find_package(polycall) con
 
 mkdir -p "$W/d" && printf 'network start\ndaemon_endpoint=127.0.0.1:0\nauth_token_env=POLYCALL_DEV_TOKEN\n' > "$W/d/Polycallfile"
 ( "$B/bin/polycall.exe" daemon start -t 10000 "$W/d/Polycallfile" && "$B/bin/polycall.exe" daemon status "$W/d/Polycallfile" &&
-  "$B/bin/polycall.exe" daemon stop "$W/d/Polycallfile" && ! "$B/bin/polycall.exe" daemon status "$W/d/Polycallfile" ) > "$W/d.log" 2>&1
-check '[ $? -eq 0 ] && grep -q "\"status\":\"ok\"" "$W/d.log"' "daemon start / status (health ok) / stop from the package"
+  "$B/bin/polycall.exe" daemon stop "$W/d/Polycallfile" && ! "$B/bin/polycall.exe" daemon status "$W/d/Polycallfile" ) > "$W/d.log" 2>&1; rc=$?
+check '[ $rc -eq 0 ] && grep -q "\"status\":\"ok\"" "$W/d.log"' "daemon start / status (health ok) / stop from the package"
 
 use_repo "$OUT/repo-v2"
 P -Syu --noconfirm >"$OUT/u1.log" 2>&1
 V=$(P -Q $PKG 2>/dev/null | awk '{print $2}')
 check '[ "$V" = "$UPV-2" ]' "pacman -Syu upgrades to $V"
 check '[ "$(PATH="$B/bin:$PATH" "$W/shared.exe" | tr -d "\r")" = "$UPV" ]' "existing consumer runs against the upgraded DLL"
-P -R --noconfirm $PKG >"$OUT/r1.log" 2>&1
-check '[ $? -eq 0 ] && [ ! -e "$B/bin/polycall.exe" ] && [ ! -e "$B/bin/libpolycall.dll" ] && [ ! -d "$B/include/polycall" ]' \
+P -R --noconfirm $PKG >"$OUT/r1.log" 2>&1; rc=$?
+check '[ $rc -eq 0 ] && [ ! -e "$B/bin/polycall.exe" ] && [ ! -e "$B/bin/libpolycall.dll" ] && [ ! -d "$B/include/polycall" ]' \
   "pacman -R removes every packaged file"
 
 AFTER=$(pacman -Q | sha256sum)
 check '[ "$BEFORE" = "$AFTER" ] && [ ! -e "$MINGW_PREFIX/bin/polycall.exe" ]' \
   "the MSYS2 installation's own package set is unchanged"
-rm -rf "$OUT/gnupg-signer"
+
 echo "== MSYS2 $ENVN: $PASS passed, $FAIL failed"
 [ $FAIL -eq 0 ]

@@ -505,6 +505,10 @@ if(BUILD_TESTING)
   else()
     message(WARNING "sh not found: the shell test suites cannot run; ctest will "
                     "only run the C unit tests")
+    # visible in every ctest summary ("tests did not run ... (Disabled)"),
+    # so the missing suites can never read as a full green run
+    add_test(NAME polycall_shell_suites_not_run COMMAND ${CMAKE_COMMAND} -E true)
+    set_tests_properties(polycall_shell_suites_not_run PROPERTIES DISABLED TRUE)
   endif()
 endif()
 
