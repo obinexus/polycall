@@ -11,7 +11,7 @@
 
 [Unit]
 Description=Polycall daemon (polycall_rpc v1 runtime)
-Documentation=https://github.com/obinexus/polycall/blob/polycall-cli-redesign/docs/DAEMON.md
+Documentation=https://github.com/obinexus/polycall/blob/HEAD/docs/DAEMON.md
 After=network-online.target
 Wants=network-online.target
 
