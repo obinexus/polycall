@@ -13,7 +13,7 @@ mkdir -p "${1:?usage: pacman-e2e.sh OUTDIR}"
 OUT=$(cd "$1" && pwd)
 IMAGE=${POLYCALL_ARCH_IMAGE:-archlinux:base-devel}
 hostpath() { if command -v cygpath >/dev/null 2>&1; then cygpath -w "$1"; else printf '%s' "$1"; fi; }
-export MSYS_NO_PATHCONV=1
+
 
 rm -rf "$OUT/arch-repo-v1" "$OUT/arch-repo-v2"
 TAR=$(sh "$ROOT/packaging/make-source-tarball.sh" HEAD "$OUT" | awk '{print $2}')
@@ -22,7 +22,7 @@ UPV=${TARNAME#polycall-}; UPV=${UPV%.tar.gz}
 SUM=$(sha256sum "$TAR" | awk '{print $1}')
 echo "== source: $TARNAME ($SUM)"
 
-docker run --rm -v "$(hostpath "$OUT"):/out" "$IMAGE" sh -c '
+MSYS_NO_PATHCONV=1 docker run --rm -v "$(hostpath "$OUT"):/out" "$IMAGE" sh -c '
   set -eu
   pacman-key --init >/dev/null 2>&1; pacman-key --populate archlinux >/dev/null 2>&1
   pacman -Syu --noconfirm --needed cmake python >/dev/null
@@ -53,7 +53,7 @@ docker run --rm -v "$(hostpath "$OUT"):/out" "$IMAGE" sh -c '
 FPR=$(cat "$OUT/arch-key.fpr")
 
 log="$OUT/client-archlinux.log"
-if docker run --rm -v "$(hostpath "$OUT/arch-repo-v1"):/repo-v1:ro" -v "$(hostpath "$OUT/arch-repo-v2"):/repo-v2:ro" \
+if MSYS_NO_PATHCONV=1 docker run --rm -v "$(hostpath "$OUT/arch-repo-v1"):/repo-v1:ro" -v "$(hostpath "$OUT/arch-repo-v2"):/repo-v2:ro" \
      -v "$(hostpath "$HERE"):/t:ro" "$IMAGE" sh /t/pacman-client.sh "$UPV" "$FPR" >"$log" 2>&1; then
   echo "PASS  $IMAGE  ($(tail -1 "$log"))"
 else

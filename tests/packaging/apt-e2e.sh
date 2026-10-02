@@ -19,7 +19,7 @@ CLIENTS=${*:-debian:12 debian:13 ubuntu:24.04}
 BUILDER=${POLYCALL_DEB_BUILDER:-debian:12}
 
 hostpath() { if command -v cygpath >/dev/null 2>&1; then cygpath -w "$1"; else printf '%s' "$1"; fi; }
-export MSYS_NO_PATHCONV=1
+
 
 rm -rf "$OUT/debs-1" "$OUT/debs-2" "$OUT/repo-v1" "$OUT/repo-v2"
 TAR=$(sh "$ROOT/packaging/make-source-tarball.sh" HEAD "$OUT" | awk '{print $2}')
@@ -28,7 +28,7 @@ UPV=${TARNAME#polycall-}; UPV=${UPV%.tar.gz}
 echo "== source: $TARNAME"
 
 echo "== build (.debs, signed repositories) on $BUILDER"
-docker run --rm -v "$(hostpath "$OUT"):/out" "$BUILDER" sh -c '
+MSYS_NO_PATHCONV=1 docker run --rm -v "$(hostpath "$OUT"):/out" "$BUILDER" sh -c '
   set -eu
   export DEBIAN_FRONTEND=noninteractive
   apt-get update -qq
@@ -52,7 +52,7 @@ tail -2 "$OUT/build.log"
 RC=0
 for img in $CLIENTS; do
   log="$OUT/client-$(echo "$img" | tr ':/' '__').log"
-  if docker run --rm -v "$(hostpath "$OUT/repo-v1"):/repo-v1:ro" -v "$(hostpath "$OUT/repo-v2"):/repo-v2:ro" \
+  if MSYS_NO_PATHCONV=1 docker run --rm -v "$(hostpath "$OUT/repo-v1"):/repo-v1:ro" -v "$(hostpath "$OUT/repo-v2"):/repo-v2:ro" \
        -v "$(hostpath "$HERE"):/t:ro" "$img" sh /t/apt-client.sh "$UPV" >"$log" 2>&1; then
     echo "PASS  $img  ($(tail -1 "$log"))"
   else

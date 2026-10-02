@@ -1,0 +1,51 @@
+# Maintainer: Nnamdi Michael Okpala <obinexusmk2@proton.me>
+#
+# MSYS2 / MinGW-w64 package (distinct from the Arch Linux package in
+# ../arch): mingw-w64-ucrt-x86_64-polycall etc. Build with makepkg-mingw.
+# Installs, under the environment prefix (e.g. /ucrt64):
+#   bin/libpolycall.dll, bin/polycall.exe, lib/libpolycall.dll.a,
+#   lib/libpolycall.a, include/polycall/*.h, lib/pkgconfig/polycall.pc,
+#   lib/cmake/polycall/*
+# No systemd unit (Windows has none); `polycall daemon` on Windows is a
+# detached background process, not a Windows Service (docs/DAEMON.md).
+#
+# Template: the release step (and tests/packaging/msys2-e2e.sh) replace
+# 'SKIP' with the release tarball's real checksum before building.
+_realname=polycall
+pkgbase=mingw-w64-${_realname}
+pkgname=("${MINGW_PACKAGE_PREFIX}-${_realname}")
+pkgver=1.1.0
+pkgrel=1
+pkgdesc="Polycall polyglot interoperability core: C library (Binding ABI v1), CLI and daemon (mingw-w64)"
+arch=('any')
+mingw_arch=('ucrt64' 'clang64' 'mingw64')
+url="https://github.com/obinexus/polycall"
+msys2_repository_url="https://github.com/obinexus/polycall"
+license=('LicenseRef-OBINexus-NT-Open-Access')
+makedepends=("${MINGW_PACKAGE_PREFIX}-cc"
+             "${MINGW_PACKAGE_PREFIX}-cmake"
+             "${MINGW_PACKAGE_PREFIX}-ninja")
+checkdepends=("${MINGW_PACKAGE_PREFIX}-python")
+source=("polycall-$pkgver.tar.gz::https://github.com/obinexus/polycall/releases/download/v$pkgver/polycall-$pkgver.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+  MSYS2_ARG_CONV_EXCL="-DCMAKE_INSTALL_PREFIX=" \
+    cmake -G Ninja -S "polycall-$pkgver" -B "build-${MSYSTEM}" \
+      -DCMAKE_BUILD_TYPE=Release \
+      -DCMAKE_INSTALL_PREFIX="${MINGW_PREFIX}" \
+      -DBUILD_TESTING=ON
+  cmake --build "build-${MSYSTEM}"
+}
+
+check() {
+  # Suites that need other language toolchains (Go, Java, Node; the Go+Python
+  # NSIGII test) run in CI, not here; excluded by name, not skipped silently.
+  POLYCALL_TELEMETRY=off ctest --test-dir "build-${MSYSTEM}" --output-on-failure \
+    -E '^polycall_(conformance_c_node_python|conformance_go|conformance_java|nsigii_two_process)$'
+}
+
+package() {
+  DESTDIR="${pkgdir}" cmake --install "build-${MSYSTEM}"
+  install -Dm644 "polycall-$pkgver/LICENSE.md" "${pkgdir}${MINGW_PREFIX}/share/licenses/${_realname}/LICENSE.md"
+}
