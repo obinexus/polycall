@@ -36,7 +36,7 @@ build/linux-gcc/bin/polycall call inventory get --endpoint 127.0.0.1:<port> \
   --input-value '{"item_id":"widget-a"}'
 ```
 
-![polycall --help](docs/assets/cli-help.png)
+![polycall 1.1.0 help](docs/assets/cli-help-1.1.0.png)
 
 See [docs/CLI.md](docs/CLI.md) for the full command reference,
 [docs/NATIVE_CONFIG.md](docs/NATIVE_CONFIG.md) for language-native
