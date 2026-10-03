@@ -1,5 +1,6 @@
 #include "polycall_config.h"
 #include "config/cfgfile.h"
+#include "core/pc_file.h"
 
 #include <ctype.h>
 #include <errno.h>
@@ -185,7 +186,7 @@ static char* trim(char* text) {
 }
 
 static bool file_exists(const char* path) {
-    FILE* file = fopen(path, "rb");
+    FILE* file = pc_fopen(path, "rb");
     if (!file) {
         return false;
     }
@@ -587,7 +588,7 @@ static bool parse_config_file(
     char raw_line[POLYCALL_CONFIG_LINE_SIZE];
     unsigned int line_number = 0;
 
-    file = fopen(path, "r");
+    file = pc_fopen(path, "r");
     if (!file) {
         cfg_errf("Unable to open configuration file: %s\n", path);
         return false;
@@ -1034,12 +1035,12 @@ static int migrate_config(const char* source, const char* destination) {
         return 1;
     }
 
-    input = fopen(source, "rb");
+    input = pc_fopen(source, "rb");
     if (!input) {
         cfg_errf("Unable to open migration source: %s\n", source);
         return 1;
     }
-    output = fopen(destination, "wb");
+    output = pc_fopen(destination, "wb");
     if (!output) {
         cfg_errf("Unable to create migration destination: %s\n", destination);
         fclose(input);
@@ -1168,7 +1169,7 @@ polycall_cfgfile_t *polycall_cfgfile_load(const char *path, unsigned flags,
         if (err && errcap) snprintf(err, errcap, "no configuration path given");
         return NULL;
     }
-    probe = fopen(path, "rb");
+    probe = pc_fopen(path, "rb");
     if (!probe) {
         if (status) *status = POLYCALL_CFGFILE_NOT_FOUND;
         if (err && errcap) {

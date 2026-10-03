@@ -97,9 +97,19 @@ static int flag_get(volatile int *p)
     CHECK(_rc == (want), "%s -> %s (got %d %s)", what, #want, _rc, polycall_strerror(_rc)); \
     } while (0)
 
+/* `path` is UTF-8. This program has no UTF-8 code-page manifest (unlike
+ * polycall.exe), so on Windows open it through UTF-16 like a binding's host
+ * runtime would. */
 static void write_file(const char *path, const char *text)
 {
-    FILE *f = fopen(path, "wb");
+    FILE *f;
+#if defined(_WIN32)
+    wchar_t wpath[1024];
+    if (MultiByteToWideChar(CP_UTF8, 0, path, -1, wpath, 1024) <= 0) return;
+    f = _wfopen(wpath, L"wb");
+#else
+    f = fopen(path, "wb");
+#endif
     if (f) { fputs(text, f); fclose(f); }
 }
 
@@ -157,6 +167,15 @@ static void test_config(void)
     EXPECT_RC(polycall_ffi_run_config("", 1), POLYCALL_E_INVALID_ARGUMENT, "run_config(\"\")");
     tmp_path(q, sizeof q, "does-not-exist-polycallrc");
     EXPECT_RC(polycall_ffi_run_config(q, 1), POLYCALL_E_NOT_FOUND, "missing file");
+
+    /* Non-ASCII UTF-8 file name ("Ünicødé-日本-polycallrc"). On Windows this
+     * process runs in the ANSI code page, as a JVM/.NET/Node host does. */
+    tmp_path(p, sizeof p, "\xc3\x9cnic\xc3\xb8" "d\xc3\xa9-\xe6\x97\xa5\xe6\x9c\xac-polycallrc");
+    write_file(p, "log_level=info\nmax_connections=10\n");
+    EXPECT_RC(polycall_ffi_run_config(p, 1), POLYCALL_OK, "non-ASCII UTF-8 path, run=1");
+    n = polycall_ffi_describe(p, buf, (int)sizeof buf);
+    CHECK(n > 0 && strstr(buf, "max_connections") != NULL,
+          "describe opens a non-ASCII UTF-8 path (%d bytes)", n);
 
     tmp_path(p, sizeof p, "bad-polycallrc");
     write_file(p, "max_connections=lots\n");

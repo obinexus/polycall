@@ -13,6 +13,7 @@
  */
 
 #include "polycall_config2.h"
+#include "../core/pc_file.h"
 
 #include <ctype.h>
 #include <stdio.h>
@@ -91,7 +92,7 @@ static const char *kv_get(const legacy_t *L, const char *k)
 static int read_layer(legacy_t *L, const char *path, bool allow_servers,
                       char *unresolved, size_t ucap, size_t *ulen)
 {
-    FILE *f = fopen(path, "r");
+    FILE *f = pc_fopen(path, "r");
     char raw[LINE_MAX];
     unsigned ln = 0;
     if (!f) {

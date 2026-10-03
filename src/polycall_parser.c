@@ -1,4 +1,5 @@
 #include "polycall_parser.h"
+#include "core/pc_file.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -332,7 +333,7 @@ PolycallAST* polycall_parser_parse_string(
 PolycallAST* polycall_parser_parse_file(PolycallParser* parser, const char* filename) {
     if (!parser || !filename) return NULL;
     
-    FILE* file = fopen(filename, "rb");
+    FILE* file = pc_fopen(filename, "rb");
     if (!file) {
         set_parser_error(parser, "Failed to open file: %s", filename);
         return NULL;

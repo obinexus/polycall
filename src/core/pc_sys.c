@@ -1,4 +1,5 @@
 #include "pc_sys.h"
+#include "pc_file.h"
 
 #include "polycall.h"
 
@@ -26,6 +27,49 @@
 #if defined(__APPLE__)
 #  include <mach/mach_time.h>
 #endif
+
+/* ===================================================================== */
+/* files                                                                 */
+/* ===================================================================== */
+
+FILE *pc_fopen(const char *path, const char *mode)
+{
+#if defined(_WIN32)
+    wchar_t *wpath;
+    wchar_t wmode[8];
+    FILE *f;
+    int n;
+
+    if (!path || !mode) {
+        errno = EINVAL;
+        return NULL;
+    }
+    if (MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, mode, -1, wmode, 8) <= 0) {
+        errno = EINVAL;
+        return NULL;
+    }
+    n = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, path, -1, NULL, 0);
+    if (n <= 0) {
+        errno = EINVAL;   /* not valid UTF-8 */
+        return NULL;
+    }
+    wpath = (wchar_t *)malloc((size_t)n * sizeof *wpath);
+    if (!wpath) {
+        errno = ENOMEM;
+        return NULL;
+    }
+    if (MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, path, -1, wpath, n) <= 0) {
+        free(wpath);
+        errno = EINVAL;
+        return NULL;
+    }
+    f = _wfopen(wpath, wmode);
+    free(wpath);
+    return f;
+#else
+    return fopen(path, mode);
+#endif
+}
 
 /* ===================================================================== */
 /* time                                                                  */
