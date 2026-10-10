@@ -24,6 +24,9 @@ struct json_value {
     /* JSON_STRING */ char *string;          /* NUL-terminated, decoded     */
     /* JSON_ARRAY  */ json_value **items; size_t count;
     /* JSON_OBJECT */ char **keys; json_value **values; /* count reused     */
+    /* every type: this value's exact source text is
+     * text[src_off .. src_off + src_len) of the buffer given to json_parse() */
+    size_t src_off, src_len;
 };
 
 /* Parse NUL-terminated / length-bounded text. Returns NULL on error and,

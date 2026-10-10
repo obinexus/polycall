@@ -104,14 +104,15 @@ void POLYCALL_CALL polycall_telemetry_timestamp(char out[POLYCALL_TELEMETRY_TS_L
 #else
     struct timespec ts;
     struct tm tm_utc;
-    long ms;
+    unsigned ms;
+    size_t n;
     clock_gettime(CLOCK_REALTIME, &ts);
-    ms = ts.tv_nsec / 1000000;
+    ms = (unsigned)(ts.tv_nsec / 1000000L) % 1000u;
     gmtime_r(&ts.tv_sec, &tm_utc);
-    snprintf(out, POLYCALL_TELEMETRY_TS_LEN,
-             "%04d-%02d-%02dT%02d:%02d:%02d.%03ldZ",
-             tm_utc.tm_year + 1900, tm_utc.tm_mon + 1, tm_utc.tm_mday,
-             tm_utc.tm_hour, tm_utc.tm_min, tm_utc.tm_sec, ms);
+    /* strftime for the calendar part: gcc's -Wformat-truncation cannot bound
+     * struct tm fields, so one snprintf of all seven values always warned. */
+    n = strftime(out, POLYCALL_TELEMETRY_TS_LEN, "%Y-%m-%dT%H:%M:%S", &tm_utc);
+    snprintf(out + n, POLYCALL_TELEMETRY_TS_LEN - n, ".%03uZ", ms);
 #endif
 }
 

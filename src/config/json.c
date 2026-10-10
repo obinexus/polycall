@@ -7,6 +7,7 @@
 #include <string.h>
 
 typedef struct {
+    const char *begin;
     const char *p;
     const char *end;
     char *err;
@@ -315,6 +316,7 @@ static json_value *parse_value(parser *ps)
     if (ps->p >= ps->end) { fail(ps, "unexpected end"); return NULL; }
     if (++ps->depth > JSON_MAX_DEPTH) { fail(ps, "too deep"); return NULL; }
 
+    const char *start = ps->p;
     json_value *r = NULL;
     switch (*ps->p) {
     case '{': r = parse_object(ps); break;
@@ -342,6 +344,10 @@ static json_value *parse_value(parser *ps)
             fail(ps, "unexpected character");
         }
     }
+    if (r) {
+        r->src_off = (size_t)(start - ps->begin);
+        r->src_len = (size_t)(ps->p - start);
+    }
     ps->depth--;
     return r;
 }
@@ -358,6 +364,7 @@ json_value *json_parse(const char *text, size_t len, char *errbuf, size_t errcap
         if (errbuf && errcap) snprintf(errbuf, errcap, "json: NULL input");
         return NULL;
     }
+    ps.begin = text;
     ps.p = text;
     ps.end = text + len;
     ps.err = errbuf;

@@ -92,9 +92,18 @@ static polycall_op_status_t op_debug_echo(
     char *out, size_t out_cap, char *ec, size_t ec_cap,
     char *em, size_t em_cap, void *user)
 {
-    (void)deadline_ms; (void)user; (void)ec; (void)ec_cap; (void)em; (void)em_cap;
-    snprintf(out, out_cap, "{\"echo\":%s}",
-             (input_json && *input_json) ? input_json : "null");
+    int n;
+    (void)deadline_ms; (void)user;
+    n = snprintf(out, out_cap, "{\"echo\":%s}",
+                 (input_json && *input_json) ? input_json : "null");
+    if (n < 0 || (size_t)n >= out_cap) {
+        /* a truncated echo would be invalid JSON under "ok":true */
+        out[0] = '\0';
+        snprintf(ec, ec_cap, "input.invalid");
+        snprintf(em, em_cap, "debug.echo input exceeds %u bytes",
+                 (unsigned)(out_cap - sizeof "{\"echo\":}"));
+        return POLYCALL_OP_ERR_INPUT;
+    }
     return POLYCALL_OP_OK;
 }
 
@@ -325,13 +334,10 @@ static char *dispatch_request(const polycall_runtime_t *rt, const char *payload,
     const polycall_op_desc_t *desc;
     uint32_t deadline;
     char out[8192], ec[64], em[256];
-    /* Re-serialised "input" sub-object text, sized and scoped for the whole
-     * function (not `static`): with one handler thread per connection
-     * (docs/CONCURRENCY.md), a static buffer here would be shared, unlocked,
-     * mutable state torn apart by concurrent requests. It must outlive the
-     * block below, since input_raw keeps pointing into it through the
-     * desc->fn() call further down. */
-    char inbuf[8192];
+    /* Per-request copy of the "input" text (never `static`: with one handler
+     * thread per connection, docs/CONCURRENCY.md, shared state here would be
+     * torn apart by concurrent requests). */
+    char *inbuf = NULL;
     char *resp;
     polycall_op_status_t st;
 
@@ -370,46 +376,23 @@ static char *dispatch_request(const polycall_runtime_t *rt, const char *payload,
         return resp;
     }
 
-    /* re-serialise the input sub-value as compact JSON text for the handler */
+    /* Hand the handler the "input" value's exact source text, sliced out of
+     * the request payload: any type, any nesting, number lexemes and string
+     * escapes all arrive byte-for-byte as the client sent them. */
     input_raw = "null";
-    {
-        /* json.c has no serialiser; for the built-ins the input is a shallow
-         * object, so pass the original slice. Cheap + safe: hand the handler
-         * the whole request's "input" by re-reading it from payload via a
-         * minimal re-emit. */
-        if (jin && jin->type == JSON_OBJECT) {
-            size_t k;
-            size_t w = 0;
-            w += (size_t)snprintf(inbuf + w, sizeof inbuf - w, "{");
-            for (k = 0; k < jin->count && w < sizeof inbuf - 64; ++k) {
-                char kq[128], vq[512];
-                const json_value *v = jin->values[k];
-                jesc(jin->keys[k], kq, sizeof kq);
-                if (v->type == JSON_STRING) {
-                    jesc(v->string, vq, sizeof vq);
-                    w += (size_t)snprintf(inbuf + w, sizeof inbuf - w,
-                                          "%s\"%s\":\"%s\"", k ? "," : "", kq, vq);
-                } else if (v->type == JSON_NUMBER) {
-                    w += (size_t)snprintf(inbuf + w, sizeof inbuf - w,
-                                          "%s\"%s\":%g", k ? "," : "", kq, v->number);
-                } else if (v->type == JSON_BOOL) {
-                    w += (size_t)snprintf(inbuf + w, sizeof inbuf - w,
-                                          "%s\"%s\":%s", k ? "," : "", kq,
-                                          v->boolean ? "true" : "false");
-                } else {
-                    w += (size_t)snprintf(inbuf + w, sizeof inbuf - w,
-                                          "%s\"%s\":null", k ? "," : "", kq);
-                }
-            }
-            snprintf(inbuf + w, sizeof inbuf - w, "}");
-            input_raw = inbuf;
-        }
+    if (jin) {
+        inbuf = malloc(jin->src_len + 1);
+        if (!inbuf) { json_free(req); return NULL; }
+        memcpy(inbuf, payload + jin->src_off, jin->src_len);
+        inbuf[jin->src_len] = '\0';
+        input_raw = inbuf;
     }
 
     out[0] = ec[0] = em[0] = '\0';
     st = desc->fn(input_raw, deadline, out, sizeof out, ec, sizeof ec,
                   em, sizeof em, desc->user);
     *status_class = (uint32_t)st;
+    free(inbuf);
 
     resp = malloc(9000);
     if (!resp) { json_free(req); return NULL; }
