@@ -3,8 +3,11 @@ name: Deploy docs to GitHub Pages
 # site-docs/ (getting-started, CLI reference, Polycallfile reference, ...) is
 # the primary site, built with MkDocs per mkdocs.yml and published at the
 # site root. docs/ (the broader reference/knowledge base) is built with
-# GitHub's default Jekyll and published alongside it under /docs/. One
-# artifact, one deployment.
+# GitHub's default Jekyll and published alongside it under /docs/. The signed
+# APT repository (apt/ on the apt-repo branch, written only by release.yml)
+# is published under /apt/. One artifact, one deployment -- so every docs
+# deployment must carry the APT repository along, or it would vanish.
+# release.yml dispatches this workflow after it updates the apt-repo branch.
 
 on:
   push:
@@ -46,6 +49,17 @@ jobs:
         with:
           source: ./docs
           destination: ./_site/docs
+
+      - name: Add the signed APT repository (apt-repo branch) -> _site/apt/
+        run: |
+          if git ls-remote --exit-code --heads origin apt-repo >/dev/null; then
+            git fetch --no-tags --depth=1 origin apt-repo
+            git archive FETCH_HEAD apt | tar -x -C _site
+            test -s _site/apt/polycall-archive-keyring.gpg
+            ls _site/apt/dists
+          else
+            echo "::notice::no apt-repo branch yet (no release published); deploying docs only"
+          fi
 
       - uses: actions/upload-pages-artifact@v3
         with:

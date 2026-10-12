@@ -1,0 +1,9 @@
+Tests: cli-smoke
+Depends: polycall
+Restrictions: allow-stderr
+
+Tests: library-consumers
+Depends: build-essential,
+         cmake,
+         libpolycall-dev,
+Restrictions: allow-stderr

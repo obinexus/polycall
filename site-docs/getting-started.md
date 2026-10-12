@@ -1,5 +1,14 @@
 # Getting started
 
+!!! note "Installing on Debian or Ubuntu"
+    Debian 12/13 and Ubuntu 22.04/24.04/26.04 (amd64, arm64) can install the
+    CLI with `sudo apt install polycall` after a one-time setup of the
+    project's signed third-party APT repository — it is not in the official
+    Debian/Ubuntu archives. Follow the
+    [README instructions](https://github.com/obinexus/polycall#install-on-debian-and-ubuntu),
+    which include the signing-key fingerprint to verify. The rest of this
+    page builds from source.
+
 ## Two independent build systems
 
 !!! success "Verified this session"

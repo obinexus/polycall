@@ -1,0 +1,163 @@
+name: Release
+
+# On a release tag:
+#   1. check the tag names the version the tree packages
+#   2. build, test, lint and install-test every package (packages.yml)
+#   3. add the .debs to the signed APT repository kept on the apt-repo branch,
+#      regenerate and sign its indexes, push the branch
+#   4. attach the versioned .debs (+ SHA256SUMS) to the GitHub release
+#   5. redeploy GitHub Pages, which serves the apt-repo branch under /apt/
+#   6. verify the published repository from clean containers (apt-verify.yml)
+#
+# Tags: vX.Y.Z (X.Y.Z = include/polycall_export.h version) or, for a
+# packaging-only revision, debian/<debian/changelog version> (DEP-14).
+#
+# Needs, before the first release (docs/PACKAGING.md):
+#   - secret APT_SIGNING_KEY (armored secret key; environment apt-signing)
+#   - secret APT_SIGNING_KEY_PASSPHRASE, only if that key has a passphrase
+#   - packaging/apt/polycall-archive-keyring.asc committed and its fingerprint
+#     in README.md (packaging/apt/new-signing-key.sh does both)
+
+on:
+  push:
+    tags: ['v*', 'debian/*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-apt-repository
+  cancel-in-progress: false
+
+jobs:
+  version:
+    name: Tag, version and signing key are consistent
+    runs-on: ubuntu-24.04
+    outputs:
+      debian: ${{ steps.version.outputs.debian }}
+    steps:
+      - uses: actions/checkout@v7
+      - id: version
+        run: echo "debian=$(sh packaging/ci/release-version.sh "$GITHUB_REF_NAME")" >> "$GITHUB_OUTPUT"
+      - run: sh packaging/ci/check-signing-key.sh
+
+  packages:
+    needs: version
+    uses: ./.github/workflows/packages.yml
+
+  publish:
+    name: Sign and publish the APT repository
+    needs: [version, packages]
+    runs-on: ubuntu-24.04
+    environment: apt-signing
+    permissions:
+      contents: write   # push the apt-repo branch, create the GitHub release
+      actions: write    # dispatch the Pages deployment
+    env:
+      GH_TOKEN: ${{ github.token }}
+      DEBIAN_VERSION: ${{ needs.version.outputs.debian }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: deb-*
+          path: dist
+          merge-multiple: true
+
+      - name: Tools
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q --no-install-recommends apt-utils gnupg gpgv xz-utils
+          find dist -name '*.deb' | sort
+
+      - name: Import the signing key (secret APT_SIGNING_KEY)
+        env:
+          APT_SIGNING_KEY: ${{ secrets.APT_SIGNING_KEY }}
+          APT_SIGNING_KEY_PASSPHRASE: ${{ secrets.APT_SIGNING_KEY_PASSPHRASE }}
+        run: |
+          if [ -z "$APT_SIGNING_KEY" ]; then
+            echo "::error::secret APT_SIGNING_KEY is not set -- see docs/PACKAGING.md"; exit 1
+          fi
+          export GNUPGHOME="$RUNNER_TEMP/gnupg"
+          install -d -m 0700 "$GNUPGHOME"
+          echo "GNUPGHOME=$GNUPGHOME" >> "$GITHUB_ENV"
+          printf '%s\n' "$APT_SIGNING_KEY" | gpg --batch --import
+          if [ -n "$APT_SIGNING_KEY_PASSPHRASE" ]; then
+            ( umask 077; printf '%s' "$APT_SIGNING_KEY_PASSPHRASE" > "$RUNNER_TEMP/apt-passphrase" )
+            echo "APT_PASSFILE=$RUNNER_TEMP/apt-passphrase" >> "$GITHUB_ENV"
+          fi
+          fpr=$(gpg --batch --with-colons --list-secret-keys | awk -F: '$1 == "fpr" { print $10; exit }')
+          sh packaging/ci/check-signing-key.sh "$fpr"
+          echo "SIGNING_FPR=$fpr" >> "$GITHUB_ENV"
+
+      - id: branch
+        name: Does the apt-repo branch exist yet?
+        run: |
+          if git ls-remote --exit-code --heads origin apt-repo >/dev/null; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ steps.branch.outputs.exists == 'true' && 'apt-repo' || github.ref }}
+          path: apt-repo-branch
+
+      - name: Start the apt-repo branch (first release only)
+        if: steps.branch.outputs.exists != 'true'
+        working-directory: apt-repo-branch
+        run: |
+          git checkout -q --orphan apt-repo
+          git rm -rfq .
+          git clean -fdxq
+
+      - name: Add the packages, regenerate and sign the indexes
+        run: |
+          sh packaging/apt/update-repo.sh --repo apt-repo-branch/apt --incoming dist \
+            --key "$SIGNING_FPR" --public-key packaging/apt/polycall-archive-keyring.asc \
+            ${APT_PASSFILE:+--passphrase-file "$APT_PASSFILE"}
+          cat > apt-repo-branch/README.md <<'EOF'
+          # polycall APT repository (generated)
+
+          This branch is written by `.github/workflows/release.yml` and served by
+          GitHub Pages at https://obinexus.github.io/polycall/apt/. Do not edit it by
+          hand: every index is signed in CI. See docs/PACKAGING.md on the default
+          branch.
+          EOF
+
+      - name: Push the apt-repo branch
+        working-directory: apt-repo-branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet && { echo "repository unchanged"; exit 0; }
+          git commit -q -m "Publish polycall $DEBIAN_VERSION ($GITHUB_REF_NAME)"
+          git push origin HEAD:refs/heads/apt-repo
+
+      - name: Attach the .deb files to the GitHub release
+        run: |
+          rm -rf release-assets; mkdir release-assets
+          # GitHub rewrites '~' in asset names; use '.' so names stay predictable
+          find dist -name '*.deb' | while read -r f; do
+            cp "$f" "release-assets/$(basename "$f" | tr '~' '.')"
+          done
+          ( cd release-assets && sha256sum -- *.deb > SHA256SUMS )
+          cat release-assets/SHA256SUMS
+          gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 \
+            || gh release create "$GITHUB_REF_NAME" --verify-tag --title "polycall $GITHUB_REF_NAME" \
+                 --notes "Debian/Ubuntu packages for polycall $DEBIAN_VERSION. Install from the signed APT repository as described in the README; the .deb files below are the same packages."
+          gh release upload "$GITHUB_REF_NAME" release-assets/* --clobber
+
+      - name: Redeploy GitHub Pages (docs + /apt/)
+        run: gh workflow run pages.yml --ref "${{ github.event.repository.default_branch }}"
+
+  verify:
+    name: Verify the published repository
+    needs: [version, publish]
+    uses: ./.github/workflows/apt-verify.yml
+    with:
+      version: ${{ needs.version.outputs.debian }}
+      wait-seconds: 1800

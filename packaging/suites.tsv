@@ -1,0 +1,21 @@
+# Debian and Ubuntu releases the polycall APT repository supports.
+# Single source of truth for packaging/deb/build.sh, packaging/apt/*.sh,
+# packaging/test/*.sh and the GitHub Actions matrices
+# (.github/workflows/packages.yml, release.yml, apt-verify.yml).
+#
+# Columns (tab separated):
+#   codename      APT suite name (= VERSION_CODENAME in /etc/os-release)
+#   image         clean Docker image used to build and to test installs
+#   suffix        appended to the Debian version: 1.0.0-1~<suffix>, so each
+#                 release gets its own build and a release upgrade (e.g.
+#                 Debian 12 -> 13) also upgrades polycall
+#   architectures space separated; each one is built, tested and published
+#   name          human-readable release name
+#
+# Adding a release: add a row, then run the packaging workflow on a PR; it
+# builds, lints and install-tests every row before anything is published.
+bookworm	debian:12	deb12	amd64 arm64	Debian 12 (bookworm)
+trixie	debian:13	deb13	amd64 arm64	Debian 13 (trixie)
+jammy	ubuntu:22.04	ubuntu22.04	amd64 arm64	Ubuntu 22.04 LTS (Jammy Jellyfish)
+noble	ubuntu:24.04	ubuntu24.04	amd64 arm64	Ubuntu 24.04 LTS (Noble Numbat)
+resolute	ubuntu:26.04	ubuntu26.04	amd64 arm64	Ubuntu 26.04 LTS (Resolute Raccoon)

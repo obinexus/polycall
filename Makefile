@@ -78,14 +78,16 @@ else ifeq ($(UNAME_S),Darwin)
   SHARED_EXT  := dylib
   EXE_EXT     :=
   SHARED_LDFLAGS := -dynamiclib
-  PLATFORM_LDLIBS := -lpthread
+  PLATFORM_LDLIBS := -lpthread -lm
   DEFINE_OS   :=
 else
   PLATFORM    := $(shell echo $(UNAME_S) | tr A-Z a-z)
   SHARED_EXT  := so
   EXE_EXT     :=
   SHARED_LDFLAGS := -shared
-  PLATFORM_LDLIBS := -lpthread -ldl
+  # -lm: src/config/json.c calls floor()/fabs(), which Clang (and -O0) do not
+  # inline the way GCC -O2 usually does.
+  PLATFORM_LDLIBS := -lpthread -ldl -lm
   DEFINE_OS   :=
 endif
 
@@ -138,6 +140,7 @@ DESTDIR ?=
 bindir  := $(PREFIX)/bin
 libdir  := $(PREFIX)/lib
 incdir  := $(PREFIX)/include/polycall
+man1dir := $(PREFIX)/share/man/man1
 
 # ---- top-level targets -------------------------------------------------
 .PHONY: all
@@ -267,6 +270,7 @@ install: all
 	$(INSTALL) -m 0644 $(INC_DIR)/polycall.h $(INC_DIR)/polycall_export.h \
 	  $(INC_DIR)/polycall_cli.h $(INC_DIR)/polycall_config2.h \
 	  $(INC_DIR)/polycall_provider.h $(INC_DIR)/polycall_runtime.h \
+	  $(INC_DIR)/polycall_telemetry.h \
 	  "$(DESTDIR)$(incdir)/"
 	$(INSTALL) -m 0644 $(STATIC_LIB) "$(DESTDIR)$(libdir)/"
 	$(INSTALL) -m 0755 $(SHARED_LIB) "$(DESTDIR)$(libdir)/"
@@ -274,6 +278,10 @@ ifeq ($(IS_WINDOWS),1)
 	$(INSTALL) -m 0644 $(IMPLIB) "$(DESTDIR)$(libdir)/"
 endif
 	$(INSTALL) -m 0755 $(EXECUTABLE) "$(DESTDIR)$(bindir)/"
+ifneq ($(IS_WINDOWS),1)
+	@mkdir -p "$(DESTDIR)$(man1dir)"
+	$(INSTALL) -m 0644 docs/man/polycall.1 "$(DESTDIR)$(man1dir)/"
+endif
 	@echo "installed to $(DESTDIR)$(PREFIX)"
 
 .PHONY: uninstall
@@ -283,6 +291,7 @@ uninstall:
 	      "$(DESTDIR)$(libdir)/$(LIB_NAME).$(SHARED_EXT)" \
 	      "$(DESTDIR)$(libdir)/$(LIB_NAME).dll.a"
 	rm -rf "$(DESTDIR)$(incdir)"
+	rm -f "$(DESTDIR)$(man1dir)/polycall.1"
 
 # ---- housekeeping ----------------------------------------------
 .PHONY: clean

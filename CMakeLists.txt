@@ -107,6 +107,13 @@ else()
   find_package(Threads REQUIRED)
   list(APPEND POLYCALL_PLATFORM_LIBS Threads::Threads)
   list(APPEND POLYCALL_PLATFORM_LIBS ${CMAKE_DL_LIBS})
+  # src/config/json.c calls floor()/fabs(). GCC at -O2 usually inlines them,
+  # but Clang and -O0 builds emit real calls, so link libm wherever it is a
+  # separate library rather than relying on the optimiser.
+  find_library(POLYCALL_LIBM m)
+  if(POLYCALL_LIBM)
+    list(APPEND POLYCALL_PLATFORM_LIBS m)
+  endif()
 endif()
 
 if(WIN32)
@@ -257,6 +264,10 @@ install(TARGETS polycall_static polycall_shared polycall_cli
   ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(FILES ${POLYCALL_PUBLIC_HEADERS}
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/polycall)
+if(UNIX)
+  install(FILES docs/man/polycall.1
+    DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
+endif()
 
 install(EXPORT polycallTargets
   FILE polycallTargets.cmake

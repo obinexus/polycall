@@ -76,6 +76,37 @@ build-*/
 /build/
 /dist/
 
+# In-source CMake / Visual Studio configure output. Configure out of source
+# (cmake -S . -B build/<name>); a CMakeCache.txt in the source root makes
+# `cmake ..`-style builds, including the Debian package build, refuse to run.
+/CMakeCache.txt
+/CMakeFiles/
+/CTestTestfile.cmake
+/DartConfiguration.tcl
+/cmake_install.cmake
+/Testing/
+/*.vcxproj
+/*.vcxproj.filters
+/*.sln
+/*.dir/
+/polycallConfig.cmake
+/polycallConfigVersion.cmake
+/polycallTargets.cmake
+
+# Debian package builds done in the tree (packaging/deb/build.sh builds in a
+# temporary copy instead)
+/obj-*/
+/debian/.debhelper/
+/debian/debhelper-build-stamp
+/debian/files
+/debian/*.substvars
+/debian/*.debhelper.log
+/debian/tmp/
+/debian/polycall/
+/debian/libpolycall1/
+/debian/libpolycall-dev/
+/debian/test-telemetry.jsonl
+
 # language-binding build artifacts (were phantom Git LFS pointers from the snapshot)
 tools/rpc-clients/java/target/
 *.class

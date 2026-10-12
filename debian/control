@@ -1,0 +1,61 @@
+Source: polycall
+Section: devel
+Priority: optional
+Maintainer: Nnamdi Michael Okpala <okpalan@protonmail.com>
+Build-Depends: debhelper-compat (= 13),
+               cmake (>= 3.20),
+               python3:any <!nocheck>,
+Standards-Version: 4.7.2
+Homepage: https://github.com/obinexus/polycall
+Vcs-Browser: https://github.com/obinexus/polycall
+Vcs-Git: https://github.com/obinexus/polycall.git -b polycall-cli-redesign
+Rules-Requires-Root: no
+
+Package: polycall
+Architecture: any
+Multi-Arch: foreign
+Depends: ${misc:Depends},
+         ${shlibs:Depends},
+Description: program-first cross-language runtime - command-line tool
+ PolyCall routes a call made of a service name, an operation name and a
+ JSON input to whichever process registered that operation, over one wire
+ protocol (polycall_rpc v1), so callers written in any language reach the
+ same typed operation and get the same typed result or structured error.
+ .
+ This package provides the polycall command. It starts the runtime in the
+ foreground or as a daemon, queries and stops a running instance over its
+ control channel, invokes registered operations, loads operation plugins,
+ validates and migrates configuration, and records GUID and timestamp
+ correlated telemetry events.
+
+Package: libpolycall1
+Section: libs
+Architecture: any
+Multi-Arch: same
+Depends: ${misc:Depends},
+         ${shlibs:Depends},
+Description: program-first cross-language runtime - shared library
+ PolyCall routes a call made of a service name, an operation name and a
+ JSON input to whichever process registered that operation, over one wire
+ protocol (polycall_rpc v1), so callers written in any language reach the
+ same typed operation and get the same typed result or structured error.
+ .
+ This package contains the shared library implementing the runtime,
+ typed configuration model, provider host and telemetry C API.
+
+Package: libpolycall-dev
+Section: libdevel
+Architecture: any
+Multi-Arch: same
+Depends: libpolycall1 (= ${binary:Version}),
+         ${misc:Depends},
+Description: program-first cross-language runtime - development files
+ PolyCall routes a call made of a service name, an operation name and a
+ JSON input to whichever process registered that operation, over one wire
+ protocol (polycall_rpc v1), so callers written in any language reach the
+ same typed operation and get the same typed result or structured error.
+ .
+ This package contains the C headers, the static library, the shared
+ library symlink and the CMake package configuration (find_package
+ polycall, targets polycall::polycall_shared and polycall::polycall_static)
+ needed to build programs and operation plugins against libpolycall.

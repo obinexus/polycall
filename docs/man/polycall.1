@@ -1,0 +1,235 @@
+.\" Manual page for the polycall command-line tool.
+.\" Keep in sync with the command registry in src/cli/cli_commands.c and
+.\" with docs/CLI.md (the authoritative CLI contract).
+.TH POLYCALL 1 2026-10-12 PolyCall "User Commands"
+.SH NAME
+polycall \- program\-first cross\-language runtime
+.SH SYNOPSIS
+.B polycall
+.RI [ global\-options ]
+.I command
+.RI [ subcommand ]
+.RI [ arguments ]
+.SH DESCRIPTION
+.B polycall
+is the command\-line interface to the PolyCall runtime.
+A caller sends a service name, an operation name and a JSON input over the
+.B polycall_rpc
+v1 wire protocol; the runtime routes the request to whichever process
+registered that
+.I service.operation
+and returns a typed JSON result or a structured error, regardless of the
+language the operation is implemented in.
+.PP
+Run with no arguments,
+.B polycall
+prints help and exits 0.
+Non\-interactive input never starts an interactive session;
+.B polycall repl
+is the only way into one.
+.SH COMMANDS
+.TP
+.BR help " [\fIcommand\fR [\fIsubcommand\fR]]"
+Show help for polycall or for a specific command.
+.TP
+.B version
+Print the version as a single line and exit.
+.TP
+.B doctor
+Report build, platform, ABI and core\-capability status.
+This is read\-only: it never starts a service, opens a socket or evaluates a
+configuration provider.
+.TP
+.BR "config validate" " [\fB\-\-provider\fR \fBc:\fILIB\fR|\fBnode:\fIMOD\fR|\fBpython:\fIMOD\fR | \fB\-\-envelope\fR \fIFILE\fR | \fIpath\fR]"
+Validate a native configuration provider or canonical envelope through the
+typed configuration model, or, with no selector, a legacy
+.I Polycallfile
+through the legacy loader.
+.TP
+.BR "config show" " [\fIselector\fR | \fIlanguage\fR] [\fB\-\-provenance\fR]"
+Print the effective configuration, optionally with the winning source of
+each field.
+.TP
+.BR "config load" " [\fIlanguage\fR]"
+Load the legacy configuration hierarchy and report the order.
+.TP
+.BR "config migrate" " \fIsrc\fR \fBPolycallrc.\fIlang\fR | \fB\-\-from\-legacy\fR [\fB\-\-language\fR \fIL\fR] \fB\-\-output\fR \fIFILE\fR"
+Copy\-migrate a legacy file to its language\-native name, or convert the
+legacy effective model into a schema\-v2 envelope.
+Never overwrites an existing file.
+.TP
+.BR "telemetry emit" " \fB\-\-event\fR \fINAME\fR [\fB\-\-service\fR \fIS\fR] [\fB\-\-operation\fR \fIOP\fR] [\fB\-\-status\fR \fIST\fR] [\fB\-\-detail\fR \fITEXT\fR] [\fB\-\-correlation\-id\fR \fIGUID\fR]"
+Append one GUID and timestamp correlated event to the telemetry sink and
+print the correlation id used.
+.TP
+.BR "telemetry show" " [\fB\-\-limit\fR \fIN\fR]"
+Print the most recent recorded events (default 20, newest last).
+.TP
+.B telemetry status
+Report whether telemetry is enabled and where it writes.
+.TP
+.B repl
+Start an explicit interactive session over the same command set.
+.TP
+.BR start " [\fB\-\-endpoint\fR \fIhost\fB:\fIport\fR] [\fB\-\-auth\-token\fR \fITOKEN\fR] [\fB\-\-endpoint\-file\fR \fIPATH\fR] [\fB\-\-load\fR \fIPATH\fR ...] [\fB\-\-daemon\fR]"
+Start the runtime in the foreground and serve the built\-in operations
+.RB ( inventory.get ", " debug.sleep )
+plus any operations added by
+.B \-\-load
+plugins, until interrupted or stopped with an authenticated
+.BR "polycall stop" .
+The default endpoint is
+.BR 127.0.0.1:0 ;
+port 0 binds an ephemeral port, which is written to
+.B \-\-endpoint\-file
+when given.
+.B \-\-load
+loads one operation plugin (a shared library exporting
+.BR polycall_ops_register );
+an ABI mismatch or missing symbol fails before anything is bound.
+.B \-\-daemon
+detaches into the background and prints the detached process ID.
+.TP
+.BR status " \fB\-\-endpoint\fR \fIhost\fB:\fIport\fR"
+Describe the registered operations of a running instance over its control
+channel.
+.TP
+.BR stop " \fB\-\-endpoint\fR \fIhost\fB:\fIport\fR [\fB\-\-auth\-token\fR \fITOKEN\fR]"
+Ask a running instance to shut down.
+.TP
+.BR call " \fISERVICE OPERATION\fR \fB\-\-endpoint\fR \fIhost\fB:\fIport\fR [\fB\-\-input\fR \fIFILE\fR|\fB\-\fR | \fB\-\-input\-value\fR \fIJSON\fR] [\fB\-\-deadline\-ms\fR \fIN\fR]"
+Invoke a registered operation with exactly one round trip and no retry.
+The deadline defaults to
+.B \-\-timeout\-ms
+when given, otherwise 5000 ms.
+.SH GLOBAL OPTIONS
+Global options are accepted before or after the command words, but never
+after
+.BR \-\- .
+Both
+.BI \-\-opt= value
+and
+.BI \-\-opt " value"
+forms are accepted.
+.TP
+.BI \-\-project\-root " PATH"
+Project root that relative paths, and the default telemetry sink, resolve
+against.
+.TP
+.BI \-\-config " PATH"
+Explicit configuration file or provider.
+.TP
+.BI \-\-language " LANG"
+Language layer or adapter to select.
+.TP
+.BR \-\-format " \fBtext\fR|\fBjson\fR"
+Output format for finite commands (default
+.BR text ).
+With
+.BR json ,
+exactly one JSON object is printed on standard output for success and
+failure alike.
+.TP
+.B \-\-no\-color
+Disable ANSI colour.
+.TP
+.B \-\-quiet
+Suppress non\-essential text on standard error.
+.TP
+.BI \-\-timeout\-ms " N"
+Deadline for operations that support one.
+.TP
+.BR \-h ", " \-\-help
+Show help and exit.
+.TP
+.BR \-V ", " \-\-version
+Show the version and exit.
+.TP
+.B \-\-
+End option parsing.
+.SH EXIT STATUS
+.TP
+.B 0
+Completed successfully.
+.TP
+.B 1
+Runtime or internal failure.
+.TP
+.B 2
+Command\-line usage error.
+.TP
+.B 3
+Invalid or missing selected configuration (also: malformed operation input).
+.TP
+.B 4
+Missing dependency, adapter, unsupported capability, or unknown operation
+or item.
+.TP
+.B 5
+Transport failure or endpoint unavailable.
+.TP
+.B 6
+Operation deadline exceeded.
+.TP
+.B 7
+Authentication or authorization rejected.
+.TP
+.B 130
+Interrupted by the user (SIGINT).
+.SH ENVIRONMENT
+.TP
+.B POLYCALL_TELEMETRY
+Set to
+.BR off ", " 0 ", " false " or " no
+to disable telemetry entirely.
+.TP
+.B POLYCALL_TELEMETRY_LOG
+Path of the telemetry sink, overriding the default.
+.TP
+.BR POLYCALL_NODE_PROVIDER ", " POLYCALL_PYTHON_PROVIDER
+Runner script used to evaluate a
+.BR node: " or " python:
+configuration provider.
+.TP
+.B POLYCALL_PYTHON
+Python interpreter used for
+.B python:
+providers (default
+.BR python3 ).
+.SH FILES
+.TP
+.I Polycallfile
+Writable project topology (legacy format).
+.TP
+.IR Polycallrc ", " Polycallrc. language
+Read\-only runtime defaults and per\-language overrides (legacy format).
+.TP
+.IB project\-root /.polycall/telemetry.jsonl
+Default telemetry sink: one JSON event per line.
+The project root defaults to the current directory.
+.SH NOTES
+The native configuration schema accepts TLS settings, but no TLS library is
+linked: the runtime speaks plaintext
+.B polycall_rpc
+v1 and binds the loopback interface by default.
+Use
+.B \-\-auth\-token
+when other local users must not be able to stop the runtime.
+.SH EXAMPLES
+Start a runtime on an ephemeral port, call the built\-in operation, and stop
+it again:
+.PP
+.nf
+.RS
+polycall start \-\-endpoint 127.0.0.1:0 \-\-endpoint\-file /tmp/ep \e
+    \-\-auth\-token secret \-\-daemon
+polycall call inventory get \-\-endpoint "$(cat /tmp/ep)" \e
+    \-\-input\-value \(aq{"item_id":"widget\-a"}\(aq
+polycall stop \-\-endpoint "$(cat /tmp/ep)" \-\-auth\-token secret
+.RE
+.fi
+.SH SEE ALSO
+The CLI contract, wire protocol and plugin ABI are documented at
+.UR https://github.com/obinexus/polycall
+.UE
+(docs/CLI.md, docs/RPC.md and docs/PLUGINS.md).
