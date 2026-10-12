@@ -1,0 +1,94 @@
+#!/bin/sh
+# Installed-package smoke test for the polycall CLI: version/help/doctor,
+# then a real runtime round trip (start --daemon -> status -> call -> stop)
+# on an ephemeral loopback port, then the telemetry it recorded.
+#
+# Optional: POLYCALL_EXPECT_VERSION=<upstream version> to pin --version.
+set -eu
+
+fail() { echo "FAIL: $*" >&2; exit 1; }
+pass() { echo "ok - $*"; }
+
+WORK=${AUTOPKGTEST_TMP:-$(mktemp -d)}
+PC=$(command -v polycall) || fail "polycall is not on PATH"
+[ "$PC" = /usr/bin/polycall ] || fail "polycall resolved to $PC, expected /usr/bin/polycall"
+pass "polycall on PATH at $PC"
+
+if command -v ldd >/dev/null 2>&1; then
+  if ldd "$PC" | grep -q "not found"; then ldd "$PC" >&2; fail "unresolved shared libraries"; fi
+  pass "all shared libraries resolve"
+fi
+
+ver=$(polycall --version)
+case "$ver" in "polycall "[0-9]*) ;; *) fail "unexpected --version output: $ver" ;; esac
+if [ -n "${POLYCALL_EXPECT_VERSION:-}" ]; then
+  [ "$ver" = "polycall $POLYCALL_EXPECT_VERSION" ] || fail "version '$ver' != 'polycall $POLYCALL_EXPECT_VERSION'"
+fi
+[ "$(polycall version)" = "$ver" ] || fail "'polycall version' differs from --version"
+pass "$ver"
+
+polycall --help | grep -q "^usage: polycall" || fail "--help has no usage line"
+polycall help call | grep -q "usage: polycall call" || fail "help call"
+pass "help"
+
+polycall doctor >"$WORK/doctor.txt" || { cat "$WORK/doctor.txt" >&2; fail "doctor exited non-zero"; }
+grep -q "No problems detected" "$WORK/doctor.txt" || { cat "$WORK/doctor.txt" >&2; fail "doctor reported problems"; }
+polycall --format json doctor | grep -q '"ok":true' || fail "doctor --format json"
+pass "doctor"
+
+rc=0; polycall frobnicate >/dev/null 2>&1 || rc=$?
+[ "$rc" -eq 2 ] || fail "unknown command exit $rc, expected 2"
+pass "usage errors exit 2"
+
+# ---- runtime round trip -------------------------------------------------
+cd "$WORK"
+EPF="$WORK/endpoint"
+TOK="autopkgtest-$$"
+polycall --project-root "$WORK" start --endpoint 127.0.0.1:0 \
+  --endpoint-file "$EPF" --auth-token "$TOK" --daemon >"$WORK/daemon.out" 2>&1 \
+  || { cat "$WORK/daemon.out" >&2; fail "start --daemon"; }
+i=0
+while [ ! -s "$EPF" ] && [ $i -lt 100 ]; do sleep 0.1; i=$((i+1)); done
+[ -s "$EPF" ] || { cat "$WORK/daemon.out" >&2; fail "runtime never wrote its endpoint"; }
+EP=$(cat "$EPF")
+pass "runtime started at $EP"
+
+stop_runtime() { polycall stop --endpoint "$EP" --auth-token "$TOK" >/dev/null 2>&1 || true; }
+trap stop_runtime EXIT
+
+polycall status --endpoint "$EP" >"$WORK/status.txt" || fail "status"
+grep -q "inventory" "$WORK/status.txt" || { cat "$WORK/status.txt" >&2; fail "status does not list inventory"; }
+pass "status lists the built-in operations"
+
+out=$(polycall --project-root "$WORK" call inventory get --endpoint "$EP" \
+        --input-value '{"item_id":"widget-a"}') || fail "call inventory get"
+case "$out" in
+  *'"quantity":42'*) ;;
+  *) fail "unexpected call output: $out" ;;
+esac
+pass "call inventory get widget-a -> quantity 42"
+
+rc=0; polycall call inventory get --endpoint "$EP" --input-value '{"item_id":"nope"}' >/dev/null 2>&1 || rc=$?
+[ "$rc" -eq 4 ] || fail "unknown item exit $rc, expected 4"
+pass "unknown item exits 4"
+
+rc=0; polycall stop --endpoint "$EP" --auth-token wrong >/dev/null 2>&1 || rc=$?
+[ "$rc" -eq 7 ] || fail "stop with wrong token exit $rc, expected 7"
+polycall stop --endpoint "$EP" --auth-token "$TOK" >/dev/null || fail "authenticated stop"
+trap - EXIT
+i=0; rc=0
+while [ $i -lt 50 ]; do
+  rc=0; polycall status --endpoint "$EP" >/dev/null 2>&1 || rc=$?
+  [ "$rc" -eq 5 ] && break
+  sleep 0.1; i=$((i+1))
+done
+[ "$rc" -eq 5 ] || fail "runtime still answering after stop (status exit $rc)"
+pass "authenticated stop shuts the runtime down"
+
+# ---- telemetry ------------------------------------------------------------
+[ -s "$WORK/.polycall/telemetry.jsonl" ] || fail "no telemetry sink under the project root"
+polycall --project-root "$WORK" telemetry show --limit 50 | grep -q "call.end" \
+  || fail "telemetry show has no call.end event"
+pass "telemetry recorded the call"
+
+echo "cli-smoke: all checks passed"

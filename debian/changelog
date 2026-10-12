@@ -1,0 +1,7 @@
+polycall (1.0.0-1) unstable; urgency=medium
+
+  * Initial Debian packaging, built with CMake: polycall (command-line
+    tool), libpolycall1 (shared library, SONAME libpolycall.so.1) and
+    libpolycall-dev (headers, static library, CMake package files).
+
+ -- Nnamdi Michael Okpala <okpalan@protonmail.com>  Mon, 12 Oct 2026 12:00:00 +0000

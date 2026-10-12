@@ -66,7 +66,7 @@ build_exe() {
          "-Fe\"$_out\"" "-Fo\"$TDIR/\"" -link $_libs >"$_log" 2>&1
   else
     _def=""; _libs="-lpthread"
-    [ "$_mode" = static ] && _libs="\"$STATIC_LIB\" $([ "$IS_WINDOWS" = 1 ] && echo -lws2_32 || echo -lpthread)"
+    [ "$_mode" = static ] && _libs="\"$STATIC_LIB\" $([ "$IS_WINDOWS" = 1 ] && echo -lws2_32 || echo -lpthread -lm)"
     [ "$_mode" = shared ] && {
       _def="-DPOLYCALL_USE_SHARED"
       if [ "$IS_WINDOWS" = 1 ]; then _libs="\"$IMPLIB\" -lws2_32"; else _libs="-L\"$LIBDIR\" -lpolycall -lpthread"; fi

@@ -25,6 +25,27 @@ All notable changes to LibPolyCall will be documented in this file.
   (there is no `fork()`). Plugin-load and bind failures in a daemonized
   process are reported via `telemetry` only, since there is no terminal
   left to print to.
+- Debian/Ubuntu packaging (`debian/`): `polycall` (CLI), `libpolycall1`
+  (shared library, SONAME `libpolycall.so.1`) and `libpolycall-dev`
+  (headers, static library, CMake package), built per release for Debian
+  12/13 and Ubuntu 22.04/24.04/26.04 on amd64 and arm64, published to a
+  signed third-party APT repository on GitHub Pages by `release.yml`. See
+  the README and `docs/PACKAGING.md`.
+- `polycall(1)` manual page (`docs/man/polycall.1`), installed by both
+  `cmake --install` and `make install`.
+
+### Fixed
+- Link libm explicitly (CMake and Make): `src/config/json.c` calls
+  `floor()`/`fabs()`, which only GCC at `-O2` inlines; Clang and `-O0`
+  builds failed to link the CLI, and the shared library carried an
+  unresolved `floor`.
+- `make install` now also installs `polycall_telemetry.h`, matching CMake.
+- `tests/runtime/roundtrip.sh` no longer fails the C CLI checks when
+  Node.js is absent: it parses JSON with Node or Python, or reports NOT RUN.
+- Removed the in-source CMake/Visual Studio configure output that had been
+  committed (`CMakeCache.txt`, `CMakeFiles/`, `*.vcxproj`, `polycall.sln`,
+  ...); its `CMakeCache.txt` made every `cmake ..` build from a fresh
+  checkout fail.
 
 ## [1.0.0] - 2026-09-16 - Version reset
 
