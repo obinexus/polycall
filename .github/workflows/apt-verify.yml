@@ -1,0 +1,75 @@
+name: Verify published APT repository
+
+# Follows README.md from a pristine container of every supported release and
+# architecture against the PUBLISHED repository
+# (https://obinexus.github.io/polycall/apt): download the key, check its
+# fingerprint against README.md, add the Signed-By source, apt update,
+# apt install polycall, CLI smoke test, libpolycall-dev consumers, upgrade
+# from the oldest published version, remove, purge, drop the repository.
+#
+# Called by release.yml after publishing; also runs weekly and on demand.
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: Debian base version that must be installable (e.g. 1.0.0-1); empty = newest published
+        type: string
+        default: ''
+      wait-seconds:
+        description: How long to wait for that version to appear (Pages deploy + CDN cache)
+        type: number
+        default: 0
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Debian base version that must be installable (e.g. 1.0.0-1); empty = newest published
+        type: string
+        default: ''
+      wait-seconds:
+        description: How long to wait for that version to appear
+        type: number
+        default: 0
+  schedule:
+    - cron: '23 5 * * 1'
+
+permissions:
+  contents: read
+
+jobs:
+  matrix:
+    name: Release matrix (packaging/suites.tsv)
+    runs-on: ubuntu-24.04
+    outputs:
+      include: ${{ steps.matrix.outputs.include }}
+      published: ${{ steps.published.outputs.published }}
+    steps:
+      - uses: actions/checkout@v7
+      - id: matrix
+        run: echo "include=$(sh packaging/ci/matrix.sh)" >> "$GITHUB_OUTPUT"
+      - id: published
+        name: Is the repository published yet?
+        run: |
+          if curl -fsSI https://obinexus.github.io/polycall/apt/polycall-archive-keyring.gpg >/dev/null; then
+            echo "published=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "published=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::https://obinexus.github.io/polycall/apt/ is not published yet"
+          fi
+
+  verify:
+    name: ${{ matrix.name }} ${{ matrix.arch }}
+    needs: matrix
+    # a scheduled run before the first release has nothing to check; a run
+    # asked to verify a specific version always runs (and waits for it)
+    if: needs.matrix.outputs.published == 'true' || inputs.version != ''
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.matrix.outputs.include) }}
+    runs-on: ${{ matrix.runner }}
+    container: ${{ matrix.image }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: README instructions against the published repository
+        run: sh packaging/test/verify-published.sh "${{ inputs.version }}" "${{ inputs.wait-seconds }}"

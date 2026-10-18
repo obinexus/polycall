@@ -1,0 +1,105 @@
+name: Debian packages
+
+# Builds polycall, libpolycall1 and libpolycall-dev for every release and
+# architecture in packaging/suites.tsv, each in a clean container of that
+# release, runs the upstream test suite and lintian, then installs the
+# packages from a signed test APT repository served over HTTPS into a
+# pristine container of the same release, following README.md step by step
+# (key fingerprint, Signed-By source, apt update, apt install polycall, CLI
+# smoke test, library consumers, upgrade, remove, purge).
+#
+# Uses a throw-away signing key: no secrets, safe for pull requests from
+# forks. release.yml calls this workflow and publishes only if it passes.
+
+on:
+  pull_request:
+  push:
+    branches: [polycall-cli-redesign, main]
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: packages-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  matrix:
+    name: Release matrix (packaging/suites.tsv)
+    runs-on: ubuntu-24.04
+    outputs:
+      include: ${{ steps.matrix.outputs.include }}
+    steps:
+      - uses: actions/checkout@v7
+      - id: matrix
+        run: |
+          include=$(sh packaging/ci/matrix.sh)
+          echo "$include" | jq .
+          echo "include=$include" >> "$GITHUB_OUTPUT"
+
+  build:
+    name: Build ${{ matrix.name }} ${{ matrix.arch }}
+    needs: matrix
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.matrix.outputs.include) }}
+    runs-on: ${{ matrix.runner }}
+    container: ${{ matrix.image }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Build, test and lint (packaging/deb/build.sh)
+        run: sh packaging/deb/build.sh --out dist
+      - uses: actions/upload-artifact@v7
+        with:
+          name: deb-${{ matrix.codename }}-${{ matrix.arch }}
+          path: dist/
+          if-no-files-found: error
+
+  apt-e2e:
+    name: APT install test ${{ matrix.name }} ${{ matrix.arch }}
+    needs: [matrix, build]
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.matrix.outputs.include) }}
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          name: deb-${{ matrix.codename }}-${{ matrix.arch }}
+          path: dist
+      - name: Signed HTTPS repository -> clean ${{ matrix.image }} (packaging/test/e2e-local.sh)
+        run: sh packaging/test/e2e-local.sh --dist dist --suite ${{ matrix.codename }} --arch ${{ matrix.arch }}
+
+  staged-install:
+    name: Staged install (DESTDIR), CMake and Make
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - name: CMake install into DESTDIR
+        run: |
+          cmake -S . -B build/cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
+          cmake --build build/cmake --parallel
+          DESTDIR="$PWD/stage/cmake" cmake --install build/cmake
+      - name: GNU Make install into DESTDIR
+        run: |
+          make BUILD_DIR=build/make -j"$(nproc)" all
+          make BUILD_DIR=build/make PREFIX=/usr DESTDIR="$PWD/stage/make" install
+      - name: Both staged trees hold the CLI, headers, libraries and man page
+        run: |
+          for root in stage/cmake stage/make; do
+            for f in usr/bin/polycall usr/share/man/man1/polycall.1 \
+                     usr/include/polycall/polycall.h usr/include/polycall/polycall_telemetry.h; do
+              test -f "$root/$f" || { echo "missing $root/$f"; exit 1; }
+            done
+            find "$root/usr/lib" -name 'libpolycall.so*' | grep -q . \
+              || { echo "no shared library under $root/usr/lib"; exit 1; }
+            "$root/usr/bin/polycall" --version
+          done
+          find stage -type f | sort
+          # nothing may have been written outside DESTDIR
+          test ! -e /usr/bin/polycall && test ! -e /usr/local/bin/polycall

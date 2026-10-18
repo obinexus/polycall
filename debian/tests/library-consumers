@@ -1,0 +1,73 @@
+#!/bin/sh
+# Build and run programs against the installed libpolycall-dev/libpolycall1:
+#   1. shared linkage with plain cc + -lpolycall (soname resolved by ld.so)
+#   2. dlopen("libpolycall.so.1") through the dynamic-linker cache
+#   3. static linkage against libpolycall.a
+#   4. CMake find_package(polycall) with the exported polycall::polycall_shared
+#      and polycall::polycall_static targets
+# Each program must report the version the installed headers declare.
+# Run from the source tree root (autopkgtest does this); uses the consumer
+# sources under tests/consumers/.
+set -eu
+
+fail() { echo "FAIL: $*" >&2; exit 1; }
+pass() { echo "ok - $*"; }
+
+SRC=$(pwd)
+WORK=${AUTOPKGTEST_TMP:-$(mktemp -d)}
+CC=${CC:-cc}
+MA=$(dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null || gcc -print-multiarch)
+INC=/usr/include/polycall
+for f in "$INC/polycall.h" "/usr/lib/$MA/libpolycall.so" "/usr/lib/$MA/libpolycall.a" \
+         "/usr/lib/$MA/cmake/polycall/polycallConfig.cmake"; do
+  [ -e "$f" ] || fail "missing $f"
+done
+
+WANT=$(sed -n 's/^#define POLYCALL_ABI_VERSION_STRING "\(.*\)"$/\1/p' "$INC/polycall_export.h")
+[ -n "$WANT" ] || fail "cannot read POLYCALL_ABI_VERSION_STRING from installed headers"
+pass "installed headers declare ABI $WANT"
+
+/sbin/ldconfig -p | grep -q "libpolycall.so.1 " || fail "libpolycall.so.1 is not in the ld.so cache"
+pass "libpolycall.so.1 registered with the dynamic linker"
+
+check() { # check NAME OUTPUT
+  [ "$2" = "$WANT" ] || fail "$1 printed '$2', expected '$WANT'"
+  pass "$1 -> $2"
+}
+
+# 1. shared
+"$CC" -o "$WORK/shared" "$SRC/tests/consumers/link_shared_consumer.c" -I"$INC" -lpolycall
+ldd "$WORK/shared" | grep -q "libpolycall.so.1 => /" || { ldd "$WORK/shared"; fail "shared consumer not linked to libpolycall.so.1"; }
+check "shared linkage" "$("$WORK/shared")"
+
+# 2. dlopen by soname
+"$CC" -o "$WORK/dlopen" "$SRC/tests/consumers/dlopen_consumer.c" -ldl
+check "dlopen(libpolycall.so.1)" "$("$WORK/dlopen" libpolycall.so.1)"
+
+# 3. static
+"$CC" -o "$WORK/static" "$SRC/tests/consumers/static_consumer.c" -I"$INC" \
+  "/usr/lib/$MA/libpolycall.a" -lpthread -lm
+if ldd "$WORK/static" | grep -q libpolycall; then fail "static consumer depends on libpolycall.so"; fi
+check "static linkage" "$("$WORK/static")"
+
+# 4. CMake package
+mkdir -p "$WORK/cmake-consumer"
+cp "$SRC/tests/consumers/link_shared_consumer.c" "$WORK/cmake-consumer/shared.c"
+cp "$SRC/tests/consumers/static_consumer.c" "$WORK/cmake-consumer/static.c"
+cat >"$WORK/cmake-consumer/CMakeLists.txt" <<'EOF'
+cmake_minimum_required(VERSION 3.16)
+project(polycall_consumer C)
+find_package(polycall 1 REQUIRED)
+add_executable(cm_shared shared.c)
+target_link_libraries(cm_shared PRIVATE polycall::polycall_shared)
+add_executable(cm_static static.c)
+target_link_libraries(cm_static PRIVATE polycall::polycall_static)
+EOF
+cmake -S "$WORK/cmake-consumer" -B "$WORK/cmake-build" >"$WORK/cmake.log" 2>&1 \
+  || { cat "$WORK/cmake.log" >&2; fail "cmake configure with find_package(polycall)"; }
+cmake --build "$WORK/cmake-build" >>"$WORK/cmake.log" 2>&1 \
+  || { cat "$WORK/cmake.log" >&2; fail "cmake build of the consumers"; }
+check "cmake polycall::polycall_shared" "$("$WORK/cmake-build/cm_shared")"
+check "cmake polycall::polycall_static" "$("$WORK/cmake-build/cm_static")"
+
+echo "library-consumers: all checks passed"

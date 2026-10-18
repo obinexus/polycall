@@ -20,6 +20,10 @@ Dockerfile      text eol=lf
 Polycallfile    text eol=lf
 Polycallrc*     text eol=lf
 *.ps1           text eol=crlf
+# Debian packaging and APT tooling run on Linux (debian/rules is a makefile)
+debian/**       text eol=lf
+packaging/**    text eol=lf
+docs/man/*.1    text eol=lf
 
 # CRLF test fixture must keep its bytes exactly as committed
 tests/fixtures/crlf/**  -text

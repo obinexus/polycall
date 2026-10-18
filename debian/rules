@@ -1,0 +1,19 @@
+#!/usr/bin/make -f
+
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+export DEB_LDFLAGS_MAINT_APPEND = -Wl,--as-needed
+
+%:
+	dh $@ --buildsystem=cmake
+
+override_dh_auto_configure:
+	dh_auto_configure -- \
+	  -DBUILD_TESTING=$(if $(filter nocheck,$(DEB_BUILD_OPTIONS)),OFF,ON)
+
+# The suite runs with the source tree as its working directory; keep the
+# telemetry it records out of the source tree.
+override_dh_auto_test:
+	POLYCALL_TELEMETRY_LOG=$(CURDIR)/debian/test-telemetry.jsonl dh_auto_test
+
+override_dh_installchangelogs:
+	dh_installchangelogs docs/CHANGELOG.md

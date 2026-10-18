@@ -33,16 +33,37 @@ if [ ! -s "$EPF" ]; then bad "runtime did not start"; cat "$RUNLOG"; echo "--- $
 EP=$(cat "$EPF")
 echo "=== runtime up at $EP (pid $RUNPID) ==="
 
-# helper: extract the compact "output" object from a {"ok":true,"output":...} reply
-out_field() { node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{const o=JSON.parse(s);process.stdout.write(JSON.stringify(o.output??o.error))}catch(e){process.exit(7)}})'; }
+# helper: extract the compact "output" object from a {"ok":true,"output":...} reply.
+# Node and Python are both optional here (the C CLI checks below must still
+# run without either), so use whichever is present; with neither, the checks
+# that need JSON parsing are reported NOT RUN rather than FAIL.
+PY_JSON=$(command -v python3 2>/dev/null || command -v python 2>/dev/null || true)
+if command -v node >/dev/null 2>&1; then
+  out_field() { node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{const o=JSON.parse(s);process.stdout.write(JSON.stringify(o.output??o.error))}catch(e){process.exit(7)}})'; }
+elif [ -n "$PY_JSON" ]; then
+  out_field() { "$PY_JSON" -c 'import json,sys
+try: o=json.load(sys.stdin)
+except Exception: sys.exit(7)
+v=o.get("output")
+sys.stdout.write(json.dumps(o.get("error") if v is None else v,separators=(",",":")))'; }
+else
+  out_field() { return 9; }
+fi
+have_json() { command -v node >/dev/null 2>&1 || [ -n "$PY_JSON" ]; }
 
 echo "=== same C operation, three entry points ==="
 
 C_RAW=$("$PC" call inventory get --endpoint "$EP" --input-value '{"item_id":"widget-a"}'); c_rc=$?
-C_OUT=$(printf '%s' "$C_RAW" | out_field)
-[ $c_rc -eq 0 ] && [ "$C_OUT" = '{"item_id":"widget-a","quantity":42,"in_stock":true}' ] \
-  && ok "C CLI  inventory.get widget-a -> quantity 42" \
-  || bad "C CLI inventory.get (rc=$c_rc out=$C_OUT)"
+if have_json; then
+  C_OUT=$(printf '%s' "$C_RAW" | out_field)
+  [ $c_rc -eq 0 ] && [ "$C_OUT" = '{"item_id":"widget-a","quantity":42,"in_stock":true}' ] \
+    && ok "C CLI  inventory.get widget-a -> quantity 42" \
+    || bad "C CLI inventory.get (rc=$c_rc out=$C_OUT)"
+else
+  [ $c_rc -eq 0 ] && ok "C CLI  inventory.get widget-a -> exit 0" \
+    || bad "C CLI inventory.get (rc=$c_rc)"
+  skip "C CLI inventory.get output shape (neither node nor python on PATH)"
+fi
 
 if command -v node >/dev/null 2>&1; then
   N_RAW=$(node "$NODE_CLIENT" "$EP" widget-a); n_rc=$?
@@ -66,9 +87,13 @@ else
 fi
 
 echo "=== known fixtures ==="
-Z=$("$PC" call inventory get --endpoint "$EP" --input-value '{"item_id":"gadget-c"}' | out_field)
-[ "$Z" = '{"item_id":"gadget-c","quantity":0,"in_stock":false}' ] \
-  && ok "gadget-c -> quantity 0, in_stock false" || bad "gadget-c fixture ($Z)"
+if have_json; then
+  Z=$("$PC" call inventory get --endpoint "$EP" --input-value '{"item_id":"gadget-c"}' | out_field)
+  [ "$Z" = '{"item_id":"gadget-c","quantity":0,"in_stock":false}' ] \
+    && ok "gadget-c -> quantity 0, in_stock false" || bad "gadget-c fixture ($Z)"
+else
+  skip "gadget-c fixture (neither node nor python on PATH)"
+fi
 
 echo "=== failure modes fail distinctly (no mocks) ==="
 "$PC" call inventory get --endpoint "$EP" --input-value '{"item_id":"nope"}' >/dev/null 2>&1

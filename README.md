@@ -17,6 +17,134 @@ delivered on the `polycall-cli-redesign` branch, start with
 
 ![LibPolycall Version Favicon](./favicon.png)
 
+## Install on Debian and Ubuntu
+
+> **Third-party repository — not part of Debian or Ubuntu.** `polycall` is
+> not in the official Debian or Ubuntu archives, so `apt install polycall`
+> only works after you add this project's own APT repository below. That
+> repository is built, signed and hosted (on GitHub Pages) by the polycall
+> project; Debian and Ubuntu do not review, build, sign or support these
+> packages. A repository's signing key can authorise any package it serves,
+> so add it only if you trust this project.
+>
+> **Status:** the repository is published by the first tagged release. Until
+> `https://obinexus.github.io/polycall/apt/` exists, build from source with
+> the [Quick start](#quick-start) below.
+
+Supported releases, each with its own build (amd64 and arm64):
+
+| Release | APT suite |
+| --- | --- |
+| Debian 12 (bookworm) | `bookworm` |
+| Debian 13 (trixie) | `trixie` |
+| Ubuntu 22.04 LTS (Jammy Jellyfish) | `jammy` |
+| Ubuntu 24.04 LTS (Noble Numbat) | `noble` |
+| Ubuntu 26.04 LTS (Resolute Raccoon) | `resolute` |
+
+Other releases and derivatives are not supported (their codename has no
+suite, so `apt update` reports it missing).
+
+### One-time repository setup
+
+1. Install the tools the next steps use (usually already present):
+
+   ```bash
+   sudo apt update
+   sudo apt install ca-certificates curl gnupg
+   ```
+
+2. Download the repository signing key into its own keyring:
+
+   ```bash
+   sudo install -d -m 0755 /etc/apt/keyrings
+   curl -fsSL https://obinexus.github.io/polycall/apt/polycall-archive-keyring.gpg | sudo tee /etc/apt/keyrings/polycall-archive-keyring.gpg > /dev/null
+   ```
+
+3. Verify the key **before** trusting it:
+
+   ```bash
+   gpg --show-keys /etc/apt/keyrings/polycall-archive-keyring.gpg
+   ```
+
+   The 40-character fingerprint line must read exactly
+   <code><!-- apt-key-fingerprint -->(set when the signing key is created)<!-- /apt-key-fingerprint --></code>.
+   If it does not, delete the file
+   (`sudo rm /etc/apt/keyrings/polycall-archive-keyring.gpg`) and stop.
+
+4. Add the repository, trusted only with that key (`Signed-By`):
+
+   ```bash
+   sudo tee /etc/apt/sources.list.d/polycall.sources > /dev/null <<EOF
+   Types: deb
+   URIs: https://obinexus.github.io/polycall/apt
+   Suites: $(. /etc/os-release && echo "$VERSION_CODENAME")
+   Components: main
+   Signed-By: /etc/apt/keyrings/polycall-archive-keyring.gpg
+   EOF
+   ```
+
+   The key is never added to APT's global trust store: no `apt-key`, no
+   `trusted=yes`, and signature checking stays on.
+
+### Install
+
+```bash
+sudo apt update
+sudo apt install polycall
+polycall --version
+```
+
+`polycall` needs only the C library. To build software or operation plugins
+against libpolycall (headers, static library, CMake package; pulls in the
+`libpolycall1` shared library):
+
+```bash
+sudo apt install libpolycall-dev
+```
+
+### Upgrade
+
+New releases arrive with your normal updates:
+
+```bash
+sudo apt update
+sudo apt upgrade
+```
+
+To upgrade only polycall: `sudo apt install --only-upgrade polycall`.
+
+### Uninstall
+
+```bash
+sudo apt remove polycall
+sudo apt purge polycall
+```
+
+`polycall` installs no configuration files, so `remove` already deletes
+everything it installed and `purge` has nothing left to do; either is fine.
+The telemetry it writes lives in your projects
+(`<project-root>/.polycall/`) and is yours to delete. If you installed the
+libraries:
+
+```bash
+sudo apt purge libpolycall-dev
+sudo apt autoremove --purge
+```
+
+To stop using the repository as well:
+
+```bash
+sudo rm /etc/apt/sources.list.d/polycall.sources /etc/apt/keyrings/polycall-archive-keyring.gpg
+sudo apt update
+```
+
+Every pull request builds the packages for each release above in a clean
+container, runs the test suite and lintian, and installs them from a signed
+test repository following exactly these steps; each release is then checked
+against the live repository. Each GitHub release also carries the `.deb`
+files and `SHA256SUMS`, but a downloaded `.deb` gets no updates — use the
+repository. Maintainer details: [docs/PACKAGING.md](docs/PACKAGING.md).
+
 ## Quick start
 
 ```sh

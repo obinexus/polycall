@@ -1,0 +1,4 @@
+usr/include/polycall
+usr/lib/*/cmake/polycall
+usr/lib/*/libpolycall.a
+usr/lib/*/libpolycall.so
